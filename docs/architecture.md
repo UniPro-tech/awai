@@ -29,4 +29,6 @@ Database models, domain models, and API response models are separate. Presenters
 
 ## Planned persistence and analysis
 
-The server will use Drizzle ORM with PostgreSQL schemas named `auth`, `core`, and `analysis`. Database migrations will run as an explicit deployment step. The Python worker will claim jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`; no Redis service is required.
+The server uses Drizzle ORM with PostgreSQL schemas named `core` and `analysis`; Better Auth will own the `auth` schema. Database migrations run as an explicit deployment step. The Python worker claims jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`; no Redis service is required.
+
+The analysis adapter converts UUIDs to short-lived integer identifiers required by Red Dwarf. Participant identifiers are discarded before results are persisted. The `analysis.points` table intentionally has no user identifier or participant mapping.

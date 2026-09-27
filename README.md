@@ -18,8 +18,8 @@ PrivatePolis is in early development. The current foundation provides shared run
 
 - Node.js 24 or later
 - pnpm 11
-- PostgreSQL (required once persistence is enabled)
-- Python and `uv` (required once the analysis worker is enabled)
+- PostgreSQL
+- Python 3.12 or later and `uv`
 
 ## Development
 
@@ -42,6 +42,15 @@ pnpm db:migrate
 
 Production application startup never runs migrations implicitly.
 
+The analysis worker is managed separately:
+
+```sh
+cd services/analysis
+uv sync --dev
+uv run pytest
+uv run python -m private_polis_analysis.worker
+```
+
 ## Repository layout
 
 ```text
@@ -49,7 +58,7 @@ apps/web             React and Vite single-page application
 apps/server          Hono application server
 packages/contracts   Zod request and response schemas
 packages/api-client  Typed Hono RPC client
-services/analysis    Python analysis worker (planned)
+services/analysis    Python and Red Dwarf analysis worker
 deploy               Deployment assets (planned)
 docs                 Architecture and contributor documentation
 ```
