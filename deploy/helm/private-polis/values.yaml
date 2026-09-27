@@ -57,6 +57,11 @@ auth:
   secret: ""
   initialAdminEmail: ""
 
+rateLimit:
+  windowSeconds: 60
+  authMax: 20
+  apiMax: 300
+
 database:
   url: ""
 

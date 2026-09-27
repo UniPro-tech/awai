@@ -8,7 +8,17 @@
       "required": ["baseUrl", "secret"],
       "properties": {
         "baseUrl": { "type": "string", "format": "uri" },
-        "secret": { "type": "string" }
+        "secret": { "type": "string" },
+        "initialAdminEmail": { "type": "string" }
+      }
+    },
+    "rateLimit": {
+      "type": "object",
+      "required": ["windowSeconds", "authMax", "apiMax"],
+      "properties": {
+        "windowSeconds": { "type": "integer", "minimum": 1 },
+        "authMax": { "type": "integer", "minimum": 1 },
+        "apiMax": { "type": "integer", "minimum": 1 }
       }
     },
     "database": {

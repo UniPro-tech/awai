@@ -7,6 +7,9 @@ metadata:
 data:
   BETTER_AUTH_URL: {{ .Values.auth.baseUrl | quote }}
   INITIAL_ADMIN_EMAIL: {{ .Values.auth.initialAdminEmail | quote }}
+  RATE_LIMIT_WINDOW_SECONDS: {{ .Values.rateLimit.windowSeconds | quote }}
+  RATE_LIMIT_AUTH_MAX: {{ .Values.rateLimit.authMax | quote }}
+  RATE_LIMIT_API_MAX: {{ .Values.rateLimit.apiMax | quote }}
   PORT: "3000"
   STATIC_ROOT: /app/public
   ANALYSIS_POLL_INTERVAL_SECONDS: {{ .Values.analysis.pollIntervalSeconds | quote }}

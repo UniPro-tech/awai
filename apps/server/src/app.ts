@@ -14,21 +14,46 @@ import { authenticateRequest, type AuthenticateRequest } from "./auth/session.js
 import { databaseRuntime } from "./db/runtime.js";
 import type { AppEnvironment } from "./http/context.js";
 import { createPostgresServices, type ApplicationServices } from "./services/services.js";
+import {
+  createFixedWindowRateLimiter,
+  rateLimit,
+  requestAddress,
+  type RateLimiter,
+} from "./http/rate-limit.js";
 
 export interface AppOptions {
   readinessCheck?: () => Promise<boolean>;
   authenticate?: AuthenticateRequest;
   services?: ApplicationServices;
+  authRateLimiter?: RateLimiter | false;
+  apiRateLimiter?: RateLimiter | false;
+}
+
+function positiveInteger(value: string | undefined, fallback: number) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 export function createApp(options: AppOptions = {}) {
   const readinessCheck = options.readinessCheck ?? checkDatabaseReadiness;
   const authenticate = options.authenticate ?? authenticateRequest;
   const services = options.services ?? createPostgresServices(databaseRuntime.db);
-  return new Hono<AppEnvironment>()
+  const windowMs = positiveInteger(process.env.RATE_LIMIT_WINDOW_SECONDS, 60) * 1_000;
+  const authRateLimiter = options.authRateLimiter === false
+    ? undefined
+    : options.authRateLimiter
+      ?? createFixedWindowRateLimiter(positiveInteger(process.env.RATE_LIMIT_AUTH_MAX, 20), windowMs);
+  const apiRateLimiter = options.apiRateLimiter === false
+    ? undefined
+    : options.apiRateLimiter
+      ?? createFixedWindowRateLimiter(positiveInteger(process.env.RATE_LIMIT_API_MAX, 300), windowMs);
+  const app = new Hono<AppEnvironment>()
     .use("*", requestId())
-    .use("*", secureHeaders())
-    .on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw))
+    .use("*", secureHeaders());
+  if (authRateLimiter) {
+    app.use("/api/auth/*", rateLimit(authRateLimiter, (c) => requestAddress(c.req.raw.headers)));
+  }
+  app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw))
     .get("/health/live", (c) => c.json({ status: "ok" as const }))
     .get("/health/ready", async (c) => {
       if (await readinessCheck()) return c.json({ status: "ok" as const }, 200);
@@ -62,7 +87,11 @@ export function createApp(options: AppOptions = {}) {
       }
       c.set("currentUser", authentication.user);
       await next();
-    })
+    });
+  if (apiRateLimiter) {
+    app.use("/api/v1/*", rateLimit(apiRateLimiter, (c) => c.get("currentUser").id));
+  }
+  return app
     .route("/api/v1/topics", createAnalysisRoute(services))
     .route("/api/v1/topics", createTopicsRoute(services))
     .route("/api/v1/statements", createStatementsRoute(services))

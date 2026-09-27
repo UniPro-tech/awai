@@ -86,3 +86,5 @@ Errors use a shared shape:
 ```
 
 Authentication failures return `401`; authorization failures (including suspended accounts) return `403`; missing or soft-deleted resources return `404`; identity-policy, topic-state, and administrator self-lockout conflicts return `409`; invalid JSON input returns `400`.
+
+Rate-limit responses return `429` with `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset` headers. Authentication limits are keyed by source address; versioned API limits are keyed by authenticated application user.

@@ -73,6 +73,7 @@ PostgreSQL 18 data is mounted at `/var/lib/postgresql`. Back up the persistent v
 - Network policies allow the application ingress on port 3000 and restrict application and worker egress to DNS and PostgreSQL. Confirm that the cluster CNI enforces NetworkPolicy and adapt the policy if the external database uses a non-standard port.
 - Set resource requests and limits before enabling the HPA; CPU utilization targets require requests.
 - Use an external secrets controller or a pre-created Secret when possible. The inline `auth.secret` and `database.url` values are provided for development and chart rendering only.
+- `rateLimit.windowSeconds`, `rateLimit.authMax`, and `rateLimit.apiMax` configure the built-in fixed-window limiter. Limits are local to each application replica; use a trusted ingress or gateway rate limiter when a deployment requires a strict cluster-wide ceiling. Ensure the proxy replaces untrusted client forwarding headers.
 
 Validate changes before upgrading:
 
