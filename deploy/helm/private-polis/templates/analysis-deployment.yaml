@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "private-polis.fullname" . }}-analysis
+  labels:
+    {{- include "private-polis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: analysis
+spec:
+  replicas: {{ .Values.analysis.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "private-polis.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: analysis
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- with .Values.analysis.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "private-polis.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: analysis
+        {{- with .Values.analysis.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "private-polis.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: analysis
+          image: "{{ .Values.analysis.image.repository }}:{{ include "private-polis.imageTag" (dict "tag" .Values.analysis.image.tag "Chart" .Chart) }}"
+          imagePullPolicy: {{ .Values.analysis.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "private-polis.secretName" . }}
+                  key: DATABASE_URL
+            - name: ANALYSIS_POLL_INTERVAL_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "private-polis.fullname" . }}
+                  key: ANALYSIS_POLL_INTERVAL_SECONDS
+          resources:
+            {{- toYaml .Values.analysis.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

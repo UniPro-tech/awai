@@ -1,0 +1,94 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "private-polis.fullname" . }}-migrate-{{ .Release.Revision }}
+  labels:
+    {{- include "private-polis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migration
+  annotations:
+    helm.sh/hook: post-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        {{- include "private-polis.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migration
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "private-polis.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-database
+          image: "{{ .Values.migration.image.repository }}:{{ include "private-polis.imageTag" (dict "tag" .Values.migration.image.tag "Chart" .Chart) }}"
+          imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
+          command:
+            - node
+            - -e
+            - |
+              const net = require("node:net");
+              const url = new URL(process.env.DATABASE_URL);
+              let attempts = 0;
+              function connect() {
+                let settled = false;
+                const socket = net.createConnection({ host: url.hostname, port: Number(url.port || 5432) });
+                const fail = () => {
+                  if (settled) return;
+                  settled = true;
+                  socket.destroy();
+                  if (++attempts >= 60) process.exit(1);
+                  setTimeout(connect, 2000);
+                };
+                socket.setTimeout(3000);
+                socket.once("connect", () => { settled = true; socket.end(); process.exit(0); });
+                socket.once("error", fail);
+                socket.once("timeout", fail);
+              }
+              connect();
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          env:
+            - name: DATABASE_URL
+              {{- if .Values.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "private-polis.secretName" . }}
+                  key: DATABASE_URL
+              {{- else }}
+              value: {{ include "private-polis.databaseUrl" . | quote }}
+              {{- end }}
+          resources:
+            {{- toYaml .Values.migration.resources | nindent 12 }}
+      containers:
+        - name: migration
+          image: "{{ .Values.migration.image.repository }}:{{ include "private-polis.imageTag" (dict "tag" .Values.migration.image.tag "Chart" .Chart) }}"
+          imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          env:
+            - name: DATABASE_URL
+              {{- if .Values.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "private-polis.secretName" . }}
+                  key: DATABASE_URL
+              {{- else }}
+              value: {{ include "private-polis.databaseUrl" . | quote }}
+              {{- end }}
+          resources:
+            {{- toYaml .Values.migration.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

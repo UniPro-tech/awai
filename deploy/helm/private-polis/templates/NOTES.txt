@@ -1,0 +1,17 @@
+PrivatePolis has been installed.
+
+{{- if .Values.gateway.enabled }}
+Traffic is exposed through HTTPRoute {{ include "private-polis.fullname" . }}.
+{{- else if .Values.ingress.enabled }}
+Traffic is exposed through Ingress {{ include "private-polis.fullname" . }}.
+{{- else }}
+To access the application locally:
+
+  kubectl -n {{ .Release.Namespace }} port-forward service/{{ include "private-polis.fullname" . }} 8080:{{ .Values.service.port }}
+
+Then open http://127.0.0.1:8080.
+{{- end }}
+
+The migration Job runs after the first install and before upgrades. Check it with:
+
+  kubectl -n {{ .Release.Namespace }} get jobs -l app.kubernetes.io/component=migration

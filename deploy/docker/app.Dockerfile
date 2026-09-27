@@ -14,7 +14,10 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 RUN pnpm build
 
 FROM build AS migration
-CMD ["pnpm", "db:migrate"]
+RUN addgroup -S privatepolis && adduser -S -G privatepolis privatepolis
+WORKDIR /workspace/apps/server
+USER privatepolis
+CMD ["node", "node_modules/drizzle-kit/bin.cjs", "migrate", "--config", "drizzle.config.ts"]
 
 FROM node:24-alpine AS application
 RUN addgroup -S privatepolis && adduser -S -G privatepolis privatepolis

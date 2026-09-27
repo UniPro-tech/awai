@@ -61,6 +61,8 @@ export BETTER_AUTH_SECRET='replace-with-at-least-32-random-characters'
 docker compose up --build -d
 ```
 
+For Kubernetes deployments, see [docs/kubernetes.md](docs/kubernetes.md). The Helm chart supports external PostgreSQL by default, optional bundled PostgreSQL for development, and mutually exclusive Ingress or Gateway API routing.
+
 ## Repository layout
 
 ```text

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: private-polis
+description: Private-first, self-hosted consensus platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - consensus
+  - polis
+  - privacy
+annotations:
+  artifacthub.io/license: Apache-2.0

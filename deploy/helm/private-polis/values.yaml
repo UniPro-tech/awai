@@ -1,0 +1,113 @@
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullSecrets: []
+
+application:
+  replicaCount: 2
+  image:
+    repository: private-polis-application
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+
+analysis:
+  replicaCount: 1
+  image:
+    repository: private-polis-analysis
+    tag: latest
+    pullPolicy: IfNotPresent
+  pollIntervalSeconds: 2
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+
+migration:
+  image:
+    repository: private-polis-migration
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+
+serviceAccount:
+  create: true
+  automount: false
+  annotations: {}
+  name: ""
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  port: 80
+
+auth:
+  baseUrl: https://consensus.example.com
+  secret: ""
+
+database:
+  url: ""
+
+# If set, the Secret must contain DATABASE_URL and BETTER_AUTH_SECRET.
+existingSecret: ""
+
+postgresql:
+  enabled: false
+  image:
+    repository: postgres
+    tag: 18-alpine
+    pullPolicy: IfNotPresent
+  auth:
+    database: private_polis
+    username: private_polis
+    password: ""
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""
+  resources: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: consensus.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+gateway:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+
+networkPolicy:
+  enabled: true
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

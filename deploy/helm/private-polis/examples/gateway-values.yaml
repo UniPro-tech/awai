@@ -1,0 +1,15 @@
+auth:
+  baseUrl: https://consensus.example.com
+
+existingSecret: private-polis-production
+
+gateway:
+  enabled: true
+  parentRefs:
+    - name: main-gateway
+      namespace: infra-gateway
+  hostnames:
+    - consensus.example.com
+
+ingress:
+  enabled: false

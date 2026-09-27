@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "existingSecret": { "type": "string" },
+    "auth": {
+      "type": "object",
+      "required": ["baseUrl", "secret"],
+      "properties": {
+        "baseUrl": { "type": "string", "format": "uri" },
+        "secret": { "type": "string" }
+      }
+    },
+    "database": {
+      "type": "object",
+      "required": ["url"],
+      "properties": { "url": { "type": "string" } }
+    },
+    "postgresql": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": { "enabled": { "type": "boolean" } }
+    },
+    "ingress": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": { "enabled": { "type": "boolean" } }
+    },
+    "gateway": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": { "enabled": { "type": "boolean" } }
+    }
+  },
+  "allOf": [
+    {
+      "not": {
+        "properties": {
+          "ingress": { "properties": { "enabled": { "const": true } } },
+          "gateway": { "properties": { "enabled": { "const": true } } }
+        },
+        "required": ["ingress", "gateway"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{{- if and .Values.ingress.enabled .Values.gateway.enabled -}}
+{{- fail "ingress.enabled and gateway.enabled are mutually exclusive" -}}
+{{- end -}}
+{{- if and (not .Values.existingSecret) (not .Values.postgresql.enabled) (not .Values.database.url) -}}
+{{- fail "set database.url, enable postgresql, or provide existingSecret" -}}
+{{- end -}}
+{{- if and (not .Values.existingSecret) (lt (len .Values.auth.secret) 32) -}}
+{{- fail "auth.secret must contain at least 32 characters when existingSecret is not set" -}}
+{{- end -}}
+{{- if and .Values.postgresql.enabled (not .Values.existingSecret) (not .Values.postgresql.auth.password) -}}
+{{- fail "postgresql.auth.password is required when the built-in PostgreSQL is enabled" -}}
+{{- end -}}
+{{- if and .Values.gateway.enabled (empty .Values.gateway.parentRefs) -}}
+{{- fail "gateway.parentRefs must contain at least one Gateway reference" -}}
+{{- end -}}

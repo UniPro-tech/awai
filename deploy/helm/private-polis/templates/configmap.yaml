@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "private-polis.fullname" . }}
+  labels:
+    {{- include "private-polis.labels" . | nindent 4 }}
+data:
+  BETTER_AUTH_URL: {{ .Values.auth.baseUrl | quote }}
+  PORT: "3000"
+  STATIC_ROOT: /app/public
+  ANALYSIS_POLL_INTERVAL_SECONDS: {{ .Values.analysis.pollIntervalSeconds | quote }}

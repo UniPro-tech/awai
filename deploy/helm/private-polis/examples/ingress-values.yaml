@@ -1,0 +1,20 @@
+auth:
+  baseUrl: https://consensus.example.com
+
+existingSecret: private-polis-production
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: consensus.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: consensus-tls
+      hosts:
+        - consensus.example.com
+
+gateway:
+  enabled: false
