@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "analysis_jobs_one_pending_per_topic" ON "analysis"."jobs" USING btree ("topic_id") WHERE "analysis"."jobs"."status" = 'PENDING';

@@ -8,22 +8,23 @@ import {
   TopicListResponseSchema,
 } from "@private-polis/contracts";
 import { Hono } from "hono";
+import type { AppEnvironment } from "../http/context.js";
 import { presentTopic } from "../presenters/topic.js";
 import { presentStatement } from "../presenters/statement.js";
-import { statementService } from "../services/statement-service.js";
-import { topicService } from "../services/topic-service.js";
+import type { ApplicationServices } from "../services/services.js";
 
-export const topicsRoute = new Hono()
-  .get("/", (c) =>
-    c.json(TopicListResponseSchema.parse({ items: topicService.list().map(presentTopic) }), 200),
+export function createTopicsRoute(services: ApplicationServices) {
+  return new Hono<AppEnvironment>()
+  .get("/", async (c) =>
+    c.json(TopicListResponseSchema.parse({ items: (await services.topics.list()).map(presentTopic) }), 200),
   )
-  .post("/", zValidator("json", CreateTopicRequestSchema), (c) => {
-    const topic = topicService.create(c.req.valid("json"));
+  .post("/", zValidator("json", CreateTopicRequestSchema), async (c) => {
+    const topic = await services.topics.create(c.req.valid("json"), c.get("currentUser"));
     return c.json(presentTopic(topic), 201);
   })
-  .get("/:topicId/statements", (c) => {
+  .get("/:topicId/statements", async (c) => {
     const topicId = IdSchema.safeParse(c.req.param("topicId"));
-    if (!topicId.success || !topicService.get(topicId.data)) {
+    if (!topicId.success || !(await services.topics.get(topicId.data))) {
       return c.json(
         ApiErrorSchema.parse({ error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." } }),
         404,
@@ -31,7 +32,7 @@ export const topicsRoute = new Hono()
     }
     return c.json(
       StatementListResponseSchema.parse({
-        items: statementService.listByTopic(topicId.data).map(presentStatement),
+        items: (await services.statements.listByTopic(topicId.data)).map(presentStatement),
       }),
       200,
     );
@@ -39,7 +40,7 @@ export const topicsRoute = new Hono()
   .post(
     "/:topicId/statements",
     zValidator("json", CreateStatementRequestSchema),
-    (c) => {
+    async (c) => {
       const topicId = IdSchema.safeParse(c.req.param("topicId"));
       if (!topicId.success) {
         return c.json(
@@ -47,7 +48,11 @@ export const topicsRoute = new Hono()
           404,
         );
       }
-      const result = statementService.create(topicId.data, c.req.valid("json"));
+      const result = await services.statements.create(
+        topicId.data,
+        c.req.valid("json"),
+        c.get("currentUser"),
+      );
       if ("error" in result) {
         const message = {
           TOPIC_NOT_FOUND: "Topic not found.",
@@ -63,9 +68,9 @@ export const topicsRoute = new Hono()
       return c.json(presentStatement(result.statement), 201);
     },
   )
-  .get("/:topicId", (c) => {
+  .get("/:topicId", async (c) => {
     const parsedId = IdSchema.safeParse(c.req.param("topicId"));
-    const topic = parsedId.success ? topicService.get(parsedId.data) : undefined;
+    const topic = parsedId.success ? await services.topics.get(parsedId.data) : undefined;
     if (!topic) {
       return c.json(
         ApiErrorSchema.parse({ error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." } }),
@@ -74,3 +79,4 @@ export const topicsRoute = new Hono()
     }
     return c.json(presentTopic(topic), 200);
   });
+}

@@ -1,10 +1,28 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { app, createApp } from "./app.js";
-import { topicService } from "./services/topic-service.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import { createApp } from "./app.js";
+import { createMemoryServices } from "./services/services.js";
 
-afterEach(() => topicService.clearForTests());
+const testUser = {
+  id: "00000000-0000-4000-8000-000000000001",
+  displayName: "Test User",
+  role: "USER" as const,
+};
+
+function authenticatedApp(readinessCheck = async () => true) {
+  return createApp({
+    readinessCheck,
+    services: createMemoryServices(),
+    authenticate: async () => ({ status: "authenticated", user: testUser }),
+  });
+}
 
 describe("application", () => {
+  let app = authenticatedApp();
+
+  beforeEach(() => {
+    app = authenticatedApp();
+  });
+
   it("reports liveness", async () => {
     const response = await app.request("/health/live");
     expect(response.status).toBe(200);
@@ -12,11 +30,23 @@ describe("application", () => {
   });
 
   it("uses database connectivity for readiness", async () => {
-    const ready = createApp({ readinessCheck: async () => true });
-    const unavailable = createApp({ readinessCheck: async () => false });
+    const ready = authenticatedApp(async () => true);
+    const unavailable = authenticatedApp(async () => false);
 
     expect((await ready.request("/health/ready")).status).toBe(200);
     expect((await unavailable.request("/health/ready")).status).toBe(503);
+  });
+
+  it("requires authentication for versioned API routes", async () => {
+    const unauthenticated = createApp({
+      services: createMemoryServices(),
+      authenticate: async () => ({ status: "unauthenticated" }),
+    });
+    const response = await unauthenticated.request("/api/v1/topics");
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({
+      error: { code: "AUTHENTICATION_REQUIRED" },
+    });
   });
 
   it("creates an anonymous topic without exposing identity", async () => {

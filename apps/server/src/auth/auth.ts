@@ -3,12 +3,7 @@ import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins";
 import { appUsers } from "../db/schema.js";
 import * as authSchema from "../db/auth-schema.js";
-import { createDatabase } from "../db/client.js";
-
-const databaseUrl =
-  process.env.DATABASE_URL ??
-  "postgresql://private_polis:private_polis@localhost:5432/private_polis";
-const runtime = createDatabase(databaseUrl);
+import { databaseRuntime } from "../db/runtime.js";
 
 function authSecret(): string {
   const secret = process.env.BETTER_AUTH_SECRET;
@@ -23,7 +18,7 @@ export const auth = betterAuth({
   basePath: "/api/auth",
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
   secret: authSecret(),
-  database: drizzleAdapter(runtime.db, {
+  database: drizzleAdapter(databaseRuntime.db, {
     provider: "pg",
     schema: authSchema,
     schemaName: "auth",
@@ -39,7 +34,7 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
-          await runtime.db
+          await databaseRuntime.db
             .insert(appUsers)
             .values({ authUserId: user.id, displayName: user.name })
             .onConflictDoNothing({ target: appUsers.authUserId });
@@ -48,7 +43,3 @@ export const auth = betterAuth({
     },
   },
 });
-
-export async function closeAuthDatabase(): Promise<void> {
-  await runtime.pool.end();
-}

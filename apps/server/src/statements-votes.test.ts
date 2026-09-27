@@ -1,33 +1,46 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { app } from "./app.js";
-import { statementService } from "./services/statement-service.js";
-import { topicService } from "./services/topic-service.js";
-import { voteService } from "./services/vote-service.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import { createApp } from "./app.js";
+import { createMemoryServices } from "./services/services.js";
 
-afterEach(() => {
-  voteService.clearForTests();
-  statementService.clearForTests();
-  topicService.clearForTests();
-});
+const testUser = {
+  id: "00000000-0000-4000-8000-000000000001",
+  displayName: "Test User",
+  role: "USER" as const,
+};
 
-async function createTopic(statementIdentityPolicy = "OPTIONAL") {
-  const response = await app.request("/api/v1/topics", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ title: "Topic", statementIdentityPolicy }),
-  });
-  return (await response.json()) as { id: string };
-}
-
-async function createStatement(topicId: string, authorVisibility = "ANONYMOUS") {
-  return app.request(`/api/v1/topics/${topicId}/statements`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ body: "A useful proposal", authorVisibility }),
+function authenticatedApp(services = createMemoryServices()) {
+  return createApp({
+    services,
+    authenticate: async () => ({ status: "authenticated", user: testUser }),
   });
 }
 
 describe("statements and votes", () => {
+  let services = createMemoryServices();
+  let app = authenticatedApp();
+
+  beforeEach(() => {
+    services = createMemoryServices();
+    app = authenticatedApp(services);
+  });
+
+  async function createTopic(statementIdentityPolicy = "OPTIONAL") {
+    const response = await app.request("/api/v1/topics", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "Topic", statementIdentityPolicy }),
+    });
+    return (await response.json()) as { id: string };
+  }
+
+  async function createStatement(topicId: string, authorVisibility = "ANONYMOUS") {
+    return app.request(`/api/v1/topics/${topicId}/statements`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ body: "A useful proposal", authorVisibility }),
+    });
+  }
+
   it("never exposes an anonymous statement author's internal identity", async () => {
     const topic = await createTopic();
     const response = await createStatement(topic.id);
@@ -63,6 +76,28 @@ describe("statements and votes", () => {
 
     const statistics = await app.request(`/api/v1/statements/${statement.id}/stats`);
     expect(await statistics.json()).toEqual({ agree: 0, disagree: 1, pass: 0, total: 1 });
+  });
+
+  it("isolates each authenticated user's current vote", async () => {
+    const topic = await createTopic();
+    const created = await createStatement(topic.id);
+    const statement = (await created.json()) as { id: string };
+    await app.request(`/api/v1/statements/${statement.id}/vote`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ value: "AGREE" }),
+    });
+
+    const secondUserApp = createApp({
+      services,
+      authenticate: async () => ({
+        status: "authenticated",
+        user: { ...testUser, id: "00000000-0000-4000-8000-000000000002" },
+      }),
+    });
+    const response = await secondUserApp.request(`/api/v1/statements/${statement.id}/vote`);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ value: null });
   });
 
   it("returns aggregates without raw voter data", async () => {

@@ -7,10 +7,8 @@ import {
   VoteStatisticsResponseSchema,
 } from "@private-polis/contracts";
 import { Hono } from "hono";
-import { statementService } from "../services/statement-service.js";
-import { voteService } from "../services/vote-service.js";
-
-const DEVELOPMENT_USER_ID = "development-user";
+import type { AppEnvironment } from "../http/context.js";
+import type { ApplicationServices } from "../services/services.js";
 
 function statementNotFound() {
   return ApiErrorSchema.parse({
@@ -18,39 +16,49 @@ function statementNotFound() {
   });
 }
 
-export const statementsRoute = new Hono()
-  .put("/:statementId/vote", zValidator("json", SetVoteRequestSchema), (c) => {
+export function createStatementsRoute(services: ApplicationServices) {
+  return new Hono<AppEnvironment>()
+  .put("/:statementId/vote", zValidator("json", SetVoteRequestSchema), async (c) => {
     const statementId = IdSchema.safeParse(c.req.param("statementId"));
-    if (!statementId.success || !statementService.get(statementId.data)) {
+    const statement = statementId.success
+      ? await services.statements.get(statementId.data)
+      : undefined;
+    if (!statement) {
       return c.json(statementNotFound(), 404);
     }
-    voteService.setVote(statementId.data, DEVELOPMENT_USER_ID, c.req.valid("json").value);
+    const user = c.get("currentUser");
+    await services.votes.setVote(statement.id, statement.topicId, user.id, c.req.valid("json").value);
     return c.json(
       CurrentVoteResponseSchema.parse({
-        value: voteService.getCurrentUserVote(statementId.data, DEVELOPMENT_USER_ID),
+        value: await services.votes.getCurrentUserVote(statement.id, user.id),
       }),
       200,
     );
   })
-  .get("/:statementId/vote", (c) => {
+  .get("/:statementId/vote", async (c) => {
     const statementId = IdSchema.safeParse(c.req.param("statementId"));
-    if (!statementId.success || !statementService.get(statementId.data)) {
+    const statement = statementId.success
+      ? await services.statements.get(statementId.data)
+      : undefined;
+    if (!statement) {
       return c.json(statementNotFound(), 404);
     }
+    const user = c.get("currentUser");
     return c.json(
       CurrentVoteResponseSchema.parse({
-        value: voteService.getCurrentUserVote(statementId.data, DEVELOPMENT_USER_ID),
+        value: await services.votes.getCurrentUserVote(statement.id, user.id),
       }),
       200,
     );
   })
-  .get("/:statementId/stats", (c) => {
+  .get("/:statementId/stats", async (c) => {
     const statementId = IdSchema.safeParse(c.req.param("statementId"));
-    if (!statementId.success || !statementService.get(statementId.data)) {
+    if (!statementId.success || !(await services.statements.get(statementId.data))) {
       return c.json(statementNotFound(), 404);
     }
     return c.json(
-      VoteStatisticsResponseSchema.parse(voteService.getVoteStatistics(statementId.data)),
+      VoteStatisticsResponseSchema.parse(await services.votes.getVoteStatistics(statementId.data)),
       200,
     );
   });
+}

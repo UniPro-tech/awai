@@ -1,6 +1,6 @@
 # Architecture
 
-PrivatePolis uses a pnpm monorepo with an application server, browser application, shared API contracts, and a typed client. PostgreSQL will be the boundary between the TypeScript application and the Python analysis worker.
+PrivatePolis uses a pnpm monorepo with an application server, browser application, shared API contracts, and a typed client. PostgreSQL is the boundary between the TypeScript application and the Python analysis worker.
 
 ```text
 Browser -> Hono HTTP API -> PostgreSQL <- Python analysis worker
@@ -27,8 +27,10 @@ Database models, domain models, and API response models are separate. Presenters
 - Anonymous responses contain `displayName: null` regardless of the caller's role.
 - Analysis results do not persist a mapping from plotted points to user identities.
 
-## Planned persistence and analysis
+## Authentication, persistence, and analysis
 
-The server uses Drizzle ORM with PostgreSQL schemas named `core` and `analysis`; Better Auth will own the `auth` schema. Database migrations run as an explicit deployment step. The Python worker claims jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`; no Redis service is required.
+Better Auth owns the `auth` schema and maps each authenticated account to a separate `core.app_users` row. Middleware rejects unauthenticated `/api/v1` requests before route handlers run. The server uses Drizzle ORM with PostgreSQL schemas named `core` and `analysis`. Database migrations run as an explicit deployment step.
+
+Creating a statement or replacing a vote schedules analysis ten seconds later. A partial unique index keeps at most one pending job per topic, so bursts move that job's availability time instead of producing an unbounded queue. The Python worker claims jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`; no Redis service is required.
 
 The analysis adapter converts UUIDs to short-lived integer identifiers required by Red Dwarf. Participant identifiers are discarded before results are persisted. The `analysis.points` table intentionally has no user identifier or participant mapping.

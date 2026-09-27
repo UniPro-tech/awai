@@ -4,7 +4,7 @@ PrivatePolis is a private-first, self-hosted platform for discovering opinion gr
 
 ## Project status
 
-PrivatePolis is in early development. The current foundation provides shared runtime-validated API contracts, a Hono application server, a typed Hono RPC client, and a React/Vite web application.
+PrivatePolis is in early development. The current foundation provides local account authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application.
 
 ## Principles
 
@@ -41,6 +41,8 @@ pnpm db:migrate
 ```
 
 Production application startup never runs migrations implicitly.
+
+All `/api/v1` routes require a Better Auth session. Register through the web UI or the `/api/auth/sign-up/email` endpoint; application users are mapped to authentication users without exposing authentication identifiers in public responses.
 
 The analysis worker is managed separately:
 

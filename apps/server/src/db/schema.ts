@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -160,7 +161,12 @@ export const analysisJobs = analysis.table(
     lockedAt: timestamp("locked_at", { withTimezone: true }),
     ...timestamps,
   },
-  (table) => [index("analysis_jobs_claim_idx").on(table.status, table.availableAt)],
+  (table) => [
+    index("analysis_jobs_claim_idx").on(table.status, table.availableAt),
+    uniqueIndex("analysis_jobs_one_pending_per_topic")
+      .on(table.topicId)
+      .where(sql`${table.status} = 'PENDING'`),
+  ],
 );
 
 export const analysisRuns = analysis.table(
