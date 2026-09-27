@@ -48,6 +48,8 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .group-legend span { border-radius: 50%; display: inline-block; height: 0.75rem; width: 0.75rem; }
 .empty-state { margin-top: 2rem; }
 .empty-state h2 { margin-top: 0; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0; }
+.tag-list span { background: #e5eee8; border-radius: 999px; color: #315d45; padding: 0.25rem 0.6rem; }
 
 .auth-shell { display: grid; min-height: 100vh; padding: 1rem; place-items: center; }
 .auth-card { background: #fff; border: 1px solid #dce3d9; border-radius: 1.25rem; box-shadow: 0 20px 60px rgb(23 32 27 / 10%); max-width: 30rem; padding: clamp(1.5rem, 6vw, 3rem); width: 100%; }

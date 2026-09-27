@@ -1,8 +1,15 @@
 import type { CreateTopicRequest } from "@private-polis/contracts";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { AuthenticatedUser } from "../auth/session.js";
 import type { Database } from "../db/client.js";
-import { appUsers, auditLogs, tags as tagTable, topicTags, topics } from "../db/schema.js";
+import {
+  appUsers,
+  auditLogs,
+  categories,
+  tags as tagTable,
+  topicTags,
+  topics,
+} from "../db/schema.js";
 import type { TopicRecord } from "../presenters/topic.js";
 
 export interface TopicService {
@@ -30,17 +37,47 @@ const topicSelection = {
   createdAt: topics.createdAt,
   updatedAt: topics.updatedAt,
   deletedAt: topics.deletedAt,
+  categoryId: categories.id,
+  categoryName: categories.name,
+};
+
+type TopicRow = Omit<TopicRecord, "category" | "tags"> & {
+  categoryId: string | null;
+  categoryName: string | null;
 };
 
 export function createPostgresTopicService(database: Database): TopicService {
+  async function hydrateTags(rows: TopicRow[]) {
+    if (rows.length === 0) return [];
+    const tagRows = await database
+      .select({ topicId: topicTags.topicId, id: tagTable.id, name: tagTable.name })
+      .from(topicTags)
+      .innerJoin(tagTable, eq(topicTags.tagId, tagTable.id))
+      .where(inArray(topicTags.topicId, rows.map((row) => row.id)))
+      .orderBy(asc(tagTable.name));
+    const tagsByTopic = new Map<string, Array<{ id: string; name: string }>>();
+    for (const tag of tagRows) {
+      const current = tagsByTopic.get(tag.topicId) ?? [];
+      current.push({ id: tag.id, name: tag.name });
+      tagsByTopic.set(tag.topicId, current);
+    }
+    return rows.map(({ categoryId, categoryName, ...topic }) => ({
+      ...topic,
+      category: categoryId && categoryName ? { id: categoryId, name: categoryName } : null,
+      tags: tagsByTopic.get(topic.id) ?? [],
+    })) as TopicRecord[];
+  }
+
   return {
     async list() {
-      return database
+      const rows = await database
         .select(topicSelection)
         .from(topics)
         .innerJoin(appUsers, eq(topics.createdByUserId, appUsers.id))
+        .leftJoin(categories, eq(topics.categoryId, categories.id))
         .where(isNull(topics.deletedAt))
         .orderBy(desc(topics.createdAt));
+      return hydrateTags(rows);
     },
 
     async get(id, options) {
@@ -48,13 +85,14 @@ export function createPostgresTopicService(database: Database): TopicService {
         .select(topicSelection)
         .from(topics)
         .innerJoin(appUsers, eq(topics.createdByUserId, appUsers.id))
+        .leftJoin(categories, eq(topics.categoryId, categories.id))
         .where(
           options?.includeDeleted
             ? eq(topics.id, id)
             : and(eq(topics.id, id), isNull(topics.deletedAt)),
         )
         .limit(1);
-      return topic;
+      return topic ? (await hydrateTags([topic]))[0] : undefined;
     },
 
     async create(input, user) {
@@ -73,6 +111,7 @@ export function createPostgresTopicService(database: Database): TopicService {
           .returning();
         if (!topic) throw new Error("Topic insertion did not return a row.");
 
+        const topicTagRecords: Array<{ id: string; name: string }> = [];
         for (const name of [...new Set(input.tags)]) {
           const [tag] = await transaction
             .insert(tagTable)
@@ -81,8 +120,17 @@ export function createPostgresTopicService(database: Database): TopicService {
             .returning({ id: tagTable.id });
           if (tag) {
             await transaction.insert(topicTags).values({ topicId: topic.id, tagId: tag.id });
+            topicTagRecords.push({ id: tag.id, name });
           }
         }
+
+        const [category] = topic.categoryId
+          ? await transaction
+              .select({ id: categories.id, name: categories.name })
+              .from(categories)
+              .where(eq(categories.id, topic.categoryId))
+              .limit(1)
+          : [];
 
         return {
           id: topic.id,
@@ -97,6 +145,8 @@ export function createPostgresTopicService(database: Database): TopicService {
           createdAt: topic.createdAt,
           updatedAt: topic.updatedAt,
           deletedAt: topic.deletedAt,
+          category: category ?? null,
+          tags: topicTagRecords.sort((a, b) => a.name.localeCompare(b.name)),
         };
       });
     },
@@ -180,6 +230,8 @@ export function createMemoryTopicService(): MemoryTopicService {
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
+        category: null,
+        tags: [...new Set(input.tags)].map((name) => ({ id: crypto.randomUUID(), name })),
       };
       records.set(topic.id, topic);
       return topic;

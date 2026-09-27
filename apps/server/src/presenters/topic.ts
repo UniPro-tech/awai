@@ -1,5 +1,10 @@
 import { TopicResponseSchema, type TopicResponse } from "@private-polis/contracts";
 
+export interface TaxonomyRecord {
+  id: string;
+  name: string;
+}
+
 export interface TopicRecord {
   id: string;
   createdByUserId: string;
@@ -10,6 +15,8 @@ export interface TopicRecord {
   authorDisplayName: string;
   statementIdentityPolicy: "OPTIONAL" | "ANONYMOUS_REQUIRED" | "IDENTIFIED_REQUIRED";
   status: "DRAFT" | "OPEN" | "CLOSED" | "ARCHIVED";
+  category: TaxonomyRecord | null;
+  tags: TaxonomyRecord[];
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -26,6 +33,8 @@ export function presentTopic(topic: TopicRecord): TopicResponse {
     },
     statementIdentityPolicy: topic.statementIdentityPolicy,
     status: topic.status,
+    category: topic.category,
+    tags: topic.tags,
     createdAt: topic.createdAt.toISOString(),
     updatedAt: topic.updatedAt.toISOString(),
   });

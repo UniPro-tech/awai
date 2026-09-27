@@ -23,11 +23,17 @@ import {
   createPostgresVoteService,
   type VoteService,
 } from "./vote-service.js";
+import {
+  createMemoryTaxonomyService,
+  createPostgresTaxonomyService,
+  type TaxonomyService,
+} from "./taxonomy-service.js";
 
 export interface ApplicationServices {
   analysis: AnalysisService;
   topics: TopicService;
   statements: StatementService;
+  taxonomy: TaxonomyService;
   votes: VoteService;
 }
 
@@ -38,6 +44,7 @@ export function createPostgresServices(database: Database): ApplicationServices 
     analysis: createPostgresAnalysisService(database),
     topics: topicService,
     statements: createPostgresStatementService(database, topicService, analysisQueue),
+    taxonomy: createPostgresTaxonomyService(database),
     votes: createPostgresVoteService(database, analysisQueue),
   };
 }
@@ -49,6 +56,7 @@ export function createMemoryServices(): ApplicationServices {
     analysis: createMemoryAnalysisService(),
     topics: topicService,
     statements: createMemoryStatementService(topicService, analysisQueue),
+    taxonomy: createMemoryTaxonomyService(),
     votes: createMemoryVoteService(analysisQueue),
   };
 }

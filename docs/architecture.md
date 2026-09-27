@@ -28,6 +28,7 @@ Database models, domain models, and API response models are separate. Presenters
 - Analysis results do not persist a mapping from plotted points to user identities.
 - Analysis APIs expose anonymous coordinates and aggregate group sizes, never participant identifiers.
 - Topic and statement deletion is logical. Delete and restore operations are authorized and audited, while historical analysis snapshots remain unchanged.
+- Categories are optional and tags are many-to-many. Removing taxonomy data never removes its topics.
 
 ## Authentication, persistence, and analysis
 

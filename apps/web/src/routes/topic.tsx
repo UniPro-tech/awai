@@ -81,6 +81,8 @@ export function TopicPage() {
             <p className="eyebrow">{topic.data.status}</p>
             <h1>{topic.data.title}</h1>
             <p>{topic.data.description || "No description provided."}</p>
+            {topic.data.category ? <p className="meta">Category: {topic.data.category.name}</p> : null}
+            {topic.data.tags.length > 0 ? <div className="tag-list">{topic.data.tags.map((tag) => <span key={tag.id}>{tag.name}</span>)}</div> : null}
             <Link className="text-link" to="/topics/$topicId/results" params={{ topicId }}>
               View analysis results
             </Link>

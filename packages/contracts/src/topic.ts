@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AuthorVisibilitySchema, IdSchema, PublicAuthorSchema } from "./common.js";
+import { TaxonomyItemResponseSchema } from "./taxonomy.js";
 
 export const StatementIdentityPolicySchema = z.enum([
   "OPTIONAL",
@@ -27,6 +28,8 @@ export const TopicResponseSchema = z.object({
   author: PublicAuthorSchema,
   statementIdentityPolicy: StatementIdentityPolicySchema,
   status: TopicStatusSchema,
+  category: TaxonomyItemResponseSchema.nullable().default(null),
+  tags: z.array(TaxonomyItemResponseSchema).default([]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

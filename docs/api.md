@@ -36,6 +36,19 @@ Deletion and restoration actions are written to `core.audit_logs`. Restore opera
 
 No endpoint lists raw votes, voters, or votes by user. Topic owners and administrators receive the same aggregate-only response as other users.
 
+## Categories and tags
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/categories` | List categories |
+| `POST` | `/api/v1/categories` | Create or return a category as an administrator |
+| `DELETE` | `/api/v1/categories/:categoryId` | Delete a category as an administrator |
+| `GET` | `/api/v1/tags` | List tags |
+| `POST` | `/api/v1/tags` | Create or return a tag as an administrator |
+| `DELETE` | `/api/v1/tags/:tagId` | Delete a tag as an administrator |
+
+Deleting a category clears the optional category reference on existing topics. Deleting a tag removes its topic associations without deleting topics. Topic responses contain their public category and tags.
+
 ## Analysis
 
 | Method | Path | Purpose |
