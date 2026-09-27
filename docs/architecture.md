@@ -26,6 +26,7 @@ Database models, domain models, and API response models are separate. Presenters
 - The identity policy stored on a topic affects future statements only. Each statement retains the author visibility selected at creation.
 - Anonymous responses contain `displayName: null` regardless of the caller's role.
 - Analysis results do not persist a mapping from plotted points to user identities.
+- Analysis APIs expose anonymous coordinates and aggregate group sizes, never participant identifiers.
 
 ## Authentication, persistence, and analysis
 

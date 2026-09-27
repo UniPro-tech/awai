@@ -12,3 +12,9 @@ export async function createTopic(input: CreateTopicRequest) {
   if (!response.ok) throw await toApiError(response);
   return response.json();
 }
+
+export async function getTopic(topicId: string) {
+  const response = await api.api.v1.topics[":topicId"].$get({ param: { topicId } });
+  if (!response.ok) throw await toApiError(response);
+  return response.json();
+}

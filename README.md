@@ -4,7 +4,7 @@ PrivatePolis is a private-first, self-hosted platform for discovering opinion gr
 
 ## Project status
 
-PrivatePolis is in early development. The current foundation provides local account authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application.
+PrivatePolis is in early development. The current foundation provides local account authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, privacy-safe result APIs and visualization, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application.
 
 ## Principles
 

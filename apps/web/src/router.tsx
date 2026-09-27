@@ -1,6 +1,8 @@
 import { createRootRoute, createRoute, createRouter, Outlet, redirect } from "@tanstack/react-router";
 import { TopicsPage } from "./routes/topics";
 import { LoginPage } from "./routes/login";
+import { TopicPage } from "./routes/topic";
+import { ResultsPage } from "./routes/results";
 
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
 const indexRoute = createRoute({
@@ -20,8 +22,24 @@ const loginRoute = createRoute({
   path: "/login",
   component: LoginPage,
 });
+const topicRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/topics/$topicId",
+  component: TopicPage,
+});
+const resultsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/topics/$topicId/results",
+  component: ResultsPage,
+});
 
-const routeTree = rootRoute.addChildren([indexRoute, loginRoute, topicsRoute]);
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  loginRoute,
+  topicsRoute,
+  topicRoute,
+  resultsRoute,
+]);
 export const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

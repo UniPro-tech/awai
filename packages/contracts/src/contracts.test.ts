@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { CreateTopicRequestSchema, TopicResponseSchema } from "./index.js";
+import {
+  AnalysisRunResponseSchema,
+  CreateTopicRequestSchema,
+  TopicResponseSchema,
+} from "./index.js";
 
 describe("topic contracts", () => {
   it("normalizes defaults", () => {
@@ -39,5 +43,41 @@ describe("topic contracts", () => {
 
     expect(response).not.toHaveProperty("createdByUserId");
     expect(response.author.displayName).toBeNull();
+  });
+});
+
+describe("analysis contracts", () => {
+  it("strips participant and statement author identities", () => {
+    const response = AnalysisRunResponseSchema.parse({
+      id: "0198f38e-c18a-7e9f-a005-629e4c37ae40",
+      status: "COMPLETED",
+      algorithmVersion: "red-dwarf-0.4.0",
+      participantCount: 2,
+      statementCount: 2,
+      completedAt: "2026-09-27T00:00:01.000Z",
+      createdAt: "2026-09-27T00:00:00.000Z",
+      groups: [],
+      points: [{ x: 0.5, y: -0.25, groupOrdinal: null, userId: "private-user" }],
+      statementResults: [
+        {
+          statement: {
+            id: "0198f38e-c18a-7e9f-a005-629e4c37ae41",
+            topicId: "0198f38e-c18a-7e9f-a005-629e4c37ae42",
+            body: "Shared ground",
+            author: { visibility: "ANONYMOUS", displayName: null },
+            createdAt: "2026-09-27T00:00:00.000Z",
+            updatedAt: "2026-09-27T00:00:00.000Z",
+            authorUserId: "private-user",
+          },
+          groupOrdinal: null,
+          kind: "CONSENSUS_AGREE",
+          score: 0.9,
+          rank: 1,
+        },
+      ],
+    });
+
+    expect(response.points[0]).not.toHaveProperty("userId");
+    expect(response.statementResults[0]?.statement).not.toHaveProperty("authorUserId");
   });
 });

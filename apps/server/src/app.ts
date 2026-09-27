@@ -5,6 +5,7 @@ import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { createTopicsRoute } from "./routes/topics.js";
 import { createStatementsRoute } from "./routes/statements.js";
+import { createAnalysisRoute } from "./routes/analysis.js";
 import { checkDatabaseReadiness } from "./db/health.js";
 import { auth } from "./auth/auth.js";
 import { authenticateRequest, type AuthenticateRequest } from "./auth/session.js";
@@ -60,6 +61,7 @@ export function createApp(options: AppOptions = {}) {
       c.set("currentUser", authentication.user);
       await next();
     })
+    .route("/api/v1/topics", createAnalysisRoute(services))
     .route("/api/v1/topics", createTopicsRoute(services))
     .route("/api/v1/statements", createStatementsRoute(services));
 }

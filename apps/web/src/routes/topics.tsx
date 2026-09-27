@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { AuthGate } from "../features/auth/auth-gate";
 import { authClient } from "../features/auth/client";
 import { createTopic, listTopics } from "../features/topics/api";
@@ -74,7 +74,7 @@ export function TopicsPage() {
         <ul className="topic-list">
           {topics.data?.items.map((topic) => (
             <li key={topic.id} className="panel">
-              <h3>{topic.title}</h3>
+              <h3><Link to="/topics/$topicId" params={{ topicId: topic.id }}>{topic.title}</Link></h3>
               <p>{topic.description || "No description provided."}</p>
               <span>{topic.author.visibility === "ANONYMOUS" ? "Anonymous author" : topic.author.displayName}</span>
             </li>
