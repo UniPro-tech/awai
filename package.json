@@ -8,6 +8,8 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "db:generate": "pnpm --filter @private-polis/server db:generate",
+    "db:migrate": "pnpm --filter @private-polis/server db:migrate",
     "dev": "pnpm --parallel --filter @private-polis/server --filter @private-polis/web dev",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck"

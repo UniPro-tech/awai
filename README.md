@@ -33,6 +33,15 @@ pnpm dev
 
 The development web server listens on `http://localhost:5173` and proxies `/api` and `/health` to the application server at `http://localhost:3000`.
 
+Copy `.env.example` to `.env`, then generate and apply schema changes explicitly:
+
+```sh
+pnpm db:generate
+pnpm db:migrate
+```
+
+Production application startup never runs migrations implicitly.
+
 ## Repository layout
 
 ```text
