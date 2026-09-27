@@ -14,6 +14,11 @@ function authSecret(): string {
   return "development-only-change-me-32-characters";
 }
 
+function initialRole(email: string): "USER" | "ADMIN" {
+  const initialAdminEmail = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();
+  return initialAdminEmail && email.toLowerCase() === initialAdminEmail ? "ADMIN" : "USER";
+}
+
 export const auth = betterAuth({
   basePath: "/api/auth",
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
@@ -36,7 +41,11 @@ export const auth = betterAuth({
         after: async (user) => {
           await databaseRuntime.db
             .insert(appUsers)
-            .values({ authUserId: user.id, displayName: user.name })
+            .values({
+              authUserId: user.id,
+              displayName: user.name,
+              role: initialRole(user.email),
+            })
             .onConflictDoNothing({ target: appUsers.authUserId });
         },
       },

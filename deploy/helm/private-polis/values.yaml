@@ -55,6 +55,7 @@ service:
 auth:
   baseUrl: https://consensus.example.com
   secret: ""
+  initialAdminEmail: ""
 
 database:
   url: ""

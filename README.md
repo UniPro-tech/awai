@@ -44,6 +44,8 @@ Production application startup never runs migrations implicitly.
 
 All `/api/v1` routes require a Better Auth session. Register through the web UI or the `/api/auth/sign-up/email` endpoint; application users are mapped to authentication users without exposing authentication identifiers in public responses.
 
+Set `INITIAL_ADMIN_EMAIL` before the first matching account is registered to bootstrap an administrator. The comparison is case-insensitive and only applies when a new account is created; changing the setting does not promote an existing account. Administrators can subsequently manage roles and suspensions from `/admin`.
+
 The analysis worker is managed separately:
 
 ```sh

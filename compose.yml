@@ -42,6 +42,7 @@ services:
       DATABASE_URL: postgresql://private_polis:${POSTGRES_PASSWORD:-private_polis}@postgres:5432/private_polis
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET to at least 32 random characters}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:8080}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-}
       PORT: 3000
       STATIC_ROOT: /app/public
     depends_on:

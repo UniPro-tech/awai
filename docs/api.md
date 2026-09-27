@@ -59,6 +59,15 @@ Deleting a category clears the optional category reference on existing topics. D
 
 Analysis points contain coordinates and an optional group ordinal only. They never contain an account, user, or participant identifier.
 
+## Administration
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/admin/users` | List application users as an administrator |
+| `PATCH` | `/api/v1/admin/users/:userId` | Change a user's role or suspension state as an administrator |
+
+The update body accepts at least one of `role` (`USER` or `ADMIN`) and `suspended` (boolean). An administrator cannot demote or suspend their own account. Suspension is checked on every versioned API request, so it invalidates access even for an already-issued session cookie. Administrative changes are recorded in `core.audit_logs`; authentication identifiers and credentials are never returned.
+
 ## Errors
 
 Errors use a shared shape:
@@ -72,4 +81,4 @@ Errors use a shared shape:
 }
 ```
 
-Authentication failures return `401`; authorization failures return `403`; missing or soft-deleted resources return `404`; identity-policy and topic-state conflicts return `409`; invalid JSON input returns `400`.
+Authentication failures return `401`; authorization failures (including suspended accounts) return `403`; missing or soft-deleted resources return `404`; identity-policy, topic-state, and administrator self-lockout conflicts return `409`; invalid JSON input returns `400`.

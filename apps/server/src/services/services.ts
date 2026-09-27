@@ -1,5 +1,10 @@
 import type { Database } from "../db/client.js";
 import {
+  createMemoryAdminService,
+  createPostgresAdminService,
+  type AdminService,
+} from "./admin-service.js";
+import {
   createMemoryAnalysisService,
   createPostgresAnalysisService,
   type AnalysisService,
@@ -30,6 +35,7 @@ import {
 } from "./taxonomy-service.js";
 
 export interface ApplicationServices {
+  admin: AdminService;
   analysis: AnalysisService;
   topics: TopicService;
   statements: StatementService;
@@ -41,6 +47,7 @@ export function createPostgresServices(database: Database): ApplicationServices 
   const analysisQueue = createPostgresAnalysisQueue(database);
   const topicService = createPostgresTopicService(database);
   return {
+    admin: createPostgresAdminService(database),
     analysis: createPostgresAnalysisService(database),
     topics: topicService,
     statements: createPostgresStatementService(database, topicService, analysisQueue),
@@ -53,6 +60,7 @@ export function createMemoryServices(): ApplicationServices {
   const analysisQueue = createMemoryAnalysisQueue();
   const topicService = createMemoryTopicService();
   return {
+    admin: createMemoryAdminService(),
     analysis: createMemoryAnalysisService(),
     topics: topicService,
     statements: createMemoryStatementService(topicService, analysisQueue),

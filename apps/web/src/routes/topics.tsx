@@ -54,6 +54,7 @@ export function TopicsPage() {
         >
           Sign out
         </button>
+        <Link className="admin-link" to="/admin">Administration</Link>
         <p className="eyebrow">Private-first consensus</p>
         <h1>Topics</h1>
         <p>Collect viewpoints, reveal opinion groups, and find shared ground.</p>

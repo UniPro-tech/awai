@@ -7,6 +7,7 @@ import { createTopicsRoute } from "./routes/topics.js";
 import { createStatementsRoute } from "./routes/statements.js";
 import { createAnalysisRoute } from "./routes/analysis.js";
 import { createCategoriesRoute, createTagsRoute } from "./routes/taxonomy.js";
+import { createAdminRoute } from "./routes/admin.js";
 import { checkDatabaseReadiness } from "./db/health.js";
 import { auth } from "./auth/auth.js";
 import { authenticateRequest, type AuthenticateRequest } from "./auth/session.js";
@@ -66,7 +67,8 @@ export function createApp(options: AppOptions = {}) {
     .route("/api/v1/topics", createTopicsRoute(services))
     .route("/api/v1/statements", createStatementsRoute(services))
     .route("/api/v1/categories", createCategoriesRoute(services))
-    .route("/api/v1/tags", createTagsRoute(services));
+    .route("/api/v1/tags", createTagsRoute(services))
+    .route("/api/v1/admin", createAdminRoute(services));
 }
 
 export const app = createApp();

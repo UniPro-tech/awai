@@ -3,6 +3,7 @@ import { TopicsPage } from "./routes/topics";
 import { LoginPage } from "./routes/login";
 import { TopicPage } from "./routes/topic";
 import { ResultsPage } from "./routes/results";
+import { AdminPage } from "./routes/admin";
 
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
 const indexRoute = createRoute({
@@ -32,6 +33,11 @@ const resultsRoute = createRoute({
   path: "/topics/$topicId/results",
   component: ResultsPage,
 });
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: AdminPage,
+});
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -39,6 +45,7 @@ const routeTree = rootRoute.addChildren([
   topicsRoute,
   topicRoute,
   resultsRoute,
+  adminRoute,
 ]);
 export const router = createRouter({ routeTree });
 

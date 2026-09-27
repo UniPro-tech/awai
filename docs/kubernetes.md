@@ -15,7 +15,8 @@ helm upgrade --install private-polis deploy/helm/private-polis \
   --set migration.image.repository=registry.example.com/private-polis/migration \
   --set migration.image.tag=0.1.0 \
   --set existingSecret=private-polis-production \
-  --set auth.baseUrl=https://consensus.example.com
+  --set auth.baseUrl=https://consensus.example.com \
+  --set auth.initialAdminEmail=admin@example.com
 ```
 
 Avoid secrets on the command line in production. Create the referenced Secret before installation:
@@ -33,6 +34,8 @@ stringData:
 ```
 
 The migration Job runs after the initial resources are installed and before each upgrade. Application readiness verifies database connectivity; schema changes are never applied by application startup.
+
+`auth.initialAdminEmail` promotes a matching account only when that account is first registered. Matching is case-insensitive; changing the value does not alter existing users. After bootstrap, administrators can manage roles and suspensions from the Administration page. The value is not a credential, but operators should still keep deployment configuration under change control.
 
 ## HTTP routing
 
