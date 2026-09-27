@@ -5,6 +5,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { topicsRoute } from "./routes/topics.js";
 import { statementsRoute } from "./routes/statements.js";
 import { checkDatabaseReadiness } from "./db/health.js";
+import { auth } from "./auth/auth.js";
 
 export interface AppOptions {
   readinessCheck?: () => Promise<boolean>;
@@ -15,6 +16,7 @@ export function createApp(options: AppOptions = {}) {
   return new Hono()
     .use("*", requestId())
     .use("*", secureHeaders())
+    .on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw))
     .get("/health/live", (c) => c.json({ status: "ok" as const }))
     .get("/health/ready", async (c) => {
       if (await readinessCheck()) return c.json({ status: "ok" as const }, 200);

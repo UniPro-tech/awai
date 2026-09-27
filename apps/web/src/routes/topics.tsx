@@ -1,8 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { AuthGate } from "../features/auth/auth-gate";
+import { authClient } from "../features/auth/client";
 import { createTopic, listTopics } from "../features/topics/api";
 
 export function TopicsPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const topics = useQuery({ queryKey: ["topics"], queryFn: listTopics });
@@ -26,9 +30,19 @@ export function TopicsPage() {
     });
   }
 
-  return (
+  return <AuthGate>
     <main className="shell">
       <header>
+        <button
+          className="button-link sign-out"
+          type="button"
+          onClick={async () => {
+            await authClient.signOut();
+            await navigate({ to: "/login" });
+          }}
+        >
+          Sign out
+        </button>
         <p className="eyebrow">Private-first consensus</p>
         <h1>Topics</h1>
         <p>Collect viewpoints, reveal opinion groups, and find shared ground.</p>
@@ -68,5 +82,5 @@ export function TopicsPage() {
         </ul>
       </section>
     </main>
-  );
+  </AuthGate>;
 }

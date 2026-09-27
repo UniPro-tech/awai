@@ -55,6 +55,7 @@ For a complete local self-hosted stack, see [docs/self-hosting.md](docs/self-hos
 
 ```sh
 export POSTGRES_PASSWORD='replace-with-a-long-random-password'
+export BETTER_AUTH_SECRET='replace-with-at-least-32-random-characters'
 docker compose up --build -d
 ```
 

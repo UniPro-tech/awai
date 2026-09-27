@@ -5,5 +5,11 @@ packages:
 
 onlyBuiltDependencies:
   - esbuild
+
+ignoredBuiltDependencies:
+  - "@prisma/client"
+  - better-sqlite3
 allowBuilds:
+  '@prisma/client': false
+  better-sqlite3: false
   esbuild: true

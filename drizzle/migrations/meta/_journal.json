@@ -15,6 +15,13 @@
       "when": 1790519568194,
       "tag": "0001_violet_menace",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790520493451,
+      "tag": "0002_typical_outlaw_kid",
+      "breakpoints": true
     }
   ]
 }
