@@ -75,7 +75,7 @@ deploy               Docker Compose and container assets
 docs                 Architecture and contributor documentation
 ```
 
-See [docs/architecture.md](docs/architecture.md) for boundaries and security invariants.
+See [docs/architecture.md](docs/architecture.md) for boundaries and security invariants, and [docs/api.md](docs/api.md) for the current HTTP API.
 
 ## Security
 

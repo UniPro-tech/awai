@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   AnalysisRunResponseSchema,
   CreateTopicRequestSchema,
+  DeletionRequestSchema,
   TopicResponseSchema,
 } from "./index.js";
 
@@ -79,5 +80,14 @@ describe("analysis contracts", () => {
 
     expect(response.points[0]).not.toHaveProperty("userId");
     expect(response.statementResults[0]?.statement).not.toHaveProperty("authorUserId");
+  });
+});
+
+describe("moderation contracts", () => {
+  it("requires a non-empty deletion reason", () => {
+    expect(DeletionRequestSchema.parse({ reason: "  duplicate  " })).toEqual({
+      reason: "duplicate",
+    });
+    expect(() => DeletionRequestSchema.parse({ reason: "   " })).toThrow();
   });
 });

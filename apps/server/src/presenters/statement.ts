@@ -9,6 +9,7 @@ export interface StatementRecord {
   authorVisibility: "IDENTIFIED" | "ANONYMOUS";
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export function presentStatement(statement: StatementRecord): StatementResponse {

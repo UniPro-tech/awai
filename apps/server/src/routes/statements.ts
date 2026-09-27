@@ -2,6 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import {
   ApiErrorSchema,
   CurrentVoteResponseSchema,
+  DeletionRequestSchema,
   IdSchema,
   SetVoteRequestSchema,
   VoteStatisticsResponseSchema,
@@ -18,6 +19,40 @@ function statementNotFound() {
 
 export function createStatementsRoute(services: ApplicationServices) {
   return new Hono<AppEnvironment>()
+  .delete("/:statementId", zValidator("json", DeletionRequestSchema), async (c) => {
+    const statementId = IdSchema.safeParse(c.req.param("statementId"));
+    if (!statementId.success) return c.json(statementNotFound(), 404);
+    const result = await services.statements.delete(
+      statementId.data,
+      c.get("currentUser"),
+      c.req.valid("json").reason,
+    );
+    if ("error" in result) {
+      if (result.error === "PERMISSION_DENIED") {
+        return c.json(
+          ApiErrorSchema.parse({ error: { code: result.error, message: "Permission denied." } }),
+          403,
+        );
+      }
+      return c.json(statementNotFound(), 404);
+    }
+    return c.body(null, 204);
+  })
+  .post("/:statementId/restore", async (c) => {
+    const statementId = IdSchema.safeParse(c.req.param("statementId"));
+    if (!statementId.success) return c.json(statementNotFound(), 404);
+    const result = await services.statements.restore(statementId.data, c.get("currentUser"));
+    if ("error" in result) {
+      if (result.error === "PERMISSION_DENIED") {
+        return c.json(
+          ApiErrorSchema.parse({ error: { code: result.error, message: "Permission denied." } }),
+          403,
+        );
+      }
+      return c.json(statementNotFound(), 404);
+    }
+    return c.body(null, 204);
+  })
   .put("/:statementId/vote", zValidator("json", SetVoteRequestSchema), async (c) => {
     const statementId = IdSchema.safeParse(c.req.param("statementId"));
     const statement = statementId.success

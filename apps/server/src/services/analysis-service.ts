@@ -82,6 +82,7 @@ export function createPostgresAnalysisService(database: Database): AnalysisServi
           authorVisibility: statements.authorVisibility,
           createdAt: statements.createdAt,
           updatedAt: statements.updatedAt,
+          deletedAt: statements.deletedAt,
           groupOrdinal: analysisGroups.ordinal,
           kind: analysisStatementResults.kind,
           score: analysisStatementResults.score,

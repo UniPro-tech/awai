@@ -27,6 +27,7 @@ Database models, domain models, and API response models are separate. Presenters
 - Anonymous responses contain `displayName: null` regardless of the caller's role.
 - Analysis results do not persist a mapping from plotted points to user identities.
 - Analysis APIs expose anonymous coordinates and aggregate group sizes, never participant identifiers.
+- Topic and statement deletion is logical. Delete and restore operations are authorized and audited, while historical analysis snapshots remain unchanged.
 
 ## Authentication, persistence, and analysis
 

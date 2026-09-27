@@ -109,4 +109,55 @@ describe("statements and votes", () => {
     expect(body).toEqual({ agree: 0, disagree: 0, pass: 0, total: 0 });
     expect(JSON.stringify(body)).not.toContain("user");
   });
+
+  it("soft-deletes and restores a statement with owner authorization", async () => {
+    const topic = await createTopic();
+    const created = await createStatement(topic.id, "IDENTIFIED");
+    const statement = (await created.json()) as { id: string };
+    const otherUserApp = createApp({
+      services,
+      authenticate: async () => ({
+        status: "authenticated",
+        user: { ...testUser, id: "00000000-0000-4000-8000-000000000002" },
+      }),
+    });
+
+    const denied = await otherUserApp.request(`/api/v1/statements/${statement.id}`, {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ reason: "Not mine" }),
+    });
+    expect(denied.status).toBe(403);
+
+    const deleted = await app.request(`/api/v1/statements/${statement.id}`, {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ reason: "Author requested removal" }),
+    });
+    expect(deleted.status).toBe(204);
+    const afterDelete = await app.request(`/api/v1/topics/${topic.id}/statements`);
+    expect(await afterDelete.json()).toEqual({ items: [] });
+
+    const restored = await app.request(`/api/v1/statements/${statement.id}/restore`, {
+      method: "POST",
+    });
+    expect(restored.status).toBe(204);
+    const afterRestore = await app.request(`/api/v1/topics/${topic.id}/statements`);
+    expect((await afterRestore.json()).items).toHaveLength(1);
+  });
+
+  it("soft-deletes and restores a topic without exposing it in between", async () => {
+    const topic = await createTopic();
+    const deleted = await app.request(`/api/v1/topics/${topic.id}`, {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ reason: "Duplicate topic" }),
+    });
+    expect(deleted.status).toBe(204);
+    expect((await app.request(`/api/v1/topics/${topic.id}`)).status).toBe(404);
+
+    const restored = await app.request(`/api/v1/topics/${topic.id}/restore`, { method: "POST" });
+    expect(restored.status).toBe(204);
+    expect((await app.request(`/api/v1/topics/${topic.id}`)).status).toBe(200);
+  });
 });

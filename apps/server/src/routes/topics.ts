@@ -3,6 +3,7 @@ import {
   ApiErrorSchema,
   CreateStatementRequestSchema,
   CreateTopicRequestSchema,
+  DeletionRequestSchema,
   IdSchema,
   StatementListResponseSchema,
   TopicListResponseSchema,
@@ -68,6 +69,56 @@ export function createTopicsRoute(services: ApplicationServices) {
       return c.json(presentStatement(result.statement), 201);
     },
   )
+  .delete("/:topicId", zValidator("json", DeletionRequestSchema), async (c) => {
+    const topicId = IdSchema.safeParse(c.req.param("topicId"));
+    if (!topicId.success) {
+      return c.json(
+        ApiErrorSchema.parse({ error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." } }),
+        404,
+      );
+    }
+    const result = await services.topics.delete(
+      topicId.data,
+      c.get("currentUser"),
+      c.req.valid("json").reason,
+    );
+    if ("error" in result) {
+      if (result.error === "PERMISSION_DENIED") {
+        return c.json(
+          ApiErrorSchema.parse({ error: { code: result.error, message: "Permission denied." } }),
+          403,
+        );
+      }
+      return c.json(
+        ApiErrorSchema.parse({ error: { code: result.error, message: "Topic not found." } }),
+        404,
+      );
+    }
+    return c.body(null, 204);
+  })
+  .post("/:topicId/restore", async (c) => {
+    const topicId = IdSchema.safeParse(c.req.param("topicId"));
+    if (!topicId.success) {
+      return c.json(
+        ApiErrorSchema.parse({ error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." } }),
+        404,
+      );
+    }
+    const result = await services.topics.restore(topicId.data, c.get("currentUser"));
+    if ("error" in result) {
+      if (result.error === "PERMISSION_DENIED") {
+        return c.json(
+          ApiErrorSchema.parse({ error: { code: result.error, message: "Permission denied." } }),
+          403,
+        );
+      }
+      return c.json(
+        ApiErrorSchema.parse({ error: { code: result.error, message: "Topic not found." } }),
+        404,
+      );
+    }
+    return c.body(null, 204);
+  })
   .get("/:topicId", async (c) => {
     const parsedId = IdSchema.safeParse(c.req.param("topicId"));
     const topic = parsedId.success ? await services.topics.get(parsedId.data) : undefined;

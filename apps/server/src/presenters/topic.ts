@@ -3,6 +3,7 @@ import { TopicResponseSchema, type TopicResponse } from "@private-polis/contract
 export interface TopicRecord {
   id: string;
   createdByUserId: string;
+  ownerUserId: string;
   title: string;
   description: string;
   authorVisibility: "IDENTIFIED" | "ANONYMOUS";
@@ -11,6 +12,7 @@ export interface TopicRecord {
   status: "DRAFT" | "OPEN" | "CLOSED" | "ARCHIVED";
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export function presentTopic(topic: TopicRecord): TopicResponse {
