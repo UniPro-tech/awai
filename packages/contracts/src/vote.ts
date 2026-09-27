@@ -12,9 +12,13 @@ export const CurrentVoteResponseSchema = z.object({
   value: VoteValueSchema.nullable(),
 });
 
+export type CurrentVoteResponse = z.infer<typeof CurrentVoteResponseSchema>;
+
 export const VoteStatisticsResponseSchema = z.object({
   agree: z.int().nonnegative(),
   disagree: z.int().nonnegative(),
   pass: z.int().nonnegative(),
   total: z.int().nonnegative(),
 });
+
+export type VoteStatisticsResponse = z.infer<typeof VoteStatisticsResponseSchema>;

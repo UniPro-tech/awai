@@ -18,3 +18,7 @@ export const StatementResponseSchema = z.object({
 });
 
 export type StatementResponse = z.infer<typeof StatementResponseSchema>;
+
+export const StatementListResponseSchema = z.object({
+  items: z.array(StatementResponseSchema),
+});
