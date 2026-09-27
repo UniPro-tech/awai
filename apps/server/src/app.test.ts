@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { app } from "./app.js";
+import { app, createApp } from "./app.js";
 import { topicService } from "./services/topic-service.js";
 
 afterEach(() => topicService.clearForTests());
@@ -9,6 +9,14 @@ describe("application", () => {
     const response = await app.request("/health/live");
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ status: "ok" });
+  });
+
+  it("uses database connectivity for readiness", async () => {
+    const ready = createApp({ readinessCheck: async () => true });
+    const unavailable = createApp({ readinessCheck: async () => false });
+
+    expect((await ready.request("/health/ready")).status).toBe(200);
+    expect((await unavailable.request("/health/ready")).status).toBe(503);
   });
 
   it("creates an anonymous topic without exposing identity", async () => {

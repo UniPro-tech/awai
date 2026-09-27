@@ -51,6 +51,13 @@ uv run pytest
 uv run python -m private_polis_analysis.worker
 ```
 
+For a complete local self-hosted stack, see [docs/self-hosting.md](docs/self-hosting.md):
+
+```sh
+export POSTGRES_PASSWORD='replace-with-a-long-random-password'
+docker compose up --build -d
+```
+
 ## Repository layout
 
 ```text
@@ -59,7 +66,7 @@ apps/server          Hono application server
 packages/contracts   Zod request and response schemas
 packages/api-client  Typed Hono RPC client
 services/analysis    Python and Red Dwarf analysis worker
-deploy               Deployment assets (planned)
+deploy               Docker Compose and container assets
 docs                 Architecture and contributor documentation
 ```
 
