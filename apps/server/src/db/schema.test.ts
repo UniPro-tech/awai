@@ -1,6 +1,6 @@
 import { getTableName } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { analysisPoints, topics, votes } from "./schema.js";
+import { analysisPoints, analysisStatementResults, topics, votes } from "./schema.js";
 
 describe("database schema", () => {
   it("keeps public API concepts in explicit database schemas", () => {
@@ -11,5 +11,9 @@ describe("database schema", () => {
 
   it("does not store a user identity on analysis points", () => {
     expect(analysisPoints).not.toHaveProperty("userId");
+  });
+
+  it("gives group-specific statement results independent identities", () => {
+    expect(analysisStatementResults).toHaveProperty("id");
   });
 });

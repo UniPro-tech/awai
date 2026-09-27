@@ -207,6 +207,7 @@ export const analysisPoints = analysis.table(
 export const analysisStatementResults = analysis.table(
   "statement_results",
   {
+    id: uuid("id").primaryKey().defaultRandom(),
     analysisRunId: uuid("analysis_run_id").notNull().references(() => analysisRuns.id, { onDelete: "cascade" }),
     statementId: uuid("statement_id").notNull().references(() => statements.id, { onDelete: "restrict" }),
     groupId: uuid("group_id").references(() => analysisGroups.id, { onDelete: "cascade" }),
@@ -215,7 +216,12 @@ export const analysisStatementResults = analysis.table(
     rank: integer("rank").notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.analysisRunId, table.statementId, table.kind] }),
+    uniqueIndex("analysis_statement_results_unique").on(
+      table.analysisRunId,
+      table.statementId,
+      table.groupId,
+      table.kind,
+    ),
     index("analysis_statement_results_group_idx").on(table.groupId),
   ],
 );

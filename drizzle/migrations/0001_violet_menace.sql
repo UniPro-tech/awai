@@ -1,0 +1,3 @@
+ALTER TABLE "analysis"."statement_results" DROP CONSTRAINT "statement_results_analysis_run_id_statement_id_kind_pk";--> statement-breakpoint
+ALTER TABLE "analysis"."statement_results" ADD COLUMN "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "analysis_statement_results_unique" ON "analysis"."statement_results" USING btree ("analysis_run_id","statement_id","group_id","kind");
