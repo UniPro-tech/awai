@@ -9,6 +9,8 @@ PrivatePolis exposes a same-origin JSON API under `/api/v1`. All versioned endpo
 | `GET` | `/api/v1/topics` | List non-deleted topics |
 | `POST` | `/api/v1/topics` | Create a topic |
 | `GET` | `/api/v1/topics/:topicId` | Read a topic |
+| `PATCH` | `/api/v1/topics/:topicId` | Change status or statement identity policy as the owner or an administrator |
+| `PATCH` | `/api/v1/topics/:topicId/owner` | Transfer ownership to an active user as the owner or an administrator |
 | `GET` | `/api/v1/topics/:topicId/statements` | List non-deleted statements |
 | `POST` | `/api/v1/topics/:topicId/statements` | Create a statement |
 | `DELETE` | `/api/v1/topics/:topicId` | Soft-delete a topic as its owner or an administrator |
@@ -25,6 +27,8 @@ Deletion requests require a reason:
 ```
 
 Deletion and restoration actions are written to `core.audit_logs`. Restore operations clear deletion metadata; audit history remains immutable. Statement deletion and restoration schedule a new analysis run without modifying historical snapshots.
+
+Topic settings updates accept one or both of `status` and `statementIdentityPolicy`. Changing the statement identity policy affects only future statements; every existing statement retains the visibility selected when it was created. Ownership transfers accept an application user UUID in `ownerUserId`. Identity-policy, status, and ownership changes are written to `core.audit_logs`.
 
 ## Votes
 

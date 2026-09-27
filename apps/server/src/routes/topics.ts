@@ -1,12 +1,14 @@
 import { zValidator } from "@hono/zod-validator";
 import {
   ApiErrorSchema,
+  ChangeTopicOwnerRequestSchema,
   CreateStatementRequestSchema,
   CreateTopicRequestSchema,
   DeletionRequestSchema,
   IdSchema,
   StatementListResponseSchema,
   TopicListResponseSchema,
+  UpdateTopicRequestSchema,
 } from "@private-polis/contracts";
 import { Hono } from "hono";
 import type { AppEnvironment } from "../http/context.js";
@@ -23,6 +25,63 @@ export function createTopicsRoute(services: ApplicationServices) {
     const topic = await services.topics.create(c.req.valid("json"), c.get("currentUser"));
     return c.json(presentTopic(topic), 201);
   })
+  .patch("/:topicId", zValidator("json", UpdateTopicRequestSchema), async (c) => {
+    const topicId = IdSchema.safeParse(c.req.param("topicId"));
+    if (!topicId.success) {
+      return c.json(
+        ApiErrorSchema.parse({ error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." } }),
+        404,
+      );
+    }
+    const result = await services.topics.update(
+      topicId.data,
+      c.req.valid("json"),
+      c.get("currentUser"),
+    );
+    if ("error" in result) {
+      return c.json(
+        ApiErrorSchema.parse({
+          error: {
+            code: result.error,
+            message: result.error === "PERMISSION_DENIED" ? "Permission denied." : "Topic not found.",
+          },
+        }),
+        result.error === "PERMISSION_DENIED" ? 403 : 404,
+      );
+    }
+    return c.json(presentTopic(result.topic), 200);
+  })
+  .patch(
+    "/:topicId/owner",
+    zValidator("json", ChangeTopicOwnerRequestSchema),
+    async (c) => {
+      const topicId = IdSchema.safeParse(c.req.param("topicId"));
+      if (!topicId.success) {
+        return c.json(
+          ApiErrorSchema.parse({ error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." } }),
+          404,
+        );
+      }
+      const result = await services.topics.changeOwner(
+        topicId.data,
+        c.req.valid("json"),
+        c.get("currentUser"),
+      );
+      if ("error" in result) {
+        const notFound = result.error === "USER_NOT_FOUND" ? "User not found." : "Topic not found.";
+        return c.json(
+          ApiErrorSchema.parse({
+            error: {
+              code: result.error,
+              message: result.error === "PERMISSION_DENIED" ? "Permission denied." : notFound,
+            },
+          }),
+          result.error === "PERMISSION_DENIED" ? 403 : 404,
+        );
+      }
+      return c.json(presentTopic(result.topic), 200);
+    },
+  )
   .get("/:topicId/statements", async (c) => {
     const topicId = IdSchema.safeParse(c.req.param("topicId"));
     if (!topicId.success || !(await services.topics.get(topicId.data))) {

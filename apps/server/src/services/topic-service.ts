@@ -1,4 +1,8 @@
-import type { CreateTopicRequest } from "@private-polis/contracts";
+import type {
+  ChangeTopicOwnerRequest,
+  CreateTopicRequest,
+  UpdateTopicRequest,
+} from "@private-polis/contracts";
 import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { AuthenticatedUser } from "../auth/session.js";
 import type { Database } from "../db/client.js";
@@ -16,6 +20,12 @@ export interface TopicService {
   list(): Promise<TopicRecord[]>;
   get(id: string, options?: { includeDeleted?: boolean }): Promise<TopicRecord | undefined>;
   create(input: CreateTopicRequest, user: AuthenticatedUser): Promise<TopicRecord>;
+  update(id: string, input: UpdateTopicRequest, user: AuthenticatedUser): Promise<TopicUpdateResult>;
+  changeOwner(
+    id: string,
+    input: ChangeTopicOwnerRequest,
+    user: AuthenticatedUser,
+  ): Promise<TopicUpdateResult>;
   delete(id: string, user: AuthenticatedUser, reason: string): Promise<TopicModerationResult>;
   restore(id: string, user: AuthenticatedUser): Promise<TopicModerationResult>;
 }
@@ -23,6 +33,10 @@ export interface TopicService {
 export type TopicModerationResult =
   | { ok: true }
   | { error: "TOPIC_NOT_FOUND" | "PERMISSION_DENIED" };
+
+export type TopicUpdateResult =
+  | { topic: TopicRecord }
+  | { error: "TOPIC_NOT_FOUND" | "USER_NOT_FOUND" | "PERMISSION_DENIED" };
 
 const topicSelection = {
   id: topics.id,
@@ -151,6 +165,87 @@ export function createPostgresTopicService(database: Database): TopicService {
       });
     },
 
+    async update(id, input, user) {
+      const current = await this.get(id);
+      if (!current) return { error: "TOPIC_NOT_FOUND" };
+      if (user.role !== "ADMIN" && current.ownerUserId !== user.id) {
+        return { error: "PERMISSION_DENIED" };
+      }
+      const now = new Date();
+      await database.transaction(async (transaction) => {
+        await transaction
+          .update(topics)
+          .set({
+            ...(input.status === undefined ? {} : { status: input.status }),
+            ...(input.statementIdentityPolicy === undefined
+              ? {}
+              : { statementIdentityPolicy: input.statementIdentityPolicy }),
+            updatedAt: now,
+          })
+          .where(and(eq(topics.id, id), isNull(topics.deletedAt)));
+        if (
+          input.statementIdentityPolicy !== undefined &&
+          input.statementIdentityPolicy !== current.statementIdentityPolicy
+        ) {
+          await transaction.insert(auditLogs).values({
+            actorUserId: user.id,
+            action: "IDENTITY_POLICY_CHANGE",
+            entityType: "topic",
+            entityId: id,
+            metadata: {
+              previousPolicy: current.statementIdentityPolicy,
+              policy: input.statementIdentityPolicy,
+            },
+          });
+        }
+        if (input.status !== undefined && input.status !== current.status) {
+          await transaction.insert(auditLogs).values({
+            actorUserId: user.id,
+            action: "TOPIC_STATUS_CHANGE",
+            entityType: "topic",
+            entityId: id,
+            metadata: { previousStatus: current.status, status: input.status },
+          });
+        }
+      });
+      const topic = await this.get(id);
+      if (!topic) return { error: "TOPIC_NOT_FOUND" };
+      return { topic };
+    },
+
+    async changeOwner(id, input, user) {
+      const current = await this.get(id);
+      if (!current) return { error: "TOPIC_NOT_FOUND" };
+      if (user.role !== "ADMIN" && current.ownerUserId !== user.id) {
+        return { error: "PERMISSION_DENIED" };
+      }
+      const [newOwner] = await database
+        .select({ id: appUsers.id })
+        .from(appUsers)
+        .where(and(eq(appUsers.id, input.ownerUserId), eq(appUsers.suspended, false)))
+        .limit(1);
+      if (!newOwner) return { error: "USER_NOT_FOUND" };
+      if (newOwner.id !== current.ownerUserId) {
+        const now = new Date();
+        await database.transaction(async (transaction) => {
+          await transaction
+            .update(topics)
+            .set({ ownerUserId: newOwner.id, updatedAt: now })
+            .where(and(eq(topics.id, id), isNull(topics.deletedAt)));
+          await transaction.insert(auditLogs).values({
+            actorUserId: user.id,
+            action: "TOPIC_OWNER_CHANGE",
+            entityType: "topic",
+            entityId: id,
+            metadata: { previousOwnerUserId: current.ownerUserId, ownerUserId: newOwner.id },
+          });
+        });
+      }
+      const topic = await this.get(id);
+      if (!topic) return { error: "TOPIC_NOT_FOUND" };
+      return { topic };
+    },
+
     async delete(id, user, reason) {
       const topic = await this.get(id);
       if (!topic) return { error: "TOPIC_NOT_FOUND" };
@@ -235,6 +330,26 @@ export function createMemoryTopicService(): MemoryTopicService {
       };
       records.set(topic.id, topic);
       return topic;
+    },
+    async update(id, input, user) {
+      const topic = records.get(id);
+      if (!topic || topic.deletedAt) return { error: "TOPIC_NOT_FOUND" };
+      if (user.role !== "ADMIN" && topic.ownerUserId !== user.id) {
+        return { error: "PERMISSION_DENIED" };
+      }
+      const updated = { ...topic, ...input, updatedAt: new Date() };
+      records.set(id, updated);
+      return { topic: updated };
+    },
+    async changeOwner(id, input, user) {
+      const topic = records.get(id);
+      if (!topic || topic.deletedAt) return { error: "TOPIC_NOT_FOUND" };
+      if (user.role !== "ADMIN" && topic.ownerUserId !== user.id) {
+        return { error: "PERMISSION_DENIED" };
+      }
+      const updated = { ...topic, ownerUserId: input.ownerUserId, updatedAt: new Date() };
+      records.set(id, updated);
+      return { topic: updated };
     },
     async delete(id, user) {
       const topic = records.get(id);

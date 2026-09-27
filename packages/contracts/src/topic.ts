@@ -21,6 +21,24 @@ export const CreateTopicRequestSchema = z.object({
 
 export type CreateTopicRequest = z.infer<typeof CreateTopicRequestSchema>;
 
+export const UpdateTopicRequestSchema = z
+  .object({
+    status: TopicStatusSchema.optional(),
+    statementIdentityPolicy: StatementIdentityPolicySchema.optional(),
+  })
+  .refine(
+    (value) => value.status !== undefined || value.statementIdentityPolicy !== undefined,
+    { message: "At least one field is required." },
+  );
+
+export type UpdateTopicRequest = z.infer<typeof UpdateTopicRequestSchema>;
+
+export const ChangeTopicOwnerRequestSchema = z.object({
+  ownerUserId: IdSchema,
+});
+
+export type ChangeTopicOwnerRequest = z.infer<typeof ChangeTopicOwnerRequestSchema>;
+
 export const TopicResponseSchema = z.object({
   id: IdSchema,
   title: z.string(),

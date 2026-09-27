@@ -1,4 +1,4 @@
-import type { CreateTopicRequest } from "@private-polis/contracts";
+import type { CreateTopicRequest, UpdateTopicRequest } from "@private-polis/contracts";
 import { api, toApiError } from "../../lib/api";
 
 export async function listTopics() {
@@ -15,6 +15,15 @@ export async function createTopic(input: CreateTopicRequest) {
 
 export async function getTopic(topicId: string) {
   const response = await api.api.v1.topics[":topicId"].$get({ param: { topicId } });
+  if (!response.ok) throw await toApiError(response);
+  return response.json();
+}
+
+export async function updateTopic(topicId: string, input: UpdateTopicRequest) {
+  const response = await api.api.v1.topics[":topicId"].$patch({
+    param: { topicId },
+    json: input,
+  });
   if (!response.ok) throw await toApiError(response);
   return response.json();
 }

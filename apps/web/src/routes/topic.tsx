@@ -1,10 +1,10 @@
 import type { StatementResponse } from "@private-polis/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { AuthGate } from "../features/auth/auth-gate";
 import { createStatement, listStatements } from "../features/statements/api";
-import { getTopic } from "../features/topics/api";
+import { getTopic, updateTopic } from "../features/topics/api";
 import { getVoteStatistics, setVote } from "../features/votes/api";
 
 type VoteValue = "AGREE" | "DISAGREE" | "PASS";
@@ -52,6 +52,8 @@ export function TopicPage() {
   const queryClient = useQueryClient();
   const [body, setBody] = useState("");
   const [visibility, setVisibility] = useState<"IDENTIFIED" | "ANONYMOUS">("ANONYMOUS");
+  const [status, setStatus] = useState<"DRAFT" | "OPEN" | "CLOSED" | "ARCHIVED">("OPEN");
+  const [policy, setPolicy] = useState<"OPTIONAL" | "ANONYMOUS_REQUIRED" | "IDENTIFIED_REQUIRED">("OPTIONAL");
   const topic = useQuery({ queryKey: ["topic", topicId], queryFn: () => getTopic(topicId) });
   const statements = useQuery({
     queryKey: ["statements", topicId],
@@ -64,10 +66,25 @@ export function TopicPage() {
       await queryClient.invalidateQueries({ queryKey: ["statements", topicId] });
     },
   });
+  const update = useMutation({
+    mutationFn: () => updateTopic(topicId, { status, statementIdentityPolicy: policy }),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["topic", topicId] }),
+  });
+
+  useEffect(() => {
+    if (!topic.data) return;
+    setStatus(topic.data.status);
+    setPolicy(topic.data.statementIdentityPolicy);
+  }, [topic.data]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     create.mutate();
+  }
+
+  function submitSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    update.mutate();
   }
 
   return (
@@ -87,6 +104,30 @@ export function TopicPage() {
               View analysis results
             </Link>
           </header>
+        ) : null}
+
+        {topic.data ? (
+          <section className="panel" aria-labelledby="topic-settings-heading">
+            <h2 id="topic-settings-heading">Topic owner controls</h2>
+            <p className="meta">Only the topic owner or an administrator can save these settings.</p>
+            <form className="stack" onSubmit={submitSettings}>
+              <label htmlFor="topic-status">Status</label>
+              <select id="topic-status" value={status} onChange={(event) => setStatus(event.target.value as typeof status)}>
+                <option value="DRAFT">Draft</option>
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+                <option value="ARCHIVED">Archived</option>
+              </select>
+              <label htmlFor="topic-statement-policy">Statement identity policy</label>
+              <select id="topic-statement-policy" value={policy} onChange={(event) => setPolicy(event.target.value as typeof policy)}>
+                <option value="OPTIONAL">Authors choose</option>
+                <option value="ANONYMOUS_REQUIRED">Anonymous required</option>
+                <option value="IDENTIFIED_REQUIRED">Display name required</option>
+              </select>
+              <button type="submit" disabled={update.isPending}>Save settings</button>
+              {update.error ? <p role="alert">{update.error.message}</p> : null}
+            </form>
+          </section>
         ) : null}
 
         <section className="panel" aria-labelledby="new-statement-heading">
