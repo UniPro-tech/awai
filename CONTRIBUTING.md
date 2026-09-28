@@ -15,6 +15,8 @@ Changes to the analysis worker must also pass `uv run ruff check .`, `uv run myp
 
 The PostgreSQL integration suite runs in CI after applying all version-controlled migrations. To run it locally against a disposable database, set `DATABASE_URL`, run `pnpm db:migrate`, then run `pnpm --filter @private-polis/server test:integration`. Do not point the suite at a shared or production database.
 
+Browser smoke tests use Playwright. Install Chromium once with `pnpm exec playwright install chromium`, then run `pnpm test:e2e`. The test runner starts the Vite development server automatically.
+
 ## Response boundary
 
 Database records are internal. Route handlers must pass explicitly selected values through the relevant Zod response schema before returning JSON. Anonymous content must retain its original anonymity even if a topic policy changes later.

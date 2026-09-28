@@ -12,12 +12,14 @@
     "db:migrate": "pnpm --filter @private-polis/server db:migrate",
     "dev": "pnpm --parallel --filter @private-polis/server --filter @private-polis/web dev",
     "lint": "eslint apps packages",
+    "test:e2e": "playwright test",
     "test:analysis": "cd services/analysis && uv run pytest",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "eslint": "^10.11.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.1",
