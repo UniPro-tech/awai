@@ -47,6 +47,38 @@ jobs:
       - run: uv run mypy
       - run: uv run pytest
 
+  postgres-integration:
+    name: PostgreSQL integration
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://private_polis:private_polis@localhost:5432/private_polis
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: private_polis
+          POSTGRES_USER: private_polis
+          POSTGRES_PASSWORD: private_polis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U private_polis -d private_polis"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+      - run: pnpm --filter @private-polis/server test:integration
+
   containers:
     name: Container images
     runs-on: ubuntu-latest

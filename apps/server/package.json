@@ -16,6 +16,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.cjs",
     "test": "vitest run",
+    "test:integration": "RUN_POSTGRES_INTEGRATION=1 vitest run src/postgres.integration.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
