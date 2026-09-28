@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { appUsers } from "../db/schema.js";
 import * as authSchema from "../db/auth-schema.js";
 import { databaseRuntime } from "../db/runtime.js";
+import { configuredTrustedOrigins } from "./origins.js";
 
 function authSecret(): string {
   const secret = process.env.BETTER_AUTH_SECRET;
@@ -44,6 +45,7 @@ async function guardSsoProviderMutation(input: { provider: { id: string } }): Pr
 export const auth = betterAuth({
   basePath: "/api/auth",
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  trustedOrigins: configuredTrustedOrigins(),
   secret: authSecret(),
   database: drizzleAdapter(databaseRuntime.db, {
     provider: "pg",

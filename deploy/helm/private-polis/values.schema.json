@@ -9,7 +9,12 @@
       "properties": {
         "baseUrl": { "type": "string", "format": "uri" },
         "secret": { "type": "string" },
-        "initialAdminEmail": { "type": "string" }
+        "initialAdminEmail": { "type": "string" },
+        "trustedOrigins": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "uniqueItems": true
+        }
       }
     },
     "rateLimit": {

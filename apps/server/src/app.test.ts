@@ -49,6 +49,27 @@ describe("application", () => {
     });
   });
 
+  it("rejects cookie-authenticated mutations from untrusted origins", async () => {
+    const protectedApp = createApp({
+      services: createMemoryServices(),
+      authenticate: async () => ({ status: "authenticated", user: testUser }),
+      csrfTrustedOrigins: ["https://community.example"],
+    });
+    const request = (origin?: string) => protectedApp.request("/api/v1/topics", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        cookie: "better-auth.session_token=test",
+        ...(origin ? { origin } : {}),
+      },
+      body: JSON.stringify({ title: "Protected topic" }),
+    });
+
+    expect((await request("https://attacker.example")).status).toBe(403);
+    expect((await request()).status).toBe(403);
+    expect((await request("https://community.example")).status).toBe(201);
+  });
+
   it("creates an anonymous topic without exposing identity", async () => {
     const response = await app.request("/api/v1/topics", {
       method: "POST",

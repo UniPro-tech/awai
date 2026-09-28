@@ -21,6 +21,8 @@ import {
   requestAddress,
   type RateLimiter,
 } from "./http/rate-limit.js";
+import { configuredTrustedOrigins } from "./auth/origins.js";
+import { requireSameOrigin } from "./http/same-origin.js";
 
 export interface AppOptions {
   readinessCheck?: () => Promise<boolean>;
@@ -28,6 +30,7 @@ export interface AppOptions {
   services?: ApplicationServices;
   authRateLimiter?: RateLimiter | false;
   apiRateLimiter?: RateLimiter | false;
+  csrfTrustedOrigins?: string[];
 }
 
 function positiveInteger(value: string | undefined, fallback: number) {
@@ -39,6 +42,7 @@ export function createApp(options: AppOptions = {}) {
   const readinessCheck = options.readinessCheck ?? checkDatabaseReadiness;
   const authenticate = options.authenticate ?? authenticateRequest;
   const services = options.services ?? createPostgresServices(databaseRuntime.db);
+  const csrfTrustedOrigins = options.csrfTrustedOrigins ?? configuredTrustedOrigins();
   const windowMs = positiveInteger(process.env.RATE_LIMIT_WINDOW_SECONDS, 60) * 1_000;
   const authRateLimiter = options.authRateLimiter === false
     ? undefined
@@ -60,6 +64,7 @@ export function createApp(options: AppOptions = {}) {
       if (await readinessCheck()) return c.json({ status: "ok" as const }, 200);
       return c.json({ status: "unavailable" as const }, 503);
     })
+    .use("/api/v1/*", requireSameOrigin(csrfTrustedOrigins))
     .use("/api/v1/*", async (c, next) => {
       const authentication = await authenticate(c.req.raw.headers);
       if (authentication.status === "unauthenticated") {

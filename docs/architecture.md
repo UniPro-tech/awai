@@ -34,6 +34,8 @@ Database models, domain models, and API response models are separate. Presenters
 
 Better Auth owns the `auth` schema and maps each authenticated account to a separate `core.app_users` row. Middleware rejects unauthenticated `/api/v1` requests before route handlers run. The server uses Drizzle ORM with PostgreSQL schemas named `core` and `analysis`. Database migrations run as an explicit deployment step.
 
+Unsafe `/api/v1` requests carrying cookies must include an exact trusted `Origin`; the authentication origin and explicitly configured operator-controlled origins are allowed. This provides an application-level CSRF boundary in addition to Better Auth's cookie protections.
+
 Creating a statement or replacing a vote schedules analysis ten seconds later. A partial unique index keeps at most one pending job per topic, so bursts move that job's availability time instead of producing an unbounded queue. The Python worker claims jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`; no Redis service is required.
 
 The analysis adapter converts UUIDs to short-lived integer identifiers required by Red Dwarf. Participant identifiers are discarded before results are persisted. The `analysis.points` table intentionally has no user identifier or participant mapping.

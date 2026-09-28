@@ -14,6 +14,8 @@ docker compose up --build -d
 
 Open `http://localhost:8080`. Set `HTTP_PORT` to publish a different host port. If the public origin differs, set `BETTER_AUTH_URL` to its absolute URL so authentication callbacks and cookies use the correct origin.
 
+Unsafe cookie-authenticated API requests require an exact trusted `Origin`. `BETTER_AUTH_URL` is always trusted. If a separate development frontend or approved same-site frontend must call the server, add its comma-separated absolute origins to `BETTER_AUTH_TRUSTED_ORIGINS`. Do not use wildcards and do not add origins that are not controlled by the operator.
+
 To create the first administrator, set `INITIAL_ADMIN_EMAIL` before registering that email address:
 
 ```sh

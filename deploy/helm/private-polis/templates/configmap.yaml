@@ -6,6 +6,7 @@ metadata:
     {{- include "private-polis.labels" . | nindent 4 }}
 data:
   BETTER_AUTH_URL: {{ .Values.auth.baseUrl | quote }}
+  BETTER_AUTH_TRUSTED_ORIGINS: {{ join "," .Values.auth.trustedOrigins | quote }}
   INITIAL_ADMIN_EMAIL: {{ .Values.auth.initialAdminEmail | quote }}
   RATE_LIMIT_WINDOW_SECONDS: {{ .Values.rateLimit.windowSeconds | quote }}
   RATE_LIMIT_AUTH_MAX: {{ .Values.rateLimit.authMax | quote }}
