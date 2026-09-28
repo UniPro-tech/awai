@@ -15,6 +15,12 @@ contracts <- api-client <- web
 
 `packages/contracts` is a pure Zod package and must not depend on React, Hono, Drizzle, Better Auth, or a database implementation. The web application does not import server implementation modules; only the API client may import the server's route-tree type.
 
+## Browser application
+
+The browser is a React and Vite SPA. TanStack Router generates a typed route tree from `apps/web/src/routes`, and TanStack Query owns remote server state. Feature API functions isolate Hono RPC transport calls from UI components. Tailwind CSS supplies utility styles, while reusable source-owned components under `apps/web/src/components/ui` follow the shadcn/ui model.
+
+The primary routes are `/login`, `/topics`, `/topics/new`, `/topics/:topicId`, `/topics/:topicId/results`, `/topics/:topicId/settings`, `/profile`, and the `/admin/*` management screens. Authentication remains enforced by the API; client-side gates improve navigation but are not an authorization boundary.
+
 ## Public response boundary
 
 Database models, domain models, and API response models are separate. Presenters construct a public shape and parse it with a response schema before a route returns it. This prevents internal user identifiers, moderation fields, and deletion metadata from leaking accidentally.

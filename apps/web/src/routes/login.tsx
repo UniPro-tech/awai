@@ -1,10 +1,10 @@
-import { useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { authClient } from "../features/auth/client";
 
 type Mode = "sign-in" | "sign-up" | "sso";
 
-export function LoginPage() {
+function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("sign-in");
   const [error, setError] = useState<string>();
@@ -111,3 +111,5 @@ export function LoginPage() {
     </main>
   );
 }
+
+export const Route = createFileRoute("/login")({ component: LoginPage });

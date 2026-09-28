@@ -8,7 +8,10 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { describe, expect, it, vi } from "vitest";
-import { LoginPage } from "./login";
+import { Route } from "./login";
+
+const LoginPage = Route.options.component;
+if (!LoginPage) throw new Error("Login route component is missing");
 
 vi.mock("../features/auth/client", () => ({
   authClient: {

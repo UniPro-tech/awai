@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   color: #17201b;
   background: #f4f6f1;
@@ -10,7 +12,17 @@ body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input, select, textarea { font: inherit; }
 a { color: #1f6948; }
 
+.app-header { background: rgb(255 255 255 / 92%); border-bottom: 1px solid #dce3d9; position: sticky; top: 0; z-index: 20; }
+.app-nav { align-items: center; display: flex; gap: 2rem; justify-content: space-between; margin: 0 auto; min-height: 4rem; width: min(1100px, calc(100% - 2rem)); }
+.brand { color: #17201b; font-weight: 850; letter-spacing: -0.035em; text-decoration: none; }
+.nav-links { align-items: center; display: flex; gap: 1.25rem; }
+.nav-links a { color: #56635a; font-size: 0.9rem; font-weight: 650; text-decoration: none; }
+.nav-links a[aria-current="page"] { color: #1f6948; }
+
 .shell { width: min(880px, calc(100% - 2rem)); margin: 0 auto; padding: 4rem 0; }
+.narrow-shell { width: min(680px, calc(100% - 2rem)); }
+.page-heading { align-items: end; display: flex; gap: 2rem; justify-content: space-between; }
+.page-heading > a { flex: none; gap: 0.45rem; text-decoration: none; }
 .eyebrow { color: #286848; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 h1 { font-size: clamp(2.5rem, 8vw, 5rem); letter-spacing: -0.06em; margin: 0; }
 h2 { margin-top: 2.5rem; }
@@ -30,6 +42,7 @@ button:disabled { cursor: wait; opacity: 0.6; }
 
 .breadcrumb { color: #68766c; margin-bottom: 2rem; }
 .text-link { display: inline-block; font-weight: 700; margin-top: 0.75rem; }
+.link-row { display: flex; flex-wrap: wrap; gap: 1.25rem; }
 .stack { display: grid; gap: 0.65rem; }
 .stack button { justify-self: start; }
 .meta { color: #68766c; font-size: 0.88rem; }
@@ -52,12 +65,22 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .tag-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0; }
 .tag-list span { background: #e5eee8; border-radius: 999px; color: #315d45; padding: 0.25rem 0.6rem; }
 .admin-list { display: grid; gap: 0.75rem; }
+.admin-destinations { display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); margin-top: 2rem; }
+.admin-destination { align-items: flex-start; color: inherit; display: flex; gap: 1rem; text-decoration: none; }
+.admin-destination h2 { font-size: 1.15rem; margin: 0 0 0.35rem; }
+.admin-destination p { color: #68766c; margin: 0; }
 .admin-row { align-items: center; display: grid; gap: 1rem; grid-template-columns: minmax(12rem, 1fr) auto auto; }
 .admin-row p { margin: 0.25rem 0 0; }
 .taxonomy-grid { display: grid; gap: 2rem; grid-template-columns: 1fr 1fr; }
 .compact-list { list-style: none; margin-top: 1rem; padding: 0; }
 .compact-list li { align-items: center; display: flex; justify-content: space-between; }
 .compact-list button { background: #7d3d32; }
+.danger-panel { border-color: #e6c9c3; margin-top: 1.5rem; }
+.profile-details dl, .settings-list dl { display: grid; gap: 1rem; }
+.profile-details dl > div, .settings-list dl > div { display: grid; gap: 0.2rem; grid-template-columns: minmax(8rem, 0.4fr) 1fr; }
+.profile-details dt, .settings-list dt { color: #68766c; font-size: 0.85rem; font-weight: 700; }
+.profile-details dd, .settings-list dd { margin: 0; overflow-wrap: anywhere; }
+.settings-list + .settings-list { margin-top: 1.5rem; }
 
 .auth-shell { display: grid; min-height: 100vh; padding: 1rem; place-items: center; }
 .auth-card { background: #fff; border: 1px solid #dce3d9; border-radius: 1.25rem; box-shadow: 0 20px 60px rgb(23 32 27 / 10%); max-width: 30rem; padding: clamp(1.5rem, 6vw, 3rem); width: 100%; }
@@ -67,8 +90,12 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .auth-form button { margin-top: 0.5rem; }
 
 @media (max-width: 560px) {
+  .app-nav { align-items: flex-start; flex-direction: column; gap: 0.6rem; padding: 0.9rem 0; }
+  .nav-links { gap: 0.8rem; max-width: 100%; overflow-x: auto; padding-bottom: 0.2rem; width: 100%; }
   .shell { padding-top: 2rem; }
+  .page-heading { align-items: flex-start; flex-direction: column; }
   .form-row { align-items: stretch; flex-direction: column; }
   .analysis-summary { grid-template-columns: 1fr; }
-  .admin-row, .taxonomy-grid { grid-template-columns: 1fr; }
+  .admin-row, .taxonomy-grid, .admin-destinations { grid-template-columns: 1fr; }
+  .profile-details dl > div, .settings-list dl > div { grid-template-columns: 1fr; }
 }
