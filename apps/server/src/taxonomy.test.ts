@@ -21,30 +21,29 @@ function appFor(services: ReturnType<typeof createMemoryServices>, currentUser: 
 }
 
 describe("categories and tags", () => {
-  it("allows all users to list taxonomy but only administrators to mutate it", async () => {
+  it("allows members to create and list taxonomy while only administrators can delete it", async () => {
     const services = createMemoryServices();
     const userApp = appFor(services, user);
     const adminApp = appFor(services, admin);
 
-    const denied = await userApp.request("/api/v1/categories", {
+    const category = await userApp.request("/api/v1/categories", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ name: "Governance" }),
     });
-    expect(denied.status).toBe(403);
-
-    const category = await adminApp.request("/api/v1/categories", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: "Governance" }),
-    });
-    const tag = await adminApp.request("/api/v1/tags", {
+    const tag = await userApp.request("/api/v1/tags", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ name: "budget" }),
     });
     expect(category.status).toBe(201);
     expect(tag.status).toBe(201);
+    const categoryBody = await category.json();
+    const tagBody = await tag.json();
+    const deniedDelete = await userApp.request(`/api/v1/categories/${categoryBody.id}`, {
+      method: "DELETE",
+    });
+    expect(deniedDelete.status).toBe(403);
     const categories = await userApp.request("/api/v1/categories");
     const tags = await userApp.request("/api/v1/tags");
     expect(await categories.json()).toMatchObject({
@@ -53,5 +52,7 @@ describe("categories and tags", () => {
     expect(await tags.json()).toMatchObject({
       items: [{ name: "budget" }],
     });
+    expect((await adminApp.request(`/api/v1/categories/${categoryBody.id}`, { method: "DELETE" })).status).toBe(204);
+    expect((await adminApp.request(`/api/v1/tags/${tagBody.id}`, { method: "DELETE" })).status).toBe(204);
   });
 });

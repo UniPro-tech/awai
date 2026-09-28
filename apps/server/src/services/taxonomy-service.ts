@@ -27,8 +27,7 @@ export function createPostgresTaxonomyService(database: Database): TaxonomyServi
         .orderBy(asc(categories.name)),
     listTags: () =>
       database.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
-    async createCategory(name, user) {
-      if (user.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
+    async createCategory(name) {
       const [item] = await database
         .insert(categories)
         .values({ name })
@@ -37,8 +36,7 @@ export function createPostgresTaxonomyService(database: Database): TaxonomyServi
       if (!item) throw new Error("Category insertion did not return a row.");
       return { item };
     },
-    async createTag(name, user) {
-      if (user.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
+    async createTag(name) {
       const [item] = await database
         .insert(tags)
         .values({ name })
@@ -68,9 +66,7 @@ export function createMemoryTaxonomyService(): TaxonomyService {
   const create = (
     records: Map<string, TaxonomyItemResponse>,
     name: string,
-    user: AuthenticatedUser,
   ): TaxonomyMutationResult => {
-    if (user.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
     const existing = [...records.values()].find((item) => item.name === name);
     if (existing) return { item: existing };
     const item = { id: crypto.randomUUID(), name };
@@ -88,8 +84,8 @@ export function createMemoryTaxonomyService(): TaxonomyService {
   return {
     listCategories: async () => list(categoryRecords),
     listTags: async () => list(tagRecords),
-    createCategory: async (name, user) => create(categoryRecords, name, user),
-    createTag: async (name, user) => create(tagRecords, name, user),
+    createCategory: async (name) => create(categoryRecords, name),
+    createTag: async (name) => create(tagRecords, name),
     deleteCategory: async (id, user) => remove(categoryRecords, id, user),
     deleteTag: async (id, user) => remove(tagRecords, id, user),
   };
