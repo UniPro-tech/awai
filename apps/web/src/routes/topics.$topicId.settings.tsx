@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { AuthGate } from "../features/auth/auth-gate";
 import { changeTopicOwner, getTopic, updateTopic } from "../features/topics/api";
+import { errorMessage } from "../lib/error-message";
 
 function TopicSettingsPage() {
   const { topicId } = Route.useParams();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<"DRAFT" | "OPEN" | "CLOSED" | "ARCHIVED">("OPEN");
   const [policy, setPolicy] = useState<"OPTIONAL" | "ANONYMOUS_REQUIRED" | "IDENTIFIED_REQUIRED">("OPTIONAL");
@@ -42,33 +45,33 @@ function TopicSettingsPage() {
   return (
     <AuthGate>
       <main className="shell narrow-shell">
-        <nav className="breadcrumb"><Link to="/topics">Topics</Link> / <Link to="/topics/$topicId" params={{ topicId }}>Discussion</Link> / Settings</nav>
-        <header><p className="eyebrow">Topic owner controls</p><h1>Topic settings</h1><p>Only the topic owner or an administrator can change these values.</p></header>
+        <nav className="breadcrumb"><Link to="/topics">{t("common.topics")}</Link> / <Link to="/topics/$topicId" params={{ topicId }}>{t("common.discussion")}</Link> / {t("common.settings")}</nav>
+        <header><p className="eyebrow">{t("topicSettings.eyebrow")}</p><h1>{t("topicSettings.title")}</h1><p>{t("topicSettings.subtitle")}</p></header>
         <section className="panel" aria-labelledby="behavior-heading">
-          <h2 id="behavior-heading">Discussion behavior</h2>
+          <h2 id="behavior-heading">{t("topicSettings.behavior")}</h2>
           <form className="stack" onSubmit={submit}>
-            <label htmlFor="topic-status">Status</label>
+            <label htmlFor="topic-status">{t("common.statusLabel")}</label>
             <select id="topic-status" value={status} onChange={(event) => setStatus(event.target.value as typeof status)}>
-              <option value="DRAFT">Draft</option><option value="OPEN">Open</option><option value="CLOSED">Closed</option><option value="ARCHIVED">Archived</option>
+              <option value="DRAFT">{t("common.status.DRAFT")}</option><option value="OPEN">{t("common.status.OPEN")}</option><option value="CLOSED">{t("common.status.CLOSED")}</option><option value="ARCHIVED">{t("common.status.ARCHIVED")}</option>
             </select>
-            <label htmlFor="topic-statement-policy">Statement identity policy</label>
+            <label htmlFor="topic-statement-policy">{t("topicSettings.identityPolicy")}</label>
             <select id="topic-statement-policy" value={policy} onChange={(event) => setPolicy(event.target.value as typeof policy)}>
-              <option value="OPTIONAL">Authors choose</option><option value="ANONYMOUS_REQUIRED">Anonymous required</option><option value="IDENTIFIED_REQUIRED">Display name required</option>
+              <option value="OPTIONAL">{t("newTopic.chooseIdentity")}</option><option value="ANONYMOUS_REQUIRED">{t("newTopic.anonymousRequired")}</option><option value="IDENTIFIED_REQUIRED">{t("newTopic.identifiedRequired")}</option>
             </select>
-            <button type="submit" disabled={update.isPending}>{update.isPending ? "Saving…" : "Save settings"}</button>
-            {update.isSuccess ? <p role="status">Settings saved.</p> : null}
-            {update.error ? <p role="alert">{update.error.message}</p> : null}
+            <button type="submit" disabled={update.isPending}>{update.isPending ? t("common.saving") : t("common.save")}</button>
+            {update.isSuccess ? <p role="status">{t("topicSettings.saved")}</p> : null}
+            {update.error ? <p role="alert">{errorMessage(update.error, t)}</p> : null}
           </form>
         </section>
         <section className="panel danger-panel" aria-labelledby="ownership-heading">
-          <h2 id="ownership-heading">Transfer ownership</h2>
-          <p className="meta">Enter the UUID of an active member. This action is recorded in the audit log.</p>
+          <h2 id="ownership-heading">{t("topicSettings.transfer")}</h2>
+          <p className="meta">{t("topicSettings.transferHelp")}</p>
           <form className="stack" onSubmit={submitTransfer}>
-            <label htmlFor="owner-user-id">New owner user ID</label>
+            <label htmlFor="owner-user-id">{t("topicSettings.newOwner")}</label>
             <input id="owner-user-id" value={ownerUserId} onChange={(event) => setOwnerUserId(event.target.value)} required pattern="[0-9a-fA-F-]{36}" />
-            <button type="submit" disabled={transfer.isPending}>Transfer ownership</button>
-            {transfer.isSuccess ? <p role="status">Ownership transferred.</p> : null}
-            {transfer.error ? <p role="alert">{transfer.error.message}</p> : null}
+            <button type="submit" disabled={transfer.isPending}>{t("topicSettings.transferAction")}</button>
+            {transfer.isSuccess ? <p role="status">{t("topicSettings.transferred")}</p> : null}
+            {transfer.error ? <p role="alert">{errorMessage(transfer.error, t)}</p> : null}
           </form>
         </section>
       </main>

@@ -1,23 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdminGate } from "../features/auth/admin-gate";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { getPublicConfig } from "../features/auth/config-api";
 
 function AdminSettingsPage() {
+  const { t } = useTranslation();
+  const config = useQuery({ queryKey: ["public-config"], queryFn: getPublicConfig });
   return (
     <AdminGate>
       <main className="shell narrow-shell">
-        <nav className="breadcrumb"><Link to="/admin">Administration</Link> / Settings</nav>
-        <header><p className="eyebrow">Administration</p><h1>Settings</h1><p>Security-sensitive deployment settings are managed by the self-hosting operator.</p></header>
+        <nav className="breadcrumb"><Link to="/admin">{t("admin.eyebrow")}</Link> / {t("admin.settings")}</nav>
+        <header><p className="eyebrow">{t("admin.eyebrow")}</p><h1>{t("admin.settings")}</h1><p>{t("admin.settingsSubtitle")}</p></header>
         <section className="panel settings-list" aria-labelledby="identity-heading">
-          <h2 id="identity-heading">Identity</h2>
-          <p>Local username/password authentication is enabled. OIDC and SAML providers are registered through Better Auth's administrator-only SSO API.</p>
-          <p className="meta">Provider secrets stay server-side. See <code>docs/sso.md</code> for registration examples and production requirements.</p>
+          <h2 id="identity-heading">{t("admin.identity")}</h2>
+          <p>{t(config.data?.localAuthEnabled === false ? "admin.identitySsoOnly" : "admin.identityBody")}</p>
+          <p className="meta">{t("admin.identityHelp")}</p>
         </section>
         <section className="panel settings-list" aria-labelledby="deployment-heading">
-          <h2 id="deployment-heading">Deployment policy</h2>
+          <h2 id="deployment-heading">{t("admin.deployment")}</h2>
           <dl>
-            <div><dt>Browser authentication</dt><dd>Secure session cookie</dd></div>
-            <div><dt>API origin policy</dt><dd>Exact Same-Origin verification for cookie mutations</dd></div>
-            <div><dt>Vote visibility</dt><dd>Aggregates only; raw votes are never exposed</dd></div>
+            <div><dt>{t("admin.browserAuth")}</dt><dd>{t("admin.sessionCookie")}</dd></div>
+            <div><dt>{t("admin.originPolicy")}</dt><dd>{t("admin.exactOrigin")}</dd></div>
+            <div><dt>{t("admin.voteVisibility")}</dt><dd>{t("admin.aggregatesOnly")}</dd></div>
           </dl>
         </section>
       </main>

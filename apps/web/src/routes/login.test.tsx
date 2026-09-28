@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   RouterProvider,
   createMemoryHistory,
@@ -7,8 +8,11 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import i18n from "../i18n";
 import { Route } from "./login";
+
+const { getPublicConfig } = vi.hoisted(() => ({ getPublicConfig: vi.fn() }));
 
 const LoginPage = Route.options.component;
 if (!LoginPage) throw new Error("Login route component is missing");
@@ -19,6 +23,7 @@ vi.mock("../features/auth/client", () => ({
     signUp: { email: vi.fn() },
   },
 }));
+vi.mock("../features/auth/config-api", () => ({ getPublicConfig }));
 
 function renderLogin() {
   const rootRoute = createRootRoute();
@@ -31,22 +36,43 @@ function renderLogin() {
     routeTree: rootRoute.addChildren([loginRoute]),
     history: createMemoryHistory({ initialEntries: ["/login"] }),
   });
-  return render(<RouterProvider router={router} />);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}><RouterProvider router={router} /></QueryClientProvider>);
 }
 
 describe("LoginPage", () => {
+  beforeEach(async () => {
+    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: true });
+    await i18n.changeLanguage("en");
+  });
+
   it("switches between sign-in and account creation fields", async () => {
     const user = userEvent.setup();
     renderLogin();
 
-    expect(await screen.findByRole("heading", { name: "Welcome back" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Email")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Need an account? Sign up" }));
+    await user.click(await screen.findByRole("button", { name: "Create an account" }));
 
     expect(screen.getByRole("heading", { name: "Create your account" })).toBeInTheDocument();
     expect(screen.getByLabelText("Display name")).toBeRequired();
     expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email");
+  });
+
+  it("hides account creation when registration is disabled", async () => {
+    getPublicConfig.mockResolvedValue({ registrationEnabled: false, localAuthEnabled: true });
+    renderLogin();
+    expect(await screen.findByText("New account registration is currently closed. Ask an administrator for access.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create an account" })).not.toBeInTheDocument();
+  });
+
+  it("shows only SSO when local authentication is disabled", async () => {
+    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: false });
+    renderLogin();
+    expect(await screen.findByRole("heading", { name: "Single sign-on" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Username")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Use local sign in" })).not.toBeInTheDocument();
   });
 
   it("offers domain-based single sign-on", async () => {

@@ -1,14 +1,17 @@
 import type { AnalysisPoint } from "@private-polis/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { AuthGate } from "../features/auth/auth-gate";
 import { getLatestAnalysis, listAnalysisRuns } from "../features/analysis/api";
 import { getTopic } from "../features/topics/api";
+import { errorMessage } from "../lib/error-message";
 
 const groupColors = ["#2a7f62", "#c2673d", "#5367a5", "#9a5a98", "#a17b24"];
 
 function ScatterPlot({ points }: { points: AnalysisPoint[] }) {
-  if (points.length === 0) return <p>No participant geometry was produced.</p>;
+  const { t } = useTranslation();
+  if (points.length === 0) return <p>{t("analysis.noGeometry")}</p>;
   const valuesX = points.map((point) => point.x);
   const valuesY = points.map((point) => point.y);
   const minX = Math.min(...valuesX);
@@ -20,8 +23,8 @@ function ScatterPlot({ points }: { points: AnalysisPoint[] }) {
 
   return (
     <svg className="analysis-plot" viewBox="0 0 300 300" role="img">
-      <title>Anonymous participant opinion map</title>
-      <desc>Each dot is an anonymous participant, colored by opinion group.</desc>
+      <title>{t("analysis.mapTitle")}</title>
+      <desc>{t("analysis.mapDescription")}</desc>
       <line x1="24" y1="150" x2="276" y2="150" />
       <line x1="150" y1="24" x2="150" y2="276" />
       {points.map((point, index) => (
@@ -37,14 +40,14 @@ function ScatterPlot({ points }: { points: AnalysisPoint[] }) {
   );
 }
 
-function resultLabel(kind: string, groupOrdinal: number | null) {
-  if (kind === "CONSENSUS_AGREE") return "Consensus · agree";
-  if (kind === "CONSENSUS_DISAGREE") return "Consensus · disagree";
-  const direction = kind.endsWith("AGREE") ? "agree" : "disagree";
-  return `Group ${(groupOrdinal ?? 0) + 1} · representative ${direction}`;
+function resultLabel(kind: string, groupOrdinal: number | null, t: ReturnType<typeof useTranslation>["t"]) {
+  if (kind === "CONSENSUS_AGREE") return t("analysis.consensusAgree");
+  if (kind === "CONSENSUS_DISAGREE") return t("analysis.consensusDisagree");
+  return t(kind.endsWith("AGREE") ? "analysis.representativeAgree" : "analysis.representativeDisagree", { number: (groupOrdinal ?? 0) + 1 });
 }
 
 export function ResultsPage() {
+  const { t } = useTranslation();
   const { topicId } = useParams({ from: "/topics/$topicId/results" });
   const topic = useQuery({ queryKey: ["topic", topicId], queryFn: () => getTopic(topicId) });
   const analysis = useQuery({
@@ -61,59 +64,59 @@ export function ResultsPage() {
     <AuthGate>
       <main className="shell">
         <nav className="breadcrumb">
-          <Link to="/topics">Topics</Link> / <Link to="/topics/$topicId" params={{ topicId }}>Discussion</Link> / Results
+          <Link to="/topics">{t("common.topics")}</Link> / <Link to="/topics/$topicId" params={{ topicId }}>{t("common.discussion")}</Link> / {t("common.results")}
         </nav>
         <header>
-          <p className="eyebrow">Analysis results</p>
-          <h1>{topic.data?.title ?? "Results"}</h1>
-          <p>Participant positions are anonymous and cannot be traced back to accounts.</p>
+          <p className="eyebrow">{t("analysis.eyebrow")}</p>
+          <h1>{topic.data?.title ?? t("common.results")}</h1>
+          <p>{t("analysis.privacy")}</p>
         </header>
 
-        {analysis.isPending ? <p>Waiting for the latest analysis…</p> : null}
+        {analysis.isPending ? <p>{t("analysis.waiting")}</p> : null}
         {analysis.error?.name === "ANALYSIS_NOT_FOUND" ? (
           <section className="panel empty-state">
-            <h2>Not enough data yet</h2>
-            <p>Results appear after at least two participants have voted on at least two statements.</p>
+            <h2>{t("analysis.insufficientTitle")}</h2>
+            <p>{t("analysis.insufficientBody")}</p>
           </section>
         ) : null}
         {analysis.error && analysis.error.name !== "ANALYSIS_NOT_FOUND" ? (
-          <p role="alert">{analysis.error.message}</p>
+          <p role="alert">{errorMessage(analysis.error, t)}</p>
         ) : null}
 
         {analysis.data ? (
           <>
             <section className="analysis-summary">
-              <div className="panel metric"><strong>{analysis.data.participantCount}</strong><span>Participants</span></div>
-              <div className="panel metric"><strong>{analysis.data.statementCount}</strong><span>Statements</span></div>
-              <div className="panel metric"><strong>{analysis.data.groups.length}</strong><span>Opinion groups</span></div>
+              <div className="panel metric"><strong>{analysis.data.participantCount}</strong><span>{t("analysis.participants")}</span></div>
+              <div className="panel metric"><strong>{analysis.data.statementCount}</strong><span>{t("analysis.statements")}</span></div>
+              <div className="panel metric"><strong>{analysis.data.groups.length}</strong><span>{t("analysis.groups")}</span></div>
             </section>
             <section className="panel" aria-labelledby="map-heading">
-              <h2 id="map-heading">Opinion map</h2>
+              <h2 id="map-heading">{t("analysis.map")}</h2>
               <ScatterPlot points={analysis.data.points} />
               <ul className="group-legend">
                 {analysis.data.groups.map((group) => (
                   <li key={group.ordinal}>
                     <span style={{ background: groupColors[group.ordinal % groupColors.length] }} />
-                    Group {group.ordinal + 1}: {group.participantCount} participants
+                    {t("analysis.group", { number: group.ordinal + 1, count: group.participantCount })}
                   </li>
                 ))}
               </ul>
             </section>
             <section aria-labelledby="findings-heading">
-              <h2 id="findings-heading">Key statements</h2>
-              {analysis.data.statementResults.length === 0 ? <p>No ranked statements were produced.</p> : null}
+              <h2 id="findings-heading">{t("analysis.findings")}</h2>
+              {analysis.data.statementResults.length === 0 ? <p>{t("analysis.noRanked")}</p> : null}
               <ul className="topic-list">
                 {analysis.data.statementResults.map((result) => (
                   <li className="panel" key={`${result.kind}-${result.groupOrdinal}-${result.statement.id}`}>
-                    <p className="eyebrow">{resultLabel(result.kind, result.groupOrdinal)}</p>
+                    <p className="eyebrow">{resultLabel(result.kind, result.groupOrdinal, t)}</p>
                     <p>{result.statement.body}</p>
-                    <p className="meta">Rank {result.rank} · score {result.score.toFixed(3)}</p>
+                    <p className="meta">{t("analysis.rank", { rank: result.rank, score: result.score.toFixed(3) })}</p>
                   </li>
                 ))}
               </ul>
             </section>
             <p className="meta">
-              {runs.data?.items.length ?? 1} analysis run{(runs.data?.items.length ?? 1) === 1 ? "" : "s"} recorded · {analysis.data.algorithmVersion}
+              {t("analysis.runs", { count: runs.data?.items.length ?? 1, version: analysis.data.algorithmVersion })}
             </p>
           </>
         ) : null}
