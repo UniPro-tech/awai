@@ -84,3 +84,5 @@ helm lint deploy/helm/private-polis \
 helm template private-polis deploy/helm/private-polis \
   --set existingSecret=private-polis-production
 ```
+
+OIDC and SAML callbacks use `auth.baseUrl`; it must be the exact externally reachable HTTPS origin. Apply migrations and then follow [OIDC and SAML single sign-on](sso.md). Identity-provider client secrets and SAML private keys belong in the provider store or a secret manager, never in chart values committed to source control.

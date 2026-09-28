@@ -7,4 +7,8 @@ test("login and registration modes render in the browser", async ({ page }) => {
   await page.getByRole("button", { name: "Need an account? Sign up" }).click();
   await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
+
+  await page.getByRole("button", { name: "Sign in with SSO" }).click();
+  await expect(page.getByRole("heading", { name: "Single sign-on" })).toBeVisible();
+  await expect(page.getByLabel("Work email")).toBeVisible();
 });

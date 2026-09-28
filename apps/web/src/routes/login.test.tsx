@@ -12,7 +12,7 @@ import { LoginPage } from "./login";
 
 vi.mock("../features/auth/client", () => ({
   authClient: {
-    signIn: { username: vi.fn() },
+    signIn: { username: vi.fn(), sso: vi.fn() },
     signUp: { email: vi.fn() },
   },
 }));
@@ -44,5 +44,16 @@ describe("LoginPage", () => {
     expect(screen.getByRole("heading", { name: "Create your account" })).toBeInTheDocument();
     expect(screen.getByLabelText("Display name")).toBeRequired();
     expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email");
+  });
+
+  it("offers domain-based single sign-on", async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.click(await screen.findByRole("button", { name: "Sign in with SSO" }));
+
+    expect(screen.getByRole("heading", { name: "Single sign-on" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Work email")).toHaveAttribute("type", "email");
+    expect(screen.getByRole("button", { name: "Continue with SSO" })).toBeInTheDocument();
   });
 });

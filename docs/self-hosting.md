@@ -43,3 +43,5 @@ docker compose down
 `docker compose down` keeps the named PostgreSQL 18 volume. Back up that volume or use PostgreSQL-native backup tooling before upgrades. Removing the volume permanently deletes application data. PostgreSQL 18 and later must mount `/var/lib/postgresql`, not the legacy `/var/lib/postgresql/data` path.
 
 For internet-facing deployments, terminate TLS using an explicitly configured Caddy hostname or an upstream reverse proxy. Do not use the development database password in production.
+
+For enterprise identity providers, complete the local administrator bootstrap first and then follow [OIDC and SAML single sign-on](sso.md). SSO requires an externally correct HTTPS `BETTER_AUTH_URL` and migration `0004` or later.

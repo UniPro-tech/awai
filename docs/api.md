@@ -2,6 +2,8 @@
 
 PrivatePolis exposes a same-origin JSON API under `/api/v1`. All versioned endpoints require a valid Better Auth session cookie. Authentication endpoints are mounted under `/api/auth`.
 
+Better Auth provides local sign-in plus optional OIDC and SAML endpoints under `/api/auth`. SSO provider registration and mutation are limited to active PrivatePolis administrators. See [OIDC and SAML single sign-on](sso.md) for callback URLs and operational guidance.
+
 ## Topics and statements
 
 | Method | Path | Purpose |

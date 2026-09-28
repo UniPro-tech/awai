@@ -10,6 +10,7 @@
     "typecheck": "tsc -b --pretty false"
   },
   "dependencies": {
+    "@better-auth/sso": "1.7.6",
     "@private-polis/api-client": "workspace:*",
     "@private-polis/contracts": "workspace:*",
     "@tanstack/react-query": "^5.90.2",

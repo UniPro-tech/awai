@@ -37,6 +37,10 @@ let topicId: string | undefined;
 
 describe.runIf(shouldRun)("PostgreSQL integration", () => {
   beforeAll(async () => {
+    const providerTable = await runtime.pool.query<{ name: string | null }>(
+      "select to_regclass('auth.sso_provider')::text as name",
+    );
+    expect(providerTable.rows[0]?.name).toBe("auth.sso_provider");
     await runtime.db.insert(appUsers).values([
       { ...owner, authUserId: `integration-${owner.id}` },
       { ...administrator, authUserId: `integration-${administrator.id}` },

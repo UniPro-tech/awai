@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.6",
+    "@better-auth/sso": "1.7.6",
     "@hono/node-server": "^1.19.5",
     "@hono/zod-validator": "^0.7.3",
     "@private-polis/contracts": "workspace:*",

@@ -53,7 +53,7 @@ export function createApp(options: AppOptions = {}) {
   if (authRateLimiter) {
     app.use("/api/auth/*", rateLimit(authRateLimiter, (c) => requestAddress(c.req.raw.headers)));
   }
-  app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw))
+  app.all("/api/auth/*", (c) => auth.handler(c.req.raw))
     .get("/health/live", (c) => c.json({ status: "ok" as const }))
     .get("/health/ready", async (c) => {
       if (await readinessCheck()) return c.json({ status: "ok" as const }, 200);
