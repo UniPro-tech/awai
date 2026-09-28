@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator";
 import {
   ApiErrorSchema,
   ChangeTopicOwnerRequestSchema,
@@ -15,17 +14,18 @@ import type { AppEnvironment } from "../http/context.js";
 import { presentTopic } from "../presenters/topic.js";
 import { presentStatement } from "../presenters/statement.js";
 import type { ApplicationServices } from "../services/services.js";
+import { jsonValidator } from "../http/validation.js";
 
 export function createTopicsRoute(services: ApplicationServices) {
   return new Hono<AppEnvironment>()
   .get("/", async (c) =>
     c.json(TopicListResponseSchema.parse({ items: (await services.topics.list()).map(presentTopic) }), 200),
   )
-  .post("/", zValidator("json", CreateTopicRequestSchema), async (c) => {
+  .post("/", jsonValidator(CreateTopicRequestSchema), async (c) => {
     const topic = await services.topics.create(c.req.valid("json"), c.get("currentUser"));
     return c.json(presentTopic(topic), 201);
   })
-  .patch("/:topicId", zValidator("json", UpdateTopicRequestSchema), async (c) => {
+  .patch("/:topicId", jsonValidator(UpdateTopicRequestSchema), async (c) => {
     const topicId = IdSchema.safeParse(c.req.param("topicId"));
     if (!topicId.success) {
       return c.json(
@@ -53,7 +53,7 @@ export function createTopicsRoute(services: ApplicationServices) {
   })
   .patch(
     "/:topicId/owner",
-    zValidator("json", ChangeTopicOwnerRequestSchema),
+    jsonValidator(ChangeTopicOwnerRequestSchema),
     async (c) => {
       const topicId = IdSchema.safeParse(c.req.param("topicId"));
       if (!topicId.success) {
@@ -99,7 +99,7 @@ export function createTopicsRoute(services: ApplicationServices) {
   })
   .post(
     "/:topicId/statements",
-    zValidator("json", CreateStatementRequestSchema),
+    jsonValidator(CreateStatementRequestSchema),
     async (c) => {
       const topicId = IdSchema.safeParse(c.req.param("topicId"));
       if (!topicId.success) {
@@ -128,7 +128,7 @@ export function createTopicsRoute(services: ApplicationServices) {
       return c.json(presentStatement(result.statement), 201);
     },
   )
-  .delete("/:topicId", zValidator("json", DeletionRequestSchema), async (c) => {
+  .delete("/:topicId", jsonValidator(DeletionRequestSchema), async (c) => {
     const topicId = IdSchema.safeParse(c.req.param("topicId"));
     if (!topicId.success) {
       return c.json(

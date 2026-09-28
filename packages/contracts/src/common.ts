@@ -15,6 +15,7 @@ export const ApiErrorCodeSchema = z.enum([
   "PERMISSION_DENIED",
   "AUTHENTICATION_REQUIRED",
   "VALIDATION_ERROR",
+  "ROUTE_NOT_FOUND",
   "RATE_LIMITED",
   "INTERNAL_ERROR",
 ]);

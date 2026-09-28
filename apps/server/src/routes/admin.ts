@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator";
 import {
   AdminUserListResponseSchema,
   AdminUserResponseSchema,
@@ -9,6 +8,7 @@ import {
 import { Hono } from "hono";
 import type { AppEnvironment } from "../http/context.js";
 import type { ApplicationServices } from "../services/services.js";
+import { jsonValidator } from "../http/validation.js";
 
 function forbidden() {
   return ApiErrorSchema.parse({
@@ -25,7 +25,7 @@ export function createAdminRoute(services: ApplicationServices) {
     })
     .patch(
       "/users/:userId",
-      zValidator("json", UpdateAdminUserRequestSchema),
+      jsonValidator(UpdateAdminUserRequestSchema),
       async (c) => {
         const id = IdSchema.safeParse(c.req.param("userId"));
         if (!id.success) {

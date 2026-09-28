@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator";
 import {
   ApiErrorSchema,
   CreateCategoryRequestSchema,
@@ -11,6 +10,7 @@ import { Hono, type Context } from "hono";
 import type { AppEnvironment } from "../http/context.js";
 import type { ApplicationServices } from "../services/services.js";
 import type { TaxonomyMutationResult } from "../services/taxonomy-service.js";
+import { jsonValidator } from "../http/validation.js";
 
 function mutationError(c: Context<AppEnvironment>, result: TaxonomyMutationResult) {
   if (!("error" in result)) return undefined;
@@ -31,7 +31,7 @@ export function createCategoriesRoute(services: ApplicationServices) {
     .get("/", async (c) =>
       c.json(TaxonomyListResponseSchema.parse({ items: await services.taxonomy.listCategories() })),
     )
-    .post("/", zValidator("json", CreateCategoryRequestSchema), async (c) => {
+    .post("/", jsonValidator(CreateCategoryRequestSchema), async (c) => {
       const result = await services.taxonomy.createCategory(
         c.req.valid("json").name,
         c.get("currentUser"),
@@ -60,7 +60,7 @@ export function createTagsRoute(services: ApplicationServices) {
     .get("/", async (c) =>
       c.json(TaxonomyListResponseSchema.parse({ items: await services.taxonomy.listTags() })),
     )
-    .post("/", zValidator("json", CreateTagRequestSchema), async (c) => {
+    .post("/", jsonValidator(CreateTagRequestSchema), async (c) => {
       const result = await services.taxonomy.createTag(
         c.req.valid("json").name,
         c.get("currentUser"),

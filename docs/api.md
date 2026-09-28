@@ -87,6 +87,6 @@ Errors use a shared shape:
 }
 ```
 
-Authentication failures return `401`; authorization failures (including suspended accounts) return `403`; missing or soft-deleted resources return `404`; identity-policy, topic-state, and administrator self-lockout conflicts return `409`; invalid JSON input returns `400`.
+Authentication failures return `401`; authorization failures (including suspended accounts) return `403`; missing or soft-deleted resources return `404`; identity-policy, topic-state, and administrator self-lockout conflicts return `409`; invalid JSON input returns `400`. Unknown versioned routes use `ROUTE_NOT_FOUND`. Validation and unexpected server errors preserve the shared error envelope and include a request ID; validation details contain issue codes, paths, and messages but never echo the request body.
 
 Rate-limit responses return `429` with `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset` headers. Authentication limits are keyed by source address; versioned API limits are keyed by authenticated application user.

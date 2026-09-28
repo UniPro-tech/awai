@@ -1,6 +1,7 @@
 import { serveStatic } from "@hono/node-server/serve-static";
 import { ApiErrorSchema } from "@private-polis/contracts";
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { createTopicsRoute } from "./routes/topics.js";
@@ -91,6 +92,48 @@ export function createApp(options: AppOptions = {}) {
   if (apiRateLimiter) {
     app.use("/api/v1/*", rateLimit(apiRateLimiter, (c) => c.get("currentUser").id));
   }
+  app.onError((error, c) => {
+    if (!c.req.path.startsWith("/api/v1")) {
+      return error instanceof HTTPException ? error.getResponse() : c.text("Internal Server Error", 500);
+    }
+    const requestIdValue = c.get("requestId");
+    if (error instanceof HTTPException && error.status === 400) {
+      return c.json(
+        ApiErrorSchema.parse({
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "The request body is invalid.",
+            requestId: requestIdValue,
+          },
+        }),
+        400,
+      );
+    }
+    console.error("Unhandled API error", { requestId: requestIdValue, error });
+    return c.json(
+      ApiErrorSchema.parse({
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "An unexpected error occurred.",
+          requestId: requestIdValue,
+        },
+      }),
+      500,
+    );
+  });
+  app.notFound((c) => {
+    if (!c.req.path.startsWith("/api/v1")) return c.text("Not Found", 404);
+    return c.json(
+      ApiErrorSchema.parse({
+        error: {
+          code: "ROUTE_NOT_FOUND",
+          message: "API route not found.",
+          requestId: c.get("requestId"),
+        },
+      }),
+      404,
+    );
+  });
   return app
     .route("/api/v1/topics", createAnalysisRoute(services))
     .route("/api/v1/topics", createTopicsRoute(services))

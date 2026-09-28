@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator";
 import {
   ApiErrorSchema,
   CurrentVoteResponseSchema,
@@ -10,6 +9,7 @@ import {
 import { Hono } from "hono";
 import type { AppEnvironment } from "../http/context.js";
 import type { ApplicationServices } from "../services/services.js";
+import { jsonValidator } from "../http/validation.js";
 
 function statementNotFound() {
   return ApiErrorSchema.parse({
@@ -19,7 +19,7 @@ function statementNotFound() {
 
 export function createStatementsRoute(services: ApplicationServices) {
   return new Hono<AppEnvironment>()
-  .delete("/:statementId", zValidator("json", DeletionRequestSchema), async (c) => {
+  .delete("/:statementId", jsonValidator(DeletionRequestSchema), async (c) => {
     const statementId = IdSchema.safeParse(c.req.param("statementId"));
     if (!statementId.success) return c.json(statementNotFound(), 404);
     const result = await services.statements.delete(
@@ -53,7 +53,7 @@ export function createStatementsRoute(services: ApplicationServices) {
     }
     return c.body(null, 204);
   })
-  .put("/:statementId/vote", zValidator("json", SetVoteRequestSchema), async (c) => {
+  .put("/:statementId/vote", jsonValidator(SetVoteRequestSchema), async (c) => {
     const statementId = IdSchema.safeParse(c.req.param("statementId"));
     const statement = statementId.success
       ? await services.statements.get(statementId.data)

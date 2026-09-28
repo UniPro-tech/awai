@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "./app.js";
 import { createMemoryServices } from "./services/services.js";
 
@@ -69,6 +69,68 @@ describe("application", () => {
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
       error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." },
+    });
+  });
+
+  it("returns the common error contract for invalid JSON input", async () => {
+    const response = await app.request("/api/v1/topics", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "" }),
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "The request body is invalid.",
+        requestId: expect.any(String),
+      },
+    });
+  });
+
+  it("returns the common error contract for malformed JSON", async () => {
+    const response = await app.request("/api/v1/topics", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{",
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      error: { code: "VALIDATION_ERROR", requestId: expect.any(String) },
+    });
+  });
+
+  it("does not leak unexpected server errors", async () => {
+    const services = createMemoryServices();
+    services.topics.list = async () => {
+      throw new Error("sensitive database detail");
+    };
+    const failing = createApp({
+      services,
+      authenticate: async () => ({ status: "authenticated", user: testUser }),
+    });
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const response = await failing.request("/api/v1/topics");
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toMatchObject({
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "An unexpected error occurred.",
+        requestId: expect.any(String),
+      },
+    });
+    errorLog.mockRestore();
+  });
+
+  it("returns the common error contract for unknown API routes", async () => {
+    const response = await app.request("/api/v1/not-a-route");
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({
+      error: { code: "ROUTE_NOT_FOUND", requestId: expect.any(String) },
     });
   });
 });
