@@ -1,6 +1,6 @@
 [project]
 name = "private-polis-analysis"
-version = "0.0.0"
+version = "0.1.0"
 description = "PostgreSQL-backed statistical analysis worker for PrivatePolis"
 requires-python = ">=3.12,<3.15"
 dependencies = [

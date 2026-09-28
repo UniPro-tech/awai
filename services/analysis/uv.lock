@@ -472,7 +472,7 @@ wheels = [
 
 [[package]]
 name = "private-polis-analysis"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "psycopg", extra = ["binary"] },
