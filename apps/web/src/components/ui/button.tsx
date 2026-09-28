@@ -8,8 +8,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-emerald-800 text-white hover:bg-emerald-900",
-        outline: "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50",
+        default: "bg-emerald-800 text-white hover:bg-emerald-900 !text-white",
+        outline:
+          "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50",
         ghost: "text-emerald-800 hover:bg-emerald-50",
         destructive: "bg-red-800 text-white hover:bg-red-900",
       },
@@ -23,11 +24,24 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  extends
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
-export function Button({ className, variant, size, asChild = false, ...props }: ButtonProps) {
+export function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: ButtonProps) {
   const Component = asChild ? Slot : "button";
-  return <Component className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+  return (
+    <Component
+      className={cn(buttonVariants({ variant, size }), className)}
+      {...props}
+    />
+  );
 }

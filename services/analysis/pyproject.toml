@@ -1,7 +1,7 @@
 [project]
 name = "private-polis-analysis"
 version = "0.1.0"
-description = "PostgreSQL-backed statistical analysis worker for PrivatePolis"
+description = "PostgreSQL-backed statistical analysis worker for Awai"
 requires-python = ">=3.12,<3.15"
 dependencies = [
   "psycopg[binary]>=3.2.10,<4",

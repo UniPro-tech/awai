@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to PrivatePolis are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 0.1.0 - 2026-09-28
 

@@ -53,15 +53,17 @@ function ProfilePage() {
                 </dd>
               </div>
             </dl>
-            <button
-              type="button"
-              onClick={async () => {
-                await authClient.signOut();
-                await navigate({ to: "/login" });
-              }}
-            >
-              {t("profile.signOut")}
-            </button>
+            <div>
+              <button
+                type="button"
+                onClick={async () => {
+                  await authClient.signOut();
+                  await navigate({ to: "/login" });
+                }}
+              >
+                {t("profile.signOut")}
+              </button>
+            </div>
           </section>
         ) : null}
       </main>

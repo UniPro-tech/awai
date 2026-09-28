@@ -22,7 +22,7 @@ class AnalysisEngine(Protocol):
 
 
 class RedDwarfAnalysisEngine:
-    """Adapts PrivatePolis UUID-based votes to Red Dwarf's integer identifiers."""
+    """Adapts Awai UUID-based votes to Red Dwarf's integer identifiers."""
 
     def __init__(self, *, force_group_count: int | None = None) -> None:
         self._force_group_count = force_group_count

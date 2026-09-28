@@ -20,8 +20,11 @@ function authSecret(): string {
 }
 
 function initialRole(email: string): "USER" | "ADMIN" {
-  const initialAdminEmail = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();
-  return initialAdminEmail && email.toLowerCase() === initialAdminEmail ? "ADMIN" : "USER";
+  const initialAdminEmail =
+    process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();
+  return initialAdminEmail && email.toLowerCase() === initialAdminEmail
+    ? "ADMIN"
+    : "USER";
 }
 
 async function ssoProviderLimit(user: { id: string }): Promise<number> {
@@ -33,14 +36,18 @@ async function ssoProviderLimit(user: { id: string }): Promise<number> {
   return appUser?.role === "ADMIN" && !appUser.suspended ? 10 : 0;
 }
 
-async function guardSsoProviderMutation(input: { provider: { id: string } }): Promise<void> {
+async function guardSsoProviderMutation(input: {
+  provider: { id: string };
+}): Promise<void> {
   const [provider] = await databaseRuntime.db
     .select({ userId: authSchema.ssoProvider.userId })
     .from(authSchema.ssoProvider)
     .where(eq(authSchema.ssoProvider.id, input.provider.id))
     .limit(1);
   if (!provider || (await ssoProviderLimit({ id: provider.userId })) === 0) {
-    throw new Error("Only an active PrivatePolis administrator can manage SSO providers.");
+    throw new Error(
+      "Only an active Awai administrator can manage SSO providers.",
+    );
   }
 }
 
@@ -51,7 +58,12 @@ export const auth = betterAuth({
   secret: authSecret(),
   disabledPaths: localAuthEnabled()
     ? []
-    : ["/sign-up/email", "/sign-in/email", "/sign-in/username", "/is-username-available"],
+    : [
+        "/sign-up/email",
+        "/sign-in/email",
+        "/sign-in/username",
+        "/is-username-available",
+      ],
   database: drizzleAdapter(databaseRuntime.db, {
     provider: "pg",
     schema: authSchema,
@@ -81,7 +93,9 @@ export const auth = betterAuth({
       create: {
         before: async () => {
           if (!registrationEnabled()) {
-            throw new APIError("FORBIDDEN", { message: "Sign-up is disabled." });
+            throw new APIError("FORBIDDEN", {
+              message: "Sign-up is disabled.",
+            });
           }
         },
         after: async (user) => {

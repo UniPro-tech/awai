@@ -11,13 +11,18 @@ type Mode = "sign-in" | "sign-up" | "sso";
 function LoginPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const config = useQuery({ queryKey: ["public-config"], queryFn: getPublicConfig, retry: false });
+  const config = useQuery({
+    queryKey: ["public-config"],
+    queryFn: getPublicConfig,
+    retry: false,
+  });
   const [mode, setMode] = useState<Mode>("sign-in");
   const [error, setError] = useState<string>();
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    if (config.data && !config.data.localAuthEnabled && mode !== "sso") setMode("sso");
+    if (config.data && !config.data.localAuthEnabled && mode !== "sso")
+      setMode("sso");
   }, [config.data, mode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -61,8 +66,13 @@ function LoginPage() {
     return (
       <main className="auth-shell">
         <section className="auth-card">
-          <div className="auth-card-header"><p className="brand">PrivatePolis</p><LanguageSwitcher compact /></div>
-          <p role={config.error ? "alert" : "status"}>{config.error ? t("auth.configError") : t("common.loading")}</p>
+          <div className="auth-card-header">
+            <p className="brand">Awai</p>
+            <LanguageSwitcher compact />
+          </div>
+          <p role={config.error ? "alert" : "status"}>
+            {config.error ? t("auth.configError") : t("common.loading")}
+          </p>
         </section>
       </main>
     );
@@ -71,27 +81,59 @@ function LoginPage() {
   return (
     <main className="auth-shell">
       <section className="auth-card">
-        <div className="auth-card-header"><p className="brand">PrivatePolis</p><LanguageSwitcher compact /></div>
-        <h1>{mode === "sign-in" ? t("auth.signInTitle") : mode === "sign-up" ? t("auth.signUpTitle") : t("auth.ssoTitle")}</h1>
+        <div className="auth-card-header">
+          <p className="brand">Awai</p>
+          <LanguageSwitcher compact />
+        </div>
+        <h1>
+          {mode === "sign-in"
+            ? t("auth.signInTitle")
+            : mode === "sign-up"
+              ? t("auth.signUpTitle")
+              : t("auth.ssoTitle")}
+        </h1>
         <p>{t("auth.subtitle")}</p>
         <form onSubmit={submit} className="auth-form">
           {mode === "sso" ? (
             <>
               <label htmlFor="email">{t("auth.workEmail")}</label>
-              <input id="email" name="email" required type="email" autoComplete="email" />
+              <input
+                id="email"
+                name="email"
+                required
+                type="email"
+                autoComplete="email"
+              />
             </>
           ) : mode === "sign-up" ? (
             <>
               <label htmlFor="name">{t("auth.displayName")}</label>
-              <input id="name" name="name" required maxLength={100} autoComplete="name" />
+              <input
+                id="name"
+                name="name"
+                required
+                maxLength={100}
+                autoComplete="name"
+              />
               <label htmlFor="email">{t("auth.email")}</label>
-              <input id="email" name="email" required type="email" autoComplete="email" />
+              <input
+                id="email"
+                name="email"
+                required
+                type="email"
+                autoComplete="email"
+              />
             </>
           ) : null}
           {mode !== "sso" ? (
             <>
               <label htmlFor="username">{t("auth.username")}</label>
-              <input id="username" name="username" required autoComplete="username" />
+              <input
+                id="username"
+                name="username"
+                required
+                autoComplete="username"
+              />
               <label htmlFor="password">{t("auth.password")}</label>
               <input
                 id="password"
@@ -99,27 +141,44 @@ function LoginPage() {
                 required
                 minLength={8}
                 type="password"
-                autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
+                autoComplete={
+                  mode === "sign-in" ? "current-password" : "new-password"
+                }
               />
             </>
           ) : null}
+          {config.data?.localAuthEnabled && config.data.registrationEnabled ? (
+            <p>
+              {mode === "sign-up"
+                ? t("auth.haveAccount")
+                : t("auth.needAccount")}{" "}
+              <button
+                className="button-link"
+                type="button"
+                onClick={() => {
+                  setError(undefined);
+                  setMode(mode === "sign-in" ? "sign-up" : "sign-in");
+                }}
+              >
+                {mode === "sign-up"
+                  ? t("auth.haveAccount")
+                  : t("auth.needAccount")}
+              </button>
+            </p>
+          ) : config.data?.localAuthEnabled && mode === "sign-in" ? (
+            <p className="notice">{t("auth.registrationClosed")}</p>
+          ) : null}
           {error ? <p role="alert">{error}</p> : null}
           <button type="submit" disabled={pending}>
-            {pending ? t("auth.pending") : mode === "sign-in" ? t("auth.signIn") : mode === "sign-up" ? t("auth.signUp") : t("auth.ssoContinue")}
+            {pending
+              ? t("auth.pending")
+              : mode === "sign-in"
+                ? t("auth.signIn")
+                : mode === "sign-up"
+                  ? t("auth.signUp")
+                  : t("auth.ssoContinue")}
           </button>
         </form>
-        {config.data?.localAuthEnabled && config.data.registrationEnabled ? (
-          <button
-            className="button-link"
-            type="button"
-            onClick={() => {
-              setError(undefined);
-              setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-            }}
-          >
-            {mode === "sign-up" ? t("auth.haveAccount") : t("auth.needAccount")}
-          </button>
-        ) : config.data?.localAuthEnabled && mode === "sign-in" ? <p className="notice">{t("auth.registrationClosed")}</p> : null}
         {config.data?.localAuthEnabled ? (
           <button
             className="button-link"

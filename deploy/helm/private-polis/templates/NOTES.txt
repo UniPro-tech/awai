@@ -1,4 +1,4 @@
-PrivatePolis has been installed.
+Awai has been installed.
 
 {{- if .Values.gateway.enabled }}
 Traffic is exposed through HTTPRoute {{ include "private-polis.fullname" . }}.

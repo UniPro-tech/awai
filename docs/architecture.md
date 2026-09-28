@@ -1,6 +1,6 @@
 # Architecture
 
-PrivatePolis uses a pnpm monorepo with an application server, browser application, shared API contracts, and a typed client. PostgreSQL is the boundary between the TypeScript application and the Python analysis worker.
+Awai uses a pnpm monorepo with an application server, browser application, shared API contracts, and a typed client. PostgreSQL is the boundary between the TypeScript application and the Python analysis worker.
 
 ```text
 Browser -> Hono HTTP API -> PostgreSQL <- Python analysis worker

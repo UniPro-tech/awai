@@ -1,4 +1,4 @@
-# PrivatePolis analysis worker
+# Awai analysis worker
 
 The worker claims due jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`, loads raw votes inside the worker boundary, runs the Red Dwarf PCA/K-means pipeline, and persists privacy-safe snapshots.
 

@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping build PrivatePolis.
+Thank you for helping build Awai.
 
 ## Development workflow
 

@@ -1,10 +1,10 @@
-# PrivatePolis
+# Awai
 
-PrivatePolis is a private-first, self-hosted platform for discovering opinion groups and consensus inside authenticated communities. It follows the statistical analysis model popularized by Polis and Agora without requiring generative AI.
+Awai is a private-first, self-hosted platform for discovering opinion groups and consensus inside authenticated communities. It follows the statistical analysis model popularized by Polis and Agora without requiring generative AI.
 
 ## Project status
 
-PrivatePolis 0.1.0 is an early release. It provides local and enterprise authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, privacy-safe result APIs and visualization, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application.
+Awai 0.1.0 is an early release. It provides local and enterprise authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, privacy-safe result APIs and visualization, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application.
 
 The web application provides Japanese and English interfaces, a responsive dashboard layout, and searchable category/tag selectors that can create missing taxonomy entries while a topic is composed. Language choice is stored in the browser and defaults to the browser language with Japanese as the fallback.
 

@@ -55,7 +55,8 @@ services:
       migration:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/health/ready"]
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/health/ready"]
       interval: 10s
       timeout: 5s
       retries: 12

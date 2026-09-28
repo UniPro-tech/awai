@@ -1,6 +1,6 @@
 # Security Policy
 
-PrivatePolis is under active development and has not reached a stable release. Only the latest commit on the default branch receives security fixes.
+Awai is under active development and has not reached a stable release. Only the latest commit on the default branch receives security fixes.
 
 The implemented trust boundaries, deployment requirements, controls, and known limitations are documented in [docs/security.md](docs/security.md). The data inventory and application-level anonymity guarantees are documented in [docs/privacy.md](docs/privacy.md).
 

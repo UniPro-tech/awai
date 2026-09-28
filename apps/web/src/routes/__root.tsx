@@ -35,23 +35,83 @@ function RootLayout() {
   if (isLogin) return <Outlet />;
 
   return (
-    <div className={`dashboard ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+    <div
+      className={`dashboard ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}
+    >
       <header className="dashboard-header">
-        <button className="icon-button menu-button" type="button" aria-label={t("nav.toggle")} aria-expanded={sidebarOpen} aria-controls="app-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}><Menu aria-hidden="true" /></button>
-        <Link className="brand" to="/topics">PrivatePolis</Link>
-        <div className="header-actions"><LanguageSwitcher compact /><Link className="profile-link" to="/profile"><UserRound aria-hidden="true" size={18} /><span>{currentUser.data?.displayName ?? t("common.profile")}</span></Link></div>
+        <button
+          className="icon-button menu-button"
+          type="button"
+          aria-label={t("nav.toggle")}
+          aria-expanded={sidebarOpen}
+          aria-controls="app-sidebar"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu aria-hidden="true" />
+        </button>
+        <Link className="brand" to="/topics">
+          Awai
+        </Link>
+        <div className="header-actions">
+          <LanguageSwitcher compact />
+          <Link className="profile-link" to="/profile">
+            <UserRound aria-hidden="true" size={18} />
+            <span>{currentUser.data?.displayName ?? t("common.profile")}</span>
+          </Link>
+        </div>
       </header>
-      {sidebarOpen ? <button type="button" className="sidebar-backdrop" aria-label={t("nav.close")} onClick={() => setSidebarOpen(false)} /> : null}
-      <aside id="app-sidebar" className="dashboard-sidebar" aria-label={t("nav.primary")}>
-        <div className="sidebar-heading"><span>{t("nav.menu")}</span><button className="icon-button sidebar-close" type="button" aria-label={t("nav.close")} onClick={() => setSidebarOpen(false)}><X size={19} /></button></div>
+      {sidebarOpen ? (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label={t("nav.close")}
+          onClick={() => setSidebarOpen(false)}
+        />
+      ) : null}
+      <aside
+        id="app-sidebar"
+        className="dashboard-sidebar"
+        aria-label={t("nav.primary")}
+      >
+        <div className="sidebar-heading">
+          <span>{t("nav.menu")}</span>
+          <button
+            className="icon-button sidebar-close"
+            type="button"
+            aria-label={t("nav.close")}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X size={19} />
+          </button>
+        </div>
         <nav className="sidebar-nav">
-          <Link to="/topics" activeOptions={{ exact: true }} activeProps={{ "aria-current": "page" }}><FolderKanban size={19} />{t("common.topics")}</Link>
-          <Link to="/topics/new" activeProps={{ "aria-current": "page" }}><PlusCircle size={19} />{t("common.newTopic")}</Link>
-          <Link to="/profile" activeProps={{ "aria-current": "page" }}><UserRound size={19} />{t("common.profile")}</Link>
-          {currentUser.data?.role === "ADMIN" ? <Link to="/admin" activeProps={{ "aria-current": "page" }}><Settings size={19} />{t("common.admin")}</Link> : null}
+          <Link
+            to="/topics"
+            activeOptions={{ exact: true }}
+            activeProps={{ "aria-current": "page" }}
+          >
+            <FolderKanban size={19} />
+            {t("common.topics")}
+          </Link>
+          <Link to="/topics/new" activeProps={{ "aria-current": "page" }}>
+            <PlusCircle size={19} />
+            {t("common.newTopic")}
+          </Link>
+          <Link to="/profile" activeProps={{ "aria-current": "page" }}>
+            <UserRound size={19} />
+            {t("common.profile")}
+          </Link>
+          {currentUser.data?.role === "ADMIN" ? (
+            <Link to="/admin" activeProps={{ "aria-current": "page" }}>
+              <Settings size={19} />
+              {t("common.admin")}
+            </Link>
+          ) : null}
         </nav>
       </aside>
-      <div className="dashboard-content"><Outlet /></div>
+      <div className="dashboard-content">
+        <Outlet />
+      </div>
     </div>
   );
 }

@@ -234,6 +234,10 @@ h2 {
   border: 1px solid #dbe2dd;
   border-radius: 0.6rem;
   padding: 1.2rem;
+  margin-top: 1.5rem;
+}
+.panel h2 {
+  margin-top: 0;
 }
 .form-row {
   display: flex;
@@ -261,8 +265,8 @@ h2 {
   list-style: none;
   padding: 0;
 }
-.topic-list h3 {
-  margin-top: 0;
+.topic-list h2 {
+  color: #1d2923 !important;
 }
 .topic-list span {
   color: #5f6f63;
@@ -433,6 +437,11 @@ h2 {
 .danger-panel {
   border-color: #e6c9c3;
   margin-top: 1rem;
+}
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 .profile-details dl,
 .settings-list dl {

@@ -5,7 +5,7 @@ import { closeDatabase } from "./db/runtime.js";
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 
 const server = serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`PrivatePolis server listening on http://localhost:${info.port}`);
+  console.log(`Awai server listening on http://localhost:${info.port}`);
 });
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {

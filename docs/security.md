@@ -1,6 +1,6 @@
 # Security model
 
-PrivatePolis is designed for a trusted self-hosting operator and authenticated community members. It does not protect data from a malicious database or host administrator. Internet-facing deployments require TLS and a maintained reverse proxy or ingress.
+Awai is designed for a trusted self-hosting operator and authenticated community members. It does not protect data from a malicious database or host administrator. Internet-facing deployments require TLS and a maintained reverse proxy or ingress.
 
 ## Trust boundaries
 
@@ -18,21 +18,21 @@ Browser -> reverse proxy / ingress -> application -> PostgreSQL <- analysis work
 
 ## Implemented controls
 
-| Risk | Control |
-| --- | --- |
-| Unauthenticated access | Every `/api/v1/*` request resolves a Better Auth session and active `core.app_users` record |
-| Suspended sessions | Suspension is checked on every versioned request, including already-issued sessions |
-| CSRF | Unsafe cookie-bearing `/api/v1` requests require an exact configured `Origin`; Better Auth applies its own trusted-origin checks under `/api/auth` |
-| Input and response confusion | Zod validates request, path, query, error, and response contracts; database records are not serialized directly |
-| SQL injection | Drizzle and parameterized `node-postgres` queries are used; dynamic SQL identifiers are not accepted from requests |
-| XSS | Topic and statement bodies are rendered as React text, not injected HTML; Hono supplies nosniff, frame, referrer, HSTS, opener, resource, and related security headers |
-| Credential handling | Passwords and sessions are delegated to Better Auth; production secrets are supplied through environment variables or Kubernetes Secrets |
-| Brute force and abuse | Fixed-window limits cover authentication by source address and versioned APIs by application user; responses include retry metadata |
-| Privilege lockout | An administrator cannot demote or suspend their own account; initial administration is explicitly bootstrapped by email |
-| SSO mutation | Only an active administrator may create, change, or remove an SSO provider; SAML requires timestamps and rejects deprecated algorithms |
-| Network exposure | Compose publishes Caddy only; Helm network policies constrain application, worker, migration, and optional PostgreSQL traffic |
-| Failure disclosure | Versioned APIs return a common error envelope and request ID; unexpected error messages are not returned to clients |
-| Supply-chain regression | CI performs lint, type, unit, browser, PostgreSQL integration, container build, Python, and Helm checks with a frozen lockfile |
+| Risk                         | Control                                                                                                                                                                |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unauthenticated access       | Every `/api/v1/*` request resolves a Better Auth session and active `core.app_users` record                                                                            |
+| Suspended sessions           | Suspension is checked on every versioned request, including already-issued sessions                                                                                    |
+| CSRF                         | Unsafe cookie-bearing `/api/v1` requests require an exact configured `Origin`; Better Auth applies its own trusted-origin checks under `/api/auth`                     |
+| Input and response confusion | Zod validates request, path, query, error, and response contracts; database records are not serialized directly                                                        |
+| SQL injection                | Drizzle and parameterized `node-postgres` queries are used; dynamic SQL identifiers are not accepted from requests                                                     |
+| XSS                          | Topic and statement bodies are rendered as React text, not injected HTML; Hono supplies nosniff, frame, referrer, HSTS, opener, resource, and related security headers |
+| Credential handling          | Passwords and sessions are delegated to Better Auth; production secrets are supplied through environment variables or Kubernetes Secrets                               |
+| Brute force and abuse        | Fixed-window limits cover authentication by source address and versioned APIs by application user; responses include retry metadata                                    |
+| Privilege lockout            | An administrator cannot demote or suspend their own account; initial administration is explicitly bootstrapped by email                                                |
+| SSO mutation                 | Only an active administrator may create, change, or remove an SSO provider; SAML requires timestamps and rejects deprecated algorithms                                 |
+| Network exposure             | Compose publishes Caddy only; Helm network policies constrain application, worker, migration, and optional PostgreSQL traffic                                          |
+| Failure disclosure           | Versioned APIs return a common error envelope and request ID; unexpected error messages are not returned to clients                                                    |
+| Supply-chain regression      | CI performs lint, type, unit, browser, PostgreSQL integration, container build, Python, and Helm checks with a frozen lockfile                                         |
 
 ## Deployment requirements
 

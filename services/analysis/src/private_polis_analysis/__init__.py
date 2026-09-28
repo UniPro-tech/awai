@@ -1,1 +1,1 @@
-"""PrivatePolis analysis worker."""
+"""Awai analysis worker."""
