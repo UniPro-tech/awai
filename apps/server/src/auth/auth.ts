@@ -1,12 +1,14 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { sso } from "@better-auth/sso";
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { username } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { appUsers } from "../db/schema.js";
 import * as authSchema from "../db/auth-schema.js";
 import { databaseRuntime } from "../db/runtime.js";
 import { configuredTrustedOrigins } from "./origins.js";
+import { registrationEnabled } from "./registration.js";
 
 function authSecret(): string {
   const secret = process.env.BETTER_AUTH_SECRET;
@@ -55,6 +57,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    disableSignUp: !registrationEnabled(),
   },
   plugins: [
     username(),
@@ -73,6 +76,11 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
+        before: async () => {
+          if (!registrationEnabled()) {
+            throw new APIError("FORBIDDEN", { message: "Sign-up is disabled." });
+          }
+        },
         after: async (user) => {
           await databaseRuntime.db
             .insert(appUsers)

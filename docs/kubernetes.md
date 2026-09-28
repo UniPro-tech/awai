@@ -75,6 +75,7 @@ PostgreSQL 18 data is mounted at `/var/lib/postgresql`. Back up the persistent v
 - Use an external secrets controller or a pre-created Secret when possible. The inline `auth.secret` and `database.url` values are provided for development and chart rendering only.
 - `rateLimit.windowSeconds`, `rateLimit.authMax`, and `rateLimit.apiMax` configure the built-in fixed-window limiter. Limits are local to each application replica; use a trusted ingress or gateway rate limiter when a deployment requires a strict cluster-wide ceiling. Ensure the proxy replaces untrusted client forwarding headers.
 - Cookie-authenticated mutations enforce exact Origin matching. `auth.baseUrl` is trusted automatically; add only operator-controlled extra origins to `auth.trustedOrigins`. Wildcards are not supported.
+- Set `auth.registrationEnabled=false` after bootstrapping members to reject new local and SSO accounts. Existing accounts continue to sign in.
 
 Validate changes before upgrading:
 

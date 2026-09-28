@@ -37,6 +37,18 @@ describe("application", () => {
     expect((await unavailable.request("/health/ready")).status).toBe(503);
   });
 
+  it("exposes only the public registration setting without authentication", async () => {
+    const configured = createApp({
+      services: createMemoryServices(),
+      authenticate: async () => ({ status: "unauthenticated" }),
+      registrationEnabled: false,
+    });
+
+    const response = await configured.request("/api/config");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ registrationEnabled: false });
+  });
+
   it("requires authentication for versioned API routes", async () => {
     const unauthenticated = createApp({
       services: createMemoryServices(),

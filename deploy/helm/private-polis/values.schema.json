@@ -10,6 +10,7 @@
         "baseUrl": { "type": "string", "format": "uri" },
         "secret": { "type": "string" },
         "initialAdminEmail": { "type": "string" },
+        "registrationEnabled": { "type": "boolean" },
         "trustedOrigins": {
           "type": "array",
           "items": { "type": "string", "format": "uri" },

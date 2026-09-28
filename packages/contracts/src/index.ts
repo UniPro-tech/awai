@@ -1,6 +1,7 @@
 export * from "./admin.js";
 export * from "./analysis.js";
 export * from "./common.js";
+export * from "./config.js";
 export * from "./moderation.js";
 export * from "./statement.js";
 export * from "./taxonomy.js";

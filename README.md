@@ -46,6 +46,8 @@ All `/api/v1` routes require a Better Auth session. Register through the web UI 
 
 Set `INITIAL_ADMIN_EMAIL` before the first matching account is registered to bootstrap an administrator. The comparison is case-insensitive and only applies when a new account is created; changing the setting does not promote an existing account. Administrators can subsequently manage roles and suspensions from `/admin`.
 
+Set `REGISTRATION_ENABLED=false` after bootstrapping the community to reject every new local and SSO account while preserving sign-in for existing users.
+
 The analysis worker is managed separately:
 
 ```sh

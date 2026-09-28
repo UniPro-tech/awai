@@ -42,7 +42,7 @@ Browser -> reverse proxy / ingress -> application -> PostgreSQL <- analysis work
 4. Replace untrusted forwarding headers at the proxy. Authentication rate limiting relies on the resolved source address.
 5. Use a dedicated PostgreSQL role and network path, enable encrypted database transport when traffic leaves the trusted node/network, and restrict backups as sensitive data.
 6. Keep application, worker, PostgreSQL, identity provider, reverse proxy, and base images patched. Rebuild images after dependency or base-image security updates.
-7. Disable public registration at the identity/deployment layer when community membership must be invitation-only; local account registration is enabled by default in the current release.
+7. Set `REGISTRATION_ENABLED=false` (Compose) or `auth.registrationEnabled=false` (Helm) after bootstrapping members when community membership must be invitation-only. The server rejects new local and SSO accounts while existing accounts continue to sign in.
 
 ## Known limitations and residual risk
 
