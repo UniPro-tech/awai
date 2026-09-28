@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  analysis:
+    name: Analysis worker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/analysis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --locked --dev
+      - run: uv run ruff check .
+      - run: uv run mypy
+      - run: uv run pytest
+
+  containers:
+    name: Container images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/docker/app.Dockerfile
+          target: application
+          push: false
+      - uses: docker/build-push-action@v6
+        with:
+          context: services/analysis
+          file: services/analysis/Dockerfile
+          target: analysis
+          push: false
+
+  helm:
+    name: Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - run: helm lint deploy/helm/private-polis --set existingSecret=private-polis-ci
+      - run: helm template private-polis deploy/helm/private-polis --set existingSecret=private-polis-ci
+      - run: helm lint deploy/helm/private-polis --set postgresql.enabled=true --set postgresql.auth.password=ci-password --set auth.secret=ci-secret-at-least-32-characters
+      - run: helm lint deploy/helm/private-polis --values deploy/helm/private-polis/examples/ingress-values.yaml --set existingSecret=private-polis-ci
+      - run: helm lint deploy/helm/private-polis --values deploy/helm/private-polis/examples/gateway-values.yaml --set existingSecret=private-polis-ci

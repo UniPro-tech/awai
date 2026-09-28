@@ -1,7 +1,7 @@
 import type { StatementResponse } from "@private-polis/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { AuthGate } from "../features/auth/auth-gate";
 import { createStatement, listStatements } from "../features/statements/api";
 import { getTopic, updateTopic } from "../features/topics/api";

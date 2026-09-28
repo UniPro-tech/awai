@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { authClient } from "../features/auth/client";
 
 type Mode = "sign-in" | "sign-up";

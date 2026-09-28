@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { listAdminUsers, updateAdminUser } from "../features/admin/api";
 import { AuthGate } from "../features/auth/auth-gate";
 import {
