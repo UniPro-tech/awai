@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUser } from "../features/auth/api";
 import { AuthGate } from "../features/auth/auth-gate";
 import { authClient } from "../features/auth/client";
 
 function ProfilePage() {
   const session = authClient.useSession();
+  const currentUser = useQuery({ queryKey: ["current-user"], queryFn: getCurrentUser });
   const navigate = useNavigate();
   const user = session.data?.user;
 
@@ -17,7 +20,8 @@ function ProfilePage() {
             <dl>
               <div><dt>Display name</dt><dd>{user.name}</dd></div>
               <div><dt>Email</dt><dd>{user.email}</dd></div>
-              <div><dt>User ID</dt><dd><code>{user.id}</code></dd></div>
+              <div><dt>Application role</dt><dd>{currentUser.data?.role === "ADMIN" ? "Administrator" : "User"}</dd></div>
+              <div><dt>User ID</dt><dd><code>{currentUser.data?.id ?? "Loading…"}</code></dd></div>
             </dl>
             <button type="button" onClick={async () => {
               await authClient.signOut();

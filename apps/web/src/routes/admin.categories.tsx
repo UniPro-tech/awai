@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { AuthGate } from "../features/auth/auth-gate";
+import { AdminGate } from "../features/auth/admin-gate";
 import { createCategory, createTag, deleteCategory, deleteTag, listCategories, listTags } from "../features/taxonomy/api";
 
 function AdminCategoriesPage() {
@@ -20,7 +20,7 @@ function AdminCategoriesPage() {
   function submitTag(event: FormEvent) { event.preventDefault(); addTag.mutate(tagName); }
 
   return (
-    <AuthGate>
+    <AdminGate>
       <main className="shell">
         <nav className="breadcrumb"><Link to="/admin">Administration</Link> / Categories and tags</nav>
         <header><p className="eyebrow">Administration</p><h1>Categories and tags</h1><p>Taxonomy is shared across all topics and intentionally has no separate ACL.</p></header>
@@ -38,7 +38,7 @@ function AdminCategoriesPage() {
           </div>
         </section>
       </main>
-    </AuthGate>
+    </AdminGate>
   );
 }
 

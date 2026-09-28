@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   AnalysisRunResponseSchema,
   CreateTopicRequestSchema,
+  CurrentUserResponseSchema,
   DeletionRequestSchema,
   TopicResponseSchema,
 } from "./index.js";
@@ -44,6 +45,24 @@ describe("topic contracts", () => {
 
     expect(response).not.toHaveProperty("createdByUserId");
     expect(response.author.displayName).toBeNull();
+  });
+});
+
+describe("current user contract", () => {
+  it("strips authentication-provider fields", () => {
+    const user = CurrentUserResponseSchema.parse({
+      id: "00000000-0000-4000-8000-000000000001",
+      displayName: "Member",
+      role: "USER",
+      email: "private@example.com",
+      authUserId: "auth-provider-id",
+    });
+
+    expect(user).toEqual({
+      id: "00000000-0000-4000-8000-000000000001",
+      displayName: "Member",
+      role: "USER",
+    });
   });
 });
 

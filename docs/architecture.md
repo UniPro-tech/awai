@@ -19,7 +19,7 @@ contracts <- api-client <- web
 
 The browser is a React and Vite SPA. TanStack Router generates a typed route tree from `apps/web/src/routes`, and TanStack Query owns remote server state. Feature API functions isolate Hono RPC transport calls from UI components. Tailwind CSS supplies utility styles, while reusable source-owned components under `apps/web/src/components/ui` follow the shadcn/ui model.
 
-The primary routes are `/login`, `/topics`, `/topics/new`, `/topics/:topicId`, `/topics/:topicId/results`, `/topics/:topicId/settings`, `/profile`, and the `/admin/*` management screens. Authentication remains enforced by the API; client-side gates improve navigation but are not an authorization boundary.
+The primary routes are `/login`, `/topics`, `/topics/new`, `/topics/:topicId`, `/topics/:topicId/results`, `/topics/:topicId/settings`, `/profile`, and the `/admin/*` management screens. The minimal `/api/v1/me` response supplies role-aware navigation without exposing authentication-provider data. Authentication and authorization remain enforced by each API; client-side gates improve navigation but are not a security boundary.
 
 ## Public response boundary
 

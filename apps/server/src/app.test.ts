@@ -49,6 +49,13 @@ describe("application", () => {
     });
   });
 
+  it("returns the current application user without authentication details", async () => {
+    const response = await app.request("/api/v1/me");
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(testUser);
+  });
+
   it("rejects cookie-authenticated mutations from untrusted origins", async () => {
     const protectedApp = createApp({
       services: createMemoryServices(),

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { FolderTree, Settings, Users } from "lucide-react";
-import { AuthGate } from "../features/auth/auth-gate";
+import { AdminGate } from "../features/auth/admin-gate";
 
 const destinations = [
   { to: "/admin/users" as const, title: "Users", description: "Manage global roles and account suspension.", icon: Users },
@@ -10,7 +10,7 @@ const destinations = [
 
 function AdminIndexPage() {
   return (
-    <AuthGate>
+    <AdminGate>
       <main className="shell">
         <header><p className="eyebrow">Administration</p><h1>Community settings</h1><p>Administrative APIs verify your role before returning or changing data.</p></header>
         <div className="admin-destinations">
@@ -21,7 +21,7 @@ function AdminIndexPage() {
           ))}
         </div>
       </main>
-    </AuthGate>
+    </AdminGate>
   );
 }
 

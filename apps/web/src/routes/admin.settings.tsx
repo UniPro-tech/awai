@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AuthGate } from "../features/auth/auth-gate";
+import { AdminGate } from "../features/auth/admin-gate";
 
 function AdminSettingsPage() {
   return (
-    <AuthGate>
+    <AdminGate>
       <main className="shell narrow-shell">
         <nav className="breadcrumb"><Link to="/admin">Administration</Link> / Settings</nav>
         <header><p className="eyebrow">Administration</p><h1>Settings</h1><p>Security-sensitive deployment settings are managed by the self-hosting operator.</p></header>
@@ -21,7 +21,7 @@ function AdminSettingsPage() {
           </dl>
         </section>
       </main>
-    </AuthGate>
+    </AdminGate>
   );
 }
 

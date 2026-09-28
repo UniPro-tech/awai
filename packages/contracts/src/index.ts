@@ -5,4 +5,5 @@ export * from "./moderation.js";
 export * from "./statement.js";
 export * from "./taxonomy.js";
 export * from "./topic.js";
+export * from "./user.js";
 export * from "./vote.js";

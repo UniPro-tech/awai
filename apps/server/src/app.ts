@@ -9,6 +9,7 @@ import { createStatementsRoute } from "./routes/statements.js";
 import { createAnalysisRoute } from "./routes/analysis.js";
 import { createCategoriesRoute, createTagsRoute } from "./routes/taxonomy.js";
 import { createAdminRoute } from "./routes/admin.js";
+import { createUsersRoute } from "./routes/users.js";
 import { checkDatabaseReadiness } from "./db/health.js";
 import { auth } from "./auth/auth.js";
 import { authenticateRequest, type AuthenticateRequest } from "./auth/session.js";
@@ -140,6 +141,7 @@ export function createApp(options: AppOptions = {}) {
     );
   });
   return app
+    .route("/api/v1", createUsersRoute())
     .route("/api/v1/topics", createAnalysisRoute(services))
     .route("/api/v1/topics", createTopicsRoute(services))
     .route("/api/v1/statements", createStatementsRoute(services))

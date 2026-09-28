@@ -4,6 +4,14 @@ PrivatePolis exposes a same-origin JSON API under `/api/v1`. All versioned endpo
 
 Better Auth provides local sign-in plus optional OIDC and SAML endpoints under `/api/auth`. SSO provider registration and mutation are limited to active PrivatePolis administrators. See [OIDC and SAML single sign-on](sso.md) for callback URLs and operational guidance.
 
+## Current user
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/me` | Read the current application user ID, display name, and global role |
+
+The response deliberately excludes email addresses, authentication-provider identifiers, session data, and credentials. The browser uses it for role-aware navigation and display only; every protected API still performs its own authorization check.
+
 ## Topics and statements
 
 | Method | Path | Purpose |

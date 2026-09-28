@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { listAdminUsers, updateAdminUser } from "../features/admin/api";
-import { AuthGate } from "../features/auth/auth-gate";
+import { AdminGate } from "../features/auth/admin-gate";
 
 function AdminUsersPage() {
   const queryClient = useQueryClient();
@@ -11,7 +11,7 @@ function AdminUsersPage() {
     onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
   });
   return (
-    <AuthGate>
+    <AdminGate>
       <main className="shell">
         <nav className="breadcrumb"><Link to="/admin">Administration</Link> / Users</nav>
         <header><p className="eyebrow">Administration</p><h1>Users</h1><p>Role and suspension changes are written to the audit log.</p></header>
@@ -32,7 +32,7 @@ function AdminUsersPage() {
           ))}
         </div>
       </main>
-    </AuthGate>
+    </AdminGate>
   );
 }
 

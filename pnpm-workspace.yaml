@@ -13,3 +13,11 @@ allowBuilds:
   '@prisma/client': false
   better-sqlite3: false
   esbuild: true
+
+# Version-pinned exceptions for the TanStack Router packages selected in the lockfile.
+# pnpm's minimum-release-age policy otherwise rejects this internally consistent set.
+minimumReleaseAgeExclude:
+  - '@tanstack/router-core@1.171.33'
+  - '@tanstack/router-generator@1.167.39'
+  - '@tanstack/router-plugin@1.168.41'
+  - '@tanstack/react-router@1.170.40'
