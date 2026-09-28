@@ -43,6 +43,7 @@ Browser -> reverse proxy / ingress -> application -> PostgreSQL <- analysis work
 5. Use a dedicated PostgreSQL role and network path, enable encrypted database transport when traffic leaves the trusted node/network, and restrict backups as sensitive data.
 6. Keep application, worker, PostgreSQL, identity provider, reverse proxy, and base images patched. Rebuild images after dependency or base-image security updates.
 7. Set `REGISTRATION_ENABLED=false` (Compose) or `auth.registrationEnabled=false` (Helm) after bootstrapping members when community membership must be invitation-only. The server rejects new local and SSO accounts while existing accounts continue to sign in.
+8. To require SSO, verify an OIDC or SAML provider and an administrative login before setting `LOCAL_AUTH_ENABLED=false` (Compose) or `auth.localAuthEnabled=false` (Helm). Otherwise all users can be locked out.
 
 ## Known limitations and residual risk
 

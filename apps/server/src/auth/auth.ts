@@ -8,7 +8,7 @@ import { appUsers } from "../db/schema.js";
 import * as authSchema from "../db/auth-schema.js";
 import { databaseRuntime } from "../db/runtime.js";
 import { configuredTrustedOrigins } from "./origins.js";
-import { registrationEnabled } from "./registration.js";
+import { localAuthEnabled, registrationEnabled } from "./registration.js";
 
 function authSecret(): string {
   const secret = process.env.BETTER_AUTH_SECRET;
@@ -49,6 +49,9 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
   trustedOrigins: configuredTrustedOrigins(),
   secret: authSecret(),
+  disabledPaths: localAuthEnabled()
+    ? []
+    : ["/sign-up/email", "/sign-in/email", "/sign-in/username", "/is-username-available"],
   database: drizzleAdapter(databaseRuntime.db, {
     provider: "pg",
     schema: authSchema,
@@ -56,7 +59,7 @@ export const auth = betterAuth({
     transaction: true,
   }),
   emailAndPassword: {
-    enabled: true,
+    enabled: localAuthEnabled(),
     disableSignUp: !registrationEnabled(),
   },
   plugins: [

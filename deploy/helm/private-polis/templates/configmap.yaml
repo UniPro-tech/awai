@@ -9,6 +9,7 @@ data:
   BETTER_AUTH_TRUSTED_ORIGINS: {{ join "," .Values.auth.trustedOrigins | quote }}
   INITIAL_ADMIN_EMAIL: {{ .Values.auth.initialAdminEmail | quote }}
   REGISTRATION_ENABLED: {{ .Values.auth.registrationEnabled | quote }}
+  LOCAL_AUTH_ENABLED: {{ .Values.auth.localAuthEnabled | quote }}
   RATE_LIMIT_WINDOW_SECONDS: {{ .Values.rateLimit.windowSeconds | quote }}
   RATE_LIMIT_AUTH_MAX: {{ .Values.rateLimit.authMax | quote }}
   RATE_LIMIT_API_MAX: {{ .Values.rateLimit.apiMax | quote }}

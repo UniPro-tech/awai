@@ -48,6 +48,8 @@ Set `INITIAL_ADMIN_EMAIL` before the first matching account is registered to boo
 
 Set `REGISTRATION_ENABLED=false` after bootstrapping the community to reject every new local and SSO account while preserving sign-in for existing users.
 
+Set `LOCAL_AUTH_ENABLED=false` to remove username/password sign-in and registration and require configured OIDC or SAML single sign-on. Verify SSO before disabling local authentication to avoid locking out all users.
+
 The analysis worker is managed separately:
 
 ```sh

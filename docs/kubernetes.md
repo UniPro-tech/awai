@@ -76,6 +76,7 @@ PostgreSQL 18 data is mounted at `/var/lib/postgresql`. Back up the persistent v
 - `rateLimit.windowSeconds`, `rateLimit.authMax`, and `rateLimit.apiMax` configure the built-in fixed-window limiter. Limits are local to each application replica; use a trusted ingress or gateway rate limiter when a deployment requires a strict cluster-wide ceiling. Ensure the proxy replaces untrusted client forwarding headers.
 - Cookie-authenticated mutations enforce exact Origin matching. `auth.baseUrl` is trusted automatically; add only operator-controlled extra origins to `auth.trustedOrigins`. Wildcards are not supported.
 - Set `auth.registrationEnabled=false` after bootstrapping members to reject new local and SSO accounts. Existing accounts continue to sign in.
+- Set `auth.localAuthEnabled=false` only after verifying OIDC or SAML sign-in. It disables username/password sign-in and registration; a deployment without working SSO will become inaccessible.
 
 Validate changes before upgrading:
 

@@ -24,7 +24,7 @@ import {
 } from "./http/rate-limit.js";
 import { configuredTrustedOrigins } from "./auth/origins.js";
 import { requireSameOrigin } from "./http/same-origin.js";
-import { registrationEnabled } from "./auth/registration.js";
+import { localAuthEnabled, registrationEnabled } from "./auth/registration.js";
 import { createConfigRoute } from "./routes/config.js";
 
 export interface AppOptions {
@@ -35,6 +35,7 @@ export interface AppOptions {
   apiRateLimiter?: RateLimiter | false;
   csrfTrustedOrigins?: string[];
   registrationEnabled?: boolean;
+  localAuthEnabled?: boolean;
 }
 
 function positiveInteger(value: string | undefined, fallback: number) {
@@ -48,6 +49,7 @@ export function createApp(options: AppOptions = {}) {
   const services = options.services ?? createPostgresServices(databaseRuntime.db);
   const csrfTrustedOrigins = options.csrfTrustedOrigins ?? configuredTrustedOrigins();
   const isRegistrationEnabled = options.registrationEnabled ?? registrationEnabled();
+  const isLocalAuthEnabled = options.localAuthEnabled ?? localAuthEnabled();
   const windowMs = positiveInteger(process.env.RATE_LIMIT_WINDOW_SECONDS, 60) * 1_000;
   const authRateLimiter = options.authRateLimiter === false
     ? undefined
@@ -63,7 +65,7 @@ export function createApp(options: AppOptions = {}) {
   if (authRateLimiter) {
     app.use("/api/auth/*", rateLimit(authRateLimiter, (c) => requestAddress(c.req.raw.headers)));
   }
-  app.route("/api/config", createConfigRoute(isRegistrationEnabled))
+  app.route("/api/config", createConfigRoute(isRegistrationEnabled, isLocalAuthEnabled))
     .all("/api/auth/*", (c) => auth.handler(c.req.raw))
     .get("/health/live", (c) => c.json({ status: "ok" as const }))
     .get("/health/ready", async (c) => {

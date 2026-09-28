@@ -24,6 +24,8 @@ export INITIAL_ADMIN_EMAIL='admin@example.com'
 
 Local and SSO account creation is enabled by default. After the initial users and administrator exist, set `REGISTRATION_ENABLED=false` and restart the application to make the deployment invitation-only. Existing local and SSO users can continue to sign in, but all new account creation paths are rejected by the server. Temporarily re-enable registration when onboarding additional members.
 
+Username/password authentication is enabled by default. To enforce SSO-only access, first configure and verify OIDC or SAML, then set `LOCAL_AUTH_ENABLED=false` and restart the application. This disables local sign-in, local registration, and username availability endpoints. Disabling local authentication before a working SSO provider exists can lock every user out.
+
 The comparison is case-insensitive and is evaluated only when a new account is created. It does not promote an existing account. After bootstrap, use the Administration page to assign additional administrators or suspend accounts. Keep the variable set to the intended bootstrap address or remove it after the account has been created.
 
 Authentication and versioned API requests are rate-limited in each application process. The defaults are a 60-second window with 20 authentication requests per source address and 300 API requests per authenticated user. Override `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_AUTH_MAX`, and `RATE_LIMIT_API_MAX` when needed. Caddy supplies the client forwarding headers used for the authentication key; if the application is placed behind another proxy, overwrite—not append untrusted client values—to those headers.

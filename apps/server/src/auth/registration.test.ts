@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { registrationEnabled } from "./registration.js";
+import { localAuthEnabled, registrationEnabled } from "./registration.js";
 
 describe("registrationEnabled", () => {
   it.each([undefined, "", "true", "1", "yes", "on"])("allows registration for %s", (value) => {
@@ -8,5 +8,15 @@ describe("registrationEnabled", () => {
 
   it.each(["false", "FALSE", "0", "no", "off"])("blocks registration for %s", (value) => {
     expect(registrationEnabled(value)).toBe(false);
+  });
+});
+
+describe("localAuthEnabled", () => {
+  it.each([undefined, "", "true", "1", "yes", "on"])("enables local auth for %s", (value) => {
+    expect(localAuthEnabled(value)).toBe(true);
+  });
+
+  it.each(["false", "FALSE", "0", "no", "off"])("disables local auth for %s", (value) => {
+    expect(localAuthEnabled(value)).toBe(false);
   });
 });
