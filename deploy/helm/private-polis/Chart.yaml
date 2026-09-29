@@ -4,9 +4,13 @@ description: Private-first, self-hosted consensus platform
 type: application
 version: 0.1.0
 appVersion: "0.1.0"
+home: https://github.com/UniPro-tech/awai
+sources:
+  - https://github.com/UniPro-tech/awai
 keywords:
   - consensus
   - polis
   - privacy
 annotations:
   artifacthub.io/license: Apache-2.0
+  org.opencontainers.image.source: https://github.com/UniPro-tech/awai

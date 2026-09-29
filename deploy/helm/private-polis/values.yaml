@@ -6,8 +6,8 @@ imagePullSecrets: []
 application:
   replicaCount: 2
   image:
-    repository: private-polis-application
-    tag: latest
+    repository: ghcr.io/unipro-tech/awai-application
+    tag: ""
     pullPolicy: IfNotPresent
   resources: {}
   podAnnotations: {}
@@ -16,8 +16,8 @@ application:
 analysis:
   replicaCount: 1
   image:
-    repository: private-polis-analysis
-    tag: latest
+    repository: ghcr.io/unipro-tech/awai-analysis
+    tag: ""
     pullPolicy: IfNotPresent
   pollIntervalSeconds: 2
   resources: {}
@@ -26,8 +26,8 @@ analysis:
 
 migration:
   image:
-    repository: private-polis-migration
-    tag: latest
+    repository: ghcr.io/unipro-tech/awai-migration
+    tag: ""
     pullPolicy: IfNotPresent
   resources: {}
 

@@ -1,8 +1,21 @@
 # Kubernetes deployment
 
-The official chart is located at `deploy/helm/private-polis`. It installs the application, analysis worker, migration job, service account, service, network policies, disruption budget, and optional HPA and HTTP routing resources.
+The official chart is located at `deploy/helm/private-polis` and is published as an OCI artifact at `oci://ghcr.io/unipro-tech/charts/private-polis`. It installs the application, analysis worker, migration job, service account, service, network policies, disruption budget, and optional HPA and HTTP routing resources.
 
-External PostgreSQL is the production default. Build and publish the three image targets before installing the chart, then override their repositories and immutable tags:
+Release tags publish multi-architecture application, analysis, and migration images to `ghcr.io/unipro-tech/awai-{application,analysis,migration}`. The chart defaults to those repositories and uses its `appVersion` as the image tag. Install a published release with:
+
+```sh
+helm upgrade --install awai oci://ghcr.io/unipro-tech/charts/private-polis \
+  --version 0.1.0 \
+  --namespace awai \
+  --create-namespace \
+  --set existingSecret=awai-production \
+  --set auth.baseUrl=https://consensus.example.com
+```
+
+Every successful `main` build also publishes immutable `sha-<commit>` image tags and a uniquely versioned `0.0.0-main.<run>.<attempt>` development chart. Release tags additionally publish semantic-version and `latest` image tags; `main` publishes the mutable `edge` tag.
+
+External PostgreSQL is the production default. To use another registry, build and publish the three image targets before installing the chart, then override their repositories and immutable tags:
 
 ```sh
 helm upgrade --install private-polis deploy/helm/private-polis \
