@@ -26,7 +26,7 @@ export function createAnalysisRoute(services: ApplicationServices) {
           404,
         );
       }
-      const run = await services.analysis.latest(topicId.data);
+      const run = await services.analysis.latest(topicId.data, c.get("currentUser").id);
       if (!run) return c.json(notFound(), 404);
       return c.json(AnalysisRunResponseSchema.parse(run), 200);
     })
@@ -51,7 +51,11 @@ export function createAnalysisRoute(services: ApplicationServices) {
       const topicId = IdSchema.safeParse(c.req.param("topicId"));
       const runId = IdSchema.safeParse(c.req.param("runId"));
       if (!topicId.success || !runId.success) return c.json(notFound(), 404);
-      const run = await services.analysis.getRun(topicId.data, runId.data);
+      const run = await services.analysis.getRun(
+        topicId.data,
+        runId.data,
+        c.get("currentUser").id,
+      );
       if (!run) return c.json(notFound(), 404);
       return c.json(AnalysisRunResponseSchema.parse(run), 200);
     });

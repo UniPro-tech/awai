@@ -4,7 +4,10 @@ import { createApp } from "./app.js";
 import { createDatabase } from "./db/client.js";
 import {
   analysisJobs,
+  analysisGroups,
+  analysisPoints,
   analysisRuns,
+  analysisStatementResults,
   appUsers,
   auditLogs,
   statements,
@@ -101,6 +104,70 @@ describe.runIf(shouldRun)("PostgreSQL integration", () => {
     );
     expect("statement" in created).toBe(true);
     if (!("statement" in created)) return;
+
+    await services.votes.setVote(
+      created.statement.id,
+      topic.id,
+      owner.id,
+      "AGREE",
+    );
+    const [run] = await runtime.db
+      .insert(analysisRuns)
+      .values({
+        topicId: topic.id,
+        status: "COMPLETED",
+        algorithmVersion: "integration-test",
+        participantCount: 2,
+        statementCount: 1,
+        completedAt: new Date(),
+      })
+      .returning({ id: analysisRuns.id });
+    if (!run) throw new Error("Analysis run insert failed.");
+    const groups = await runtime.db
+      .insert(analysisGroups)
+      .values([
+        {
+          analysisRunId: run.id,
+          ordinal: 0,
+          participantCount: 1,
+          centroidX: -1,
+          centroidY: 0,
+        },
+        {
+          analysisRunId: run.id,
+          ordinal: 1,
+          participantCount: 1,
+          centroidX: 1,
+          centroidY: 0,
+        },
+      ])
+      .returning({ id: analysisGroups.id, ordinal: analysisGroups.ordinal });
+    await runtime.db.insert(analysisPoints).values(
+      groups.map((group) => ({
+        analysisRunId: run.id,
+        groupId: group.id,
+        x: group.ordinal === 0 ? -1 : 1,
+        y: 0,
+      })),
+    );
+    await runtime.db.insert(analysisStatementResults).values(
+      groups.map((group) => ({
+        analysisRunId: run.id,
+        statementId: created.statement.id,
+        groupId: group.id,
+        kind:
+          group.ordinal === 0
+            ? "REPRESENTATIVE_AGREE"
+            : "REPRESENTATIVE_DISAGREE",
+        score: 1,
+        rank: 1,
+      })),
+    );
+
+    const viewerAnalysis = await services.analysis.latest(topic.id, owner.id);
+    expect(viewerAnalysis?.viewerPoint).toMatchObject({ groupOrdinal: 0 });
+    expect(viewerAnalysis?.viewerPoint?.x).toBeLessThan(-0.9);
+    expect(viewerAnalysis?.points[0]).not.toHaveProperty("userId");
 
     await expect(
       runtime.db.select({ authorUserId: statements.authorUserId }).from(statements)

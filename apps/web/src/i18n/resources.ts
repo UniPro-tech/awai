@@ -108,13 +108,19 @@ export const resources = {
         authorVisibility: "投稿者表示",
         add: "意見を追加",
         statements: "意見一覧",
+        votingEyebrow: "ひとつずつ回答",
         loading: "意見を読み込んでいます…",
         empty: "意見はまだありません。",
         voteLabel: "この意見に投票",
         agree: "賛成",
         disagree: "反対",
-        pass: "保留",
-        stats: "賛成 {{agree}}・反対 {{disagree}}・保留 {{pass}}",
+        pass: "パス",
+        stats: "賛成 {{agree}}・反対 {{disagree}}・パス {{pass}}",
+        statsLocked: "回答すると、みんなの投票結果が表示されます。",
+        statementProgress: "{{current}} / {{total}}",
+        statementNavigation: "意見の移動",
+        previousStatement: "前の意見",
+        nextStatement: "次の意見",
       },
       topicSettings: {
         eyebrow: "トピック管理",
@@ -132,7 +138,8 @@ export const resources = {
       },
       analysis: {
         eyebrow: "分析結果",
-        privacy: "参加者の位置は匿名で、アカウントにたどることはできません。",
+        privacy:
+          "他の参加者の位置は匿名です。あなたの推定位置は、あなたにだけ表示されます。",
         waiting: "最新の分析を待っています…",
         insufficientTitle: "まだデータが足りません",
         insufficientBody:
@@ -144,8 +151,22 @@ export const resources = {
         mapTitle: "匿名参加者の意見マップ",
         mapDescription: "各点は匿名の参加者で、色は意見グループを表します。",
         noGeometry: "参加者の座標は生成されませんでした。",
+        youAreHere: "あなたの推定位置",
+        yourPositionEyebrow: "回答から見えてくるもの",
+        yourPosition: "意見マップ上のあなた",
+        yourPositionHelp:
+          "回答が増えるほど、各グループの特徴との近さから推定位置が更新されます。",
+        positionPending: "回答を分析しています。位置は分析完了後に表示されます。",
+        positionLearning:
+          "位置を推定するには、グループを特徴づける意見への回答がもう少し必要です。",
         group: "グループ {{number}}：{{count}}人",
         findings: "注目すべき意見",
+        commonOpinions: "共通の意見",
+        commonOpinionsHelp: "グループをまたいで賛成または反対が集まった意見です。",
+        groupOpinions: "グループ {{number}}の意見",
+        groupOpinionsHelp: "このグループをほかのグループから特徴づける意見です。",
+        agreeFinding: "賛成が特徴的",
+        disagreeFinding: "反対が特徴的",
         noRanked: "順位付けされた意見はありません。",
         consensusAgree: "全体の合意・賛成",
         consensusDisagree: "全体の合意・反対",
@@ -153,6 +174,14 @@ export const resources = {
         representativeDisagree: "グループ {{number}}の特徴・反対",
         rank: "順位 {{rank}}・スコア {{score}}",
         runs: "分析 {{count}}回・{{version}}",
+        downloadPdf: "詳細分析PDFをダウンロード",
+        preparingPdf: "PDFを作成しています…",
+        pdfFailed: "PDFを作成できませんでした。もう一度お試しください。",
+        reportTitle: "Awai 詳細分析レポート",
+        generatedAt: "作成日時：{{date}}",
+        pdfScore: "分析スコア {{score}}",
+        reportPrivacy:
+          "全体の点は匿名化されています。本人の推定位置は、このダウンロードを実行した本人にのみ表示されます。",
       },
       profile: {
         eyebrow: "アカウント",
@@ -218,6 +247,7 @@ export const resources = {
         TOPIC_NOT_FOUND: "トピックが見つかりません。",
         TOPIC_CLOSED: "このトピックは終了しています。",
         ANALYSIS_NOT_FOUND: "分析結果はまだありません。",
+        VOTE_REQUIRED: "票数を見る前に、この意見へ回答してください。",
         TAXONOMY_NOT_FOUND: "カテゴリまたはタグが見つかりません。",
         INTERNAL_ERROR: "予期しないエラーが発生しました。",
         fallback: "処理に失敗しました。",
@@ -335,6 +365,7 @@ export const resources = {
         authorVisibility: "Author visibility",
         add: "Add statement",
         statements: "Statements",
+        votingEyebrow: "One statement at a time",
         loading: "Loading statements…",
         empty: "No statements yet.",
         voteLabel: "Vote on this statement",
@@ -342,6 +373,11 @@ export const resources = {
         disagree: "Disagree",
         pass: "Pass",
         stats: "{{agree}} agree · {{disagree}} disagree · {{pass}} pass",
+        statsLocked: "Vote to reveal how everyone responded.",
+        statementProgress: "{{current}} / {{total}}",
+        statementNavigation: "Statement navigation",
+        previousStatement: "Previous",
+        nextStatement: "Next",
       },
       topicSettings: {
         eyebrow: "Topic management",
@@ -360,7 +396,7 @@ export const resources = {
       analysis: {
         eyebrow: "Analysis results",
         privacy:
-          "Participant positions are anonymous and cannot be traced back to accounts.",
+          "Other participants remain anonymous. Only you can see your estimated position.",
         waiting: "Waiting for the latest analysis…",
         insufficientTitle: "Not enough data yet",
         insufficientBody:
@@ -373,8 +409,25 @@ export const resources = {
         mapDescription:
           "Each dot is an anonymous participant, colored by opinion group.",
         noGeometry: "No participant geometry was produced.",
+        youAreHere: "Your estimated position",
+        yourPositionEyebrow: "What your answers reveal",
+        yourPosition: "You on the opinion map",
+        yourPositionHelp:
+          "As you answer more statements, your estimated position updates from your similarity to each opinion group.",
+        positionPending:
+          "Your answers are being analyzed. Your position will appear after the next analysis run.",
+        positionLearning:
+          "Answer a few more group-defining statements to estimate your position.",
         group: "Group {{number}}: {{count}} participants",
         findings: "Key statements",
+        commonOpinions: "Common opinions",
+        commonOpinionsHelp:
+          "Statements that attracted agreement or disagreement across opinion groups.",
+        groupOpinions: "Group {{number}} opinions",
+        groupOpinionsHelp:
+          "Statements that distinguish this group from the other groups.",
+        agreeFinding: "Distinctive agreement",
+        disagreeFinding: "Distinctive disagreement",
         noRanked: "No ranked statements were produced.",
         consensusAgree: "Consensus · agree",
         consensusDisagree: "Consensus · disagree",
@@ -382,6 +435,14 @@ export const resources = {
         representativeDisagree: "Group {{number}} · representative disagree",
         rank: "Rank {{rank}} · score {{score}}",
         runs: "{{count}} analysis runs · {{version}}",
+        downloadPdf: "Download detailed analysis PDF",
+        preparingPdf: "Preparing PDF…",
+        pdfFailed: "The PDF could not be created. Please try again.",
+        reportTitle: "Awai detailed analysis report",
+        generatedAt: "Generated {{date}}",
+        pdfScore: "Analysis score {{score}}",
+        reportPrivacy:
+          "Aggregate points are anonymous. The viewer estimate is shown only to the person downloading this report.",
       },
       profile: {
         eyebrow: "Account",
@@ -449,6 +510,7 @@ export const resources = {
         TOPIC_NOT_FOUND: "Topic not found.",
         TOPIC_CLOSED: "This topic is closed.",
         ANALYSIS_NOT_FOUND: "Analysis is not available yet.",
+        VOTE_REQUIRED: "Vote on this statement before viewing the counts.",
         TAXONOMY_NOT_FOUND: "Category or tag not found.",
         INTERNAL_ERROR: "An unexpected error occurred.",
         fallback: "The operation failed.",

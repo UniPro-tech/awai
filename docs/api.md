@@ -48,9 +48,9 @@ Topic settings updates accept one or both of `status` and `statementIdentityPoli
 | ------ | --------------------------------------- | ----------------------------------------- |
 | `PUT`  | `/api/v1/statements/:statementId/vote`  | Create or replace the current user's vote |
 | `GET`  | `/api/v1/statements/:statementId/vote`  | Read the current user's vote              |
-| `GET`  | `/api/v1/statements/:statementId/stats` | Read aggregate counts                     |
+| `GET`  | `/api/v1/statements/:statementId/stats` | Read aggregate counts after voting        |
 
-No endpoint lists raw votes, voters, or votes by user. Topic owners and administrators receive the same aggregate-only response as other users.
+The statistics endpoint returns `VOTE_REQUIRED` until the current user has voted on that statement. No endpoint lists raw votes, voters, or votes by user. Topic owners and administrators receive the same aggregate-only response as other users.
 
 ## Categories and tags
 
@@ -73,7 +73,9 @@ Members can create taxonomy entries while composing a topic; deletion remains ad
 | `GET`  | `/api/v1/topics/:topicId/analysis/runs`        | List analysis run metadata         |
 | `GET`  | `/api/v1/topics/:topicId/analysis/runs/:runId` | Read a specific analysis snapshot  |
 
-Analysis points contain coordinates and an optional group ordinal only. They never contain an account, user, or participant identifier.
+Analysis points contain coordinates and an optional group ordinal only. They never contain an account, user, or participant identifier. A run response also includes `viewerPoint`, which is either `null` or a request-time estimate derived from the current user's votes and anonymous group centroids. The estimate is not persisted and never includes an identity field.
+
+The web client separates statement results into common opinions and per-group opinions. Detailed PDF reports are rendered and downloaded entirely in the browser from the authenticated response; the server does not create or retain report files.
 
 ## Administration
 

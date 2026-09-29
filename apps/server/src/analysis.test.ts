@@ -36,6 +36,7 @@ describe("analysis results", () => {
         { x: -1, y: 0, groupOrdinal: 0 },
         { x: 1, y: 0, groupOrdinal: 0 },
       ],
+      viewerPoint: { x: -1, y: 0, groupOrdinal: 0 },
       statementResults: [],
     };
     services.analysis = {
@@ -54,6 +55,7 @@ describe("analysis results", () => {
       id: run.id,
       participantCount: 2,
       points: [{ groupOrdinal: 0 }, { groupOrdinal: 0 }],
+      viewerPoint: { groupOrdinal: 0 },
     });
 
     const history = await app.request(`/api/v1/topics/${topic.id}/analysis/runs`);

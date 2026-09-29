@@ -1,0 +1,36 @@
+.opinion-map {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, auto);
+  align-items: center;
+}
+
+.opinion-map--compact {
+  grid-template-columns: minmax(0, 22rem) 1fr;
+}
+
+.opinion-map__participant {
+  opacity: 0.58;
+}
+
+.opinion-map__viewer circle:first-child {
+  fill: #fff;
+  stroke: #17271f;
+  stroke-width: 4;
+}
+
+.opinion-map__viewer circle:last-child {
+  fill: #17271f;
+}
+
+.opinion-map__viewer-key > span {
+  background: #fff;
+  border: 3px solid #17271f;
+}
+
+@media (max-width: 720px) {
+  .opinion-map,
+  .opinion-map--compact {
+    grid-template-columns: 1fr;
+  }
+}

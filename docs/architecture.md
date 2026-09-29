@@ -27,12 +27,12 @@ Database models, domain models, and API response models are separate. Presenters
 
 ## Privacy invariants
 
-- A vote can be created or replaced, read by its voter, and aggregated. APIs that list voters or votes by user do not exist.
+- A vote can be created or replaced and read by its voter. Aggregate counts become available to that voter only after answering the statement; APIs that list voters or votes by user do not exist.
 - Topic owners and administrators have no special access to raw votes.
 - The identity policy stored on a topic affects future statements only. Each statement retains the author visibility selected at creation.
 - Anonymous responses contain `displayName: null` regardless of the caller's role.
 - Analysis results do not persist a mapping from plotted points to user identities.
-- Analysis APIs expose anonymous coordinates and aggregate group sizes, never participant identifiers.
+- Analysis APIs expose anonymous coordinates and aggregate group sizes, never participant identifiers. A viewer-only position estimate is computed from that viewer's votes and anonymous group centroids without persisting a point-to-user mapping.
 - Topic and statement deletion is logical. Delete and restore operations are authorized and audited, while historical analysis snapshots remain unchanged.
 - Categories are optional and tags are many-to-many. Removing taxonomy data never removes its topics.
 - Authenticated members can create categories and tags from the topic editor; only administrators can delete shared taxonomy.
@@ -45,4 +45,4 @@ Unsafe `/api/v1` requests carrying cookies must include an exact trusted `Origin
 
 Creating a statement or replacing a vote schedules analysis ten seconds later. A partial unique index keeps at most one pending job per topic, so bursts move that job's availability time instead of producing an unbounded queue. The Python worker claims jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`; no Redis service is required.
 
-The analysis adapter converts UUIDs to short-lived integer identifiers required by Red Dwarf. Participant identifiers are discarded before results are persisted. The `analysis.points` table intentionally has no user identifier or participant mapping.
+The analysis adapter converts UUIDs to short-lived integer identifiers required by Red Dwarf. Participant identifiers are discarded before results are persisted. The `analysis.points` table intentionally has no user identifier or participant mapping. When a member requests a result, the server compares their current votes with group-representative statements and returns a weighted centroid estimate as `viewerPoint`; this derived coordinate exists only for that response. The browser can rasterize the authenticated result into a PDF without a server-side report store.

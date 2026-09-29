@@ -1,38 +1,82 @@
 import type { StatementResponse } from "@private-polis/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { getLatestAnalysis } from "../features/analysis/api";
+import { OpinionMap } from "../features/analysis/opinion-map";
 import { AuthGate } from "../features/auth/auth-gate";
 import { createStatement, listStatements } from "../features/statements/api";
 import { getTopic } from "../features/topics/api";
-import { getVoteStatistics, setVote } from "../features/votes/api";
+import {
+  getCurrentVote,
+  getVoteStatistics,
+  setVote,
+} from "../features/votes/api";
 import { errorMessage } from "../lib/error-message";
+import "./topic-voting.css";
 
 type VoteValue = "AGREE" | "DISAGREE" | "PASS";
 
-function StatementCard({ statement }: { statement: StatementResponse }) {
+function StatementCard({
+  statement,
+  onAnswered,
+}: {
+  statement: StatementResponse;
+  onAnswered: () => void;
+}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const statistics = useQuery({ queryKey: ["vote-statistics", statement.id], queryFn: () => getVoteStatistics(statement.id) });
+  const currentVote = useQuery({
+    queryKey: ["current-vote", statement.id],
+    queryFn: () => getCurrentVote(statement.id),
+  });
+  const statistics = useQuery({
+    queryKey: ["vote-statistics", statement.id],
+    queryFn: () => getVoteStatistics(statement.id),
+    enabled: currentVote.data?.value !== null && currentVote.data !== undefined,
+  });
   const vote = useMutation({
     mutationFn: (value: VoteValue) => setVote(statement.id, { value }),
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["vote-statistics", statement.id] }),
+    onSuccess: async (result) => {
+      queryClient.setQueryData(["current-vote", statement.id], result);
+      onAnswered();
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["vote-statistics", statement.id],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["analysis", statement.topicId] }),
+      ]);
+    },
   });
+  useEffect(() => {
+    if (currentVote.data?.value) onAnswered();
+  }, [currentVote.data?.value, onAnswered]);
+
   return (
-    <li className="panel statement-card">
+    <article className="panel statement-card statement-card--focused">
       <p>{statement.body}</p>
       <p className="meta">{statement.author.visibility === "ANONYMOUS" ? t("common.anonymous") : statement.author.displayName}</p>
       <div className="vote-actions" aria-label={t("topic.voteLabel")}>
         {(["AGREE", "DISAGREE", "PASS"] as const).map((value) => (
-          <button key={value} type="button" onClick={() => vote.mutate(value)} disabled={vote.isPending}>
+          <button
+            aria-pressed={currentVote.data?.value === value}
+            className={currentVote.data?.value === value ? "is-selected" : undefined}
+            key={value}
+            type="button"
+            onClick={() => vote.mutate(value)}
+            disabled={vote.isPending || currentVote.isPending}
+          >
             {value === "AGREE" ? t("topic.agree") : value === "DISAGREE" ? t("topic.disagree") : t("topic.pass")}
           </button>
         ))}
       </div>
+      {currentVote.data?.value === null ? (
+        <p className="meta vote-counts-locked">{t("topic.statsLocked")}</p>
+      ) : null}
       {statistics.data ? <p className="meta">{t("topic.stats", statistics.data)}</p> : null}
       {vote.error ? <p role="alert">{errorMessage(vote.error, t)}</p> : null}
-    </li>
+    </article>
   );
 }
 
@@ -42,8 +86,18 @@ function TopicPage() {
   const queryClient = useQueryClient();
   const [body, setBody] = useState("");
   const [visibility, setVisibility] = useState<"IDENTIFIED" | "ANONYMOUS">("ANONYMOUS");
+  const [statementIndex, setStatementIndex] = useState(0);
+  const [hasAnswered, setHasAnswered] = useState(false);
+  const markAnswered = useCallback(() => setHasAnswered(true), []);
   const topic = useQuery({ queryKey: ["topic", topicId], queryFn: () => getTopic(topicId) });
   const statements = useQuery({ queryKey: ["statements", topicId], queryFn: () => listStatements(topicId) });
+  const analysis = useQuery({
+    queryKey: ["analysis", topicId, "latest"],
+    queryFn: () => getLatestAnalysis(topicId),
+    enabled: hasAnswered,
+    retry: false,
+    refetchInterval: hasAnswered ? 5_000 : false,
+  });
   const create = useMutation({
     mutationFn: () => createStatement(topicId, { body, authorVisibility: visibility }),
     onSuccess: async () => {
@@ -56,6 +110,9 @@ function TopicPage() {
     event.preventDefault();
     create.mutate();
   }
+
+  const statementItems = statements.data?.items ?? [];
+  const currentStatement = statementItems[statementIndex];
 
   return (
     <AuthGate>
@@ -91,13 +148,87 @@ function TopicPage() {
           </form>
         </section>
 
-        <section aria-labelledby="statements-heading">
-          <h2 id="statements-heading">{t("topic.statements")}</h2>
+        <section className="voting-flow" aria-labelledby="statements-heading">
+          <div className="voting-flow__heading">
+            <div>
+              <p className="eyebrow">{t("topic.votingEyebrow")}</p>
+              <h2 id="statements-heading">{t("topic.statements")}</h2>
+            </div>
+            {statementItems.length > 0 ? (
+              <p className="meta">
+                {t("topic.statementProgress", {
+                  current: statementIndex + 1,
+                  total: statementItems.length,
+                })}
+              </p>
+            ) : null}
+          </div>
           {statements.isPending ? <p>{t("topic.loading")}</p> : null}
           {statements.error ? <p role="alert">{errorMessage(statements.error, t)}</p> : null}
-          {statements.data?.items.length === 0 ? <p>{t("topic.empty")}</p> : null}
-          <ul className="topic-list">{statements.data?.items.map((statement) => <StatementCard key={statement.id} statement={statement} />)}</ul>
+          {statementItems.length === 0 ? <p>{t("topic.empty")}</p> : null}
+          {currentStatement ? (
+            <StatementCard
+              key={currentStatement.id}
+              statement={currentStatement}
+              onAnswered={markAnswered}
+            />
+          ) : null}
+          {statementItems.length > 1 ? (
+            <div className="statement-pager" aria-label={t("topic.statementNavigation")}>
+              <button
+                className="secondary"
+                type="button"
+                onClick={() => setStatementIndex((index) => Math.max(0, index - 1))}
+                disabled={statementIndex === 0}
+              >
+                {t("topic.previousStatement")}
+              </button>
+              <div className="statement-pager__track" aria-hidden="true">
+                <span
+                  style={{
+                    width: `${((statementIndex + 1) / statementItems.length) * 100}%`,
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setStatementIndex((index) =>
+                    Math.min(statementItems.length - 1, index + 1),
+                  )
+                }
+                disabled={statementIndex === statementItems.length - 1}
+              >
+                {t("topic.nextStatement")}
+              </button>
+            </div>
+          ) : null}
         </section>
+
+        {hasAnswered ? (
+          <section className="panel position-preview" aria-labelledby="position-heading">
+            <div>
+              <p className="eyebrow">{t("analysis.yourPositionEyebrow")}</p>
+              <h2 id="position-heading">{t("analysis.yourPosition")}</h2>
+              <p>{t("analysis.yourPositionHelp")}</p>
+            </div>
+            {analysis.data ? (
+              <>
+                <OpinionMap
+                  compact
+                  points={analysis.data.points}
+                  groups={analysis.data.groups}
+                  viewerPoint={analysis.data.viewerPoint}
+                />
+                {!analysis.data.viewerPoint ? (
+                  <p className="meta">{t("analysis.positionLearning")}</p>
+                ) : null}
+              </>
+            ) : (
+              <p className="meta">{t("analysis.positionPending")}</p>
+            )}
+          </section>
+        ) : null}
       </main>
     </AuthGate>
   );

@@ -22,6 +22,8 @@ export const AnalysisGroupSchema = z.object({
   centroid: z.object({ x: z.number(), y: z.number() }),
 });
 
+export type AnalysisGroup = z.infer<typeof AnalysisGroupSchema>;
+
 export const AnalysisPointSchema = z.object({
   x: z.number(),
   y: z.number(),
@@ -48,6 +50,7 @@ export const AnalysisStatementResultSchema = z.object({
 export const AnalysisRunResponseSchema = AnalysisRunSummarySchema.extend({
   groups: z.array(AnalysisGroupSchema),
   points: z.array(AnalysisPointSchema),
+  viewerPoint: AnalysisPointSchema.nullable(),
   statementResults: z.array(AnalysisStatementResultSchema),
 });
 

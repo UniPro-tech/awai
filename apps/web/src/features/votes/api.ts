@@ -17,3 +17,11 @@ export async function getVoteStatistics(statementId: string) {
   if (!response.ok) throw await toApiError(response);
   return response.json();
 }
+
+export async function getCurrentVote(statementId: string) {
+  const response = await api.api.v1.statements[":statementId"].vote.$get({
+    param: { statementId },
+  });
+  if (!response.ok) throw await toApiError(response);
+  return response.json();
+}

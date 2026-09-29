@@ -1,0 +1,42 @@
+.analysis-section {
+  margin-top: 2.5rem;
+}
+
+.analysis-findings {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.analysis-findings .panel {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.analysis-findings .panel::before {
+  content: counter(list-item, decimal-leading-zero);
+  position: absolute;
+  top: 1.2rem;
+  left: -0.35rem;
+  color: #809087;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.analysis-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.analysis-group-heading > span {
+  width: 0.8rem;
+  min-height: 4rem;
+  border-radius: 999px;
+}
+
+.analysis-group-heading h2,
+.analysis-group-heading p {
+  margin-block: 0.15rem;
+}

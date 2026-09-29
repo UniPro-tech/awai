@@ -91,6 +91,21 @@ export function createStatementsRoute(services: ApplicationServices) {
     if (!statementId.success || !(await services.statements.get(statementId.data))) {
       return c.json(statementNotFound(), 404);
     }
+    const currentVote = await services.votes.getCurrentUserVote(
+      statementId.data,
+      c.get("currentUser").id,
+    );
+    if (currentVote === null) {
+      return c.json(
+        ApiErrorSchema.parse({
+          error: {
+            code: "VOTE_REQUIRED",
+            message: "Vote before viewing aggregate counts.",
+          },
+        }),
+        403,
+      );
+    }
     return c.json(
       VoteStatisticsResponseSchema.parse(await services.votes.getVoteStatistics(statementId.data)),
       200,

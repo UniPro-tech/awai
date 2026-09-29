@@ -1,53 +1,50 @@
-import type { AnalysisPoint } from "@private-polis/contracts";
+import type { AnalysisRunResponse } from "@private-polis/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { OpinionMap } from "../features/analysis/opinion-map";
+import { groupColors } from "../features/analysis/palette";
 import { AuthGate } from "../features/auth/auth-gate";
 import { getLatestAnalysis, listAnalysisRuns } from "../features/analysis/api";
+import { downloadAnalysisPdf } from "../features/analysis/pdf";
 import { getTopic } from "../features/topics/api";
 import { errorMessage } from "../lib/error-message";
+import "./results-analysis.css";
 
-const groupColors = ["#2a7f62", "#c2673d", "#5367a5", "#9a5a98", "#a17b24"];
-
-function ScatterPlot({ points }: { points: AnalysisPoint[] }) {
+function FindingsList({
+  results,
+}: {
+  results: AnalysisRunResponse["statementResults"];
+}) {
   const { t } = useTranslation();
-  if (points.length === 0) return <p>{t("analysis.noGeometry")}</p>;
-  const valuesX = points.map((point) => point.x);
-  const valuesY = points.map((point) => point.y);
-  const minX = Math.min(...valuesX);
-  const maxX = Math.max(...valuesX);
-  const minY = Math.min(...valuesY);
-  const maxY = Math.max(...valuesY);
-  const scale = (value: number, min: number, max: number) =>
-    max === min ? 150 : 24 + ((value - min) / (max - min)) * 252;
-
+  if (results.length === 0) return <p>{t("analysis.noRanked")}</p>;
   return (
-    <svg className="analysis-plot" viewBox="0 0 300 300" role="img">
-      <title>{t("analysis.mapTitle")}</title>
-      <desc>{t("analysis.mapDescription")}</desc>
-      <line x1="24" y1="150" x2="276" y2="150" />
-      <line x1="150" y1="24" x2="150" y2="276" />
-      {points.map((point, index) => (
-        <circle
-          key={`${point.x}-${point.y}-${index}`}
-          cx={scale(point.x, minX, maxX)}
-          cy={300 - scale(point.y, minY, maxY)}
-          r="7"
-          fill={point.groupOrdinal === null ? "#8b968e" : groupColors[point.groupOrdinal % groupColors.length]}
-        />
+    <ol className="analysis-findings">
+      {results.map((result) => (
+        <li className="panel" key={`${result.kind}-${result.statement.id}`}>
+          <p className="eyebrow">
+            {result.kind.endsWith("_AGREE")
+              ? t("analysis.agreeFinding")
+              : t("analysis.disagreeFinding")}
+          </p>
+          <p>{result.statement.body}</p>
+          <p className="meta">
+            {t("analysis.rank", {
+              rank: result.rank,
+              score: result.score.toFixed(3),
+            })}
+          </p>
+        </li>
       ))}
-    </svg>
+    </ol>
   );
 }
 
-function resultLabel(kind: string, groupOrdinal: number | null, t: ReturnType<typeof useTranslation>["t"]) {
-  if (kind === "CONSENSUS_AGREE") return t("analysis.consensusAgree");
-  if (kind === "CONSENSUS_DISAGREE") return t("analysis.consensusDisagree");
-  return t(kind.endsWith("AGREE") ? "analysis.representativeAgree" : "analysis.representativeDisagree", { number: (groupOrdinal ?? 0) + 1 });
-}
-
 export function ResultsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadFailed, setDownloadFailed] = useState(false);
   const { topicId } = useParams({ from: "/topics/$topicId/results" });
   const topic = useQuery({ queryKey: ["topic", topicId], queryFn: () => getTopic(topicId) });
   const analysis = useQuery({
@@ -60,6 +57,42 @@ export function ResultsPage() {
     queryFn: () => listAnalysisRuns(topicId),
   });
 
+  async function downloadReport() {
+    if (!analysis.data || !topic.data) return;
+    setIsDownloading(true);
+    setDownloadFailed(false);
+    try {
+      await downloadAnalysisPdf({
+        topicTitle: topic.data.title,
+        analysis: analysis.data,
+        labels: {
+          title: t("analysis.reportTitle"),
+          generatedAt: t("analysis.generatedAt", {
+            date: new Intl.DateTimeFormat(i18n.language, {
+              dateStyle: "long",
+              timeStyle: "short",
+            }).format(new Date()),
+          }),
+          participants: t("analysis.participants"),
+          statements: t("analysis.statements"),
+          groups: t("analysis.groups"),
+          map: t("analysis.map"),
+          commonOpinions: t("analysis.commonOpinions"),
+          groupOpinions: (number) => t("analysis.groupOpinions", { number }),
+          agree: t("analysis.agreeFinding"),
+          disagree: t("analysis.disagreeFinding"),
+          score: (value) => t("analysis.pdfScore", { score: value }),
+          noRanked: t("analysis.noRanked"),
+          privacy: t("analysis.reportPrivacy"),
+        },
+      });
+    } catch {
+      setDownloadFailed(true);
+    } finally {
+      setIsDownloading(false);
+    }
+  }
+
   return (
     <AuthGate>
       <main className="shell">
@@ -70,6 +103,14 @@ export function ResultsPage() {
           <p className="eyebrow">{t("analysis.eyebrow")}</p>
           <h1>{topic.data?.title ?? t("common.results")}</h1>
           <p>{t("analysis.privacy")}</p>
+          <button
+            type="button"
+            onClick={downloadReport}
+            disabled={!analysis.data || !topic.data || isDownloading}
+          >
+            {isDownloading ? t("analysis.preparingPdf") : t("analysis.downloadPdf")}
+          </button>
+          {downloadFailed ? <p role="alert">{t("analysis.pdfFailed")}</p> : null}
         </header>
 
         {analysis.isPending ? <p>{t("analysis.waiting")}</p> : null}
@@ -92,29 +133,55 @@ export function ResultsPage() {
             </section>
             <section className="panel" aria-labelledby="map-heading">
               <h2 id="map-heading">{t("analysis.map")}</h2>
-              <ScatterPlot points={analysis.data.points} />
-              <ul className="group-legend">
-                {analysis.data.groups.map((group) => (
-                  <li key={group.ordinal}>
-                    <span style={{ background: groupColors[group.ordinal % groupColors.length] }} />
-                    {t("analysis.group", { number: group.ordinal + 1, count: group.participantCount })}
-                  </li>
-                ))}
-              </ul>
+              <OpinionMap
+                points={analysis.data.points}
+                groups={analysis.data.groups}
+                viewerPoint={analysis.data.viewerPoint}
+              />
             </section>
-            <section aria-labelledby="findings-heading">
-              <h2 id="findings-heading">{t("analysis.findings")}</h2>
-              {analysis.data.statementResults.length === 0 ? <p>{t("analysis.noRanked")}</p> : null}
-              <ul className="topic-list">
-                {analysis.data.statementResults.map((result) => (
-                  <li className="panel" key={`${result.kind}-${result.groupOrdinal}-${result.statement.id}`}>
-                    <p className="eyebrow">{resultLabel(result.kind, result.groupOrdinal, t)}</p>
-                    <p>{result.statement.body}</p>
-                    <p className="meta">{t("analysis.rank", { rank: result.rank, score: result.score.toFixed(3) })}</p>
-                  </li>
-                ))}
-              </ul>
+            <section className="analysis-section" aria-labelledby="common-opinions-heading">
+              <p className="eyebrow">{t("analysis.findings")}</p>
+              <h2 id="common-opinions-heading">{t("analysis.commonOpinions")}</h2>
+              <p>{t("analysis.commonOpinionsHelp")}</p>
+              <FindingsList
+                results={analysis.data.statementResults.filter(
+                  (result) => result.groupOrdinal === null,
+                )}
+              />
             </section>
+            {analysis.data.groups.map((group) => (
+              <section
+                className="analysis-section"
+                aria-labelledby={`group-${group.ordinal}-opinions-heading`}
+                key={group.ordinal}
+              >
+                <div className="analysis-group-heading">
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      background: groupColors[group.ordinal % groupColors.length],
+                    }}
+                  />
+                  <div>
+                    <p className="eyebrow">
+                      {t("analysis.group", {
+                        number: group.ordinal + 1,
+                        count: group.participantCount,
+                      })}
+                    </p>
+                    <h2 id={`group-${group.ordinal}-opinions-heading`}>
+                      {t("analysis.groupOpinions", { number: group.ordinal + 1 })}
+                    </h2>
+                  </div>
+                </div>
+                <p>{t("analysis.groupOpinionsHelp")}</p>
+                <FindingsList
+                  results={analysis.data.statementResults.filter(
+                    (result) => result.groupOrdinal === group.ordinal,
+                  )}
+                />
+              </section>
+            ))}
             <p className="meta">
               {t("analysis.runs", { count: runs.data?.items.length ?? 1, version: analysis.data.algorithmVersion })}
             </p>

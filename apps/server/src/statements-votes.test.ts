@@ -104,9 +104,18 @@ describe("statements and votes", () => {
     const topic = await createTopic();
     const created = await createStatement(topic.id);
     const statement = (await created.json()) as { id: string };
+    const hidden = await app.request(`/api/v1/statements/${statement.id}/stats`);
+    expect(hidden.status).toBe(403);
+    expect(await hidden.json()).toMatchObject({ error: { code: "VOTE_REQUIRED" } });
+
+    await app.request(`/api/v1/statements/${statement.id}/vote`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ value: "PASS" }),
+    });
     const response = await app.request(`/api/v1/statements/${statement.id}/stats`);
     const body = await response.json();
-    expect(body).toEqual({ agree: 0, disagree: 0, pass: 0, total: 0 });
+    expect(body).toEqual({ agree: 0, disagree: 0, pass: 1, total: 1 });
     expect(JSON.stringify(body)).not.toContain("user");
   });
 

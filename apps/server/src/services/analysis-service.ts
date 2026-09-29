@@ -8,13 +8,75 @@ import {
   analysisStatementResults,
   appUsers,
   statements,
+  votes,
 } from "../db/schema.js";
 import { presentStatement } from "../presenters/statement.js";
 
 export interface AnalysisService {
-  latest(topicId: string): Promise<AnalysisRunResponse | undefined>;
+  latest(topicId: string, viewerUserId: string): Promise<AnalysisRunResponse | undefined>;
   listRuns(topicId: string): Promise<AnalysisRunSummary[]>;
-  getRun(topicId: string, runId: string): Promise<AnalysisRunResponse | undefined>;
+  getRun(
+    topicId: string,
+    runId: string,
+    viewerUserId: string,
+  ): Promise<AnalysisRunResponse | undefined>;
+}
+
+type GroupPosition = AnalysisRunResponse["groups"][number];
+type RankedStatement = AnalysisRunResponse["statementResults"][number];
+type ViewerVote = { statementId: string; value: "AGREE" | "DISAGREE" | "PASS" };
+
+export function estimateViewerPoint(
+  groups: GroupPosition[],
+  results: RankedStatement[],
+  viewerVotes: ViewerVote[],
+): AnalysisRunResponse["viewerPoint"] {
+  const voteByStatement = new Map(
+    viewerVotes.map((vote) => [vote.statementId, vote.value] as const),
+  );
+  let hasDirectionalEvidence = false;
+  const scoredGroups = groups.map((group) => {
+    let weightedSimilarity = 0;
+    let totalWeight = 0;
+    for (const result of results) {
+      if (
+        result.groupOrdinal !== group.ordinal ||
+        !result.kind.startsWith("REPRESENTATIVE_")
+      ) {
+        continue;
+      }
+      const vote = voteByStatement.get(result.statement.id);
+      if (!vote || vote === "PASS") continue;
+      hasDirectionalEvidence = true;
+      const expected = result.kind.endsWith("_AGREE") ? "AGREE" : "DISAGREE";
+      const weight = Math.max(result.score, 0.01);
+      weightedSimilarity += (vote === expected ? 1 : -1) * weight;
+      totalWeight += weight;
+    }
+    return {
+      group,
+      similarity: totalWeight === 0 ? 0 : weightedSimilarity / totalWeight,
+    };
+  });
+  if (!hasDirectionalEvidence || scoredGroups.length === 0) return null;
+
+  const strongest = scoredGroups.reduce((best, entry) =>
+    entry.similarity > best.similarity ? entry : best,
+  );
+  const weights = scoredGroups.map((entry) => Math.exp(entry.similarity * 2));
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+
+  return {
+    x: scoredGroups.reduce(
+      (sum, entry, index) => sum + entry.group.centroid.x * weights[index]!,
+      0,
+    ) / totalWeight,
+    y: scoredGroups.reduce(
+      (sum, entry, index) => sum + entry.group.centroid.y * weights[index]!,
+      0,
+    ) / totalWeight,
+    groupOrdinal: strongest.group.ordinal,
+  };
 }
 
 const runSelection = {
@@ -44,7 +106,11 @@ function summarize(run: {
 }
 
 export function createPostgresAnalysisService(database: Database): AnalysisService {
-  async function getRun(topicId: string, runId: string): Promise<AnalysisRunResponse | undefined> {
+  async function getRun(
+    topicId: string,
+    runId: string,
+    viewerUserId: string,
+  ): Promise<AnalysisRunResponse | undefined> {
     const [run] = await database
       .select(runSelection)
       .from(analysisRuns)
@@ -52,7 +118,7 @@ export function createPostgresAnalysisService(database: Database): AnalysisServi
       .limit(1);
     if (!run) return undefined;
 
-    const [groups, points, statementResults] = await Promise.all([
+    const [groups, points, statementResults, viewerVotes] = await Promise.all([
       database
         .select({
           ordinal: analysisGroups.ordinal,
@@ -94,39 +160,48 @@ export function createPostgresAnalysisService(database: Database): AnalysisServi
         .leftJoin(analysisGroups, eq(analysisStatementResults.groupId, analysisGroups.id))
         .where(eq(analysisStatementResults.analysisRunId, runId))
         .orderBy(asc(analysisStatementResults.kind), asc(analysisStatementResults.rank)),
+      database
+        .select({ statementId: votes.statementId, value: votes.value })
+        .from(votes)
+        .innerJoin(statements, eq(votes.statementId, statements.id))
+        .where(and(eq(votes.userId, viewerUserId), eq(statements.topicId, topicId))),
     ]);
+
+    const presentedGroups = groups.map((group) => ({
+      ordinal: group.ordinal,
+      participantCount: group.participantCount,
+      centroid: { x: group.centroidX, y: group.centroidY },
+    }));
+    const presentedResults = statementResults.map((result) => ({
+      statement: presentStatement(result),
+      groupOrdinal: result.groupOrdinal,
+      kind: result.kind as AnalysisRunResponse["statementResults"][number]["kind"],
+      score: result.score,
+      rank: result.rank,
+    }));
 
     return {
       ...summarize(run),
-      groups: groups.map((group) => ({
-        ordinal: group.ordinal,
-        participantCount: group.participantCount,
-        centroid: { x: group.centroidX, y: group.centroidY },
-      })),
+      groups: presentedGroups,
       points: points.map((point) => ({
         x: point.x,
         y: point.y,
         groupOrdinal: point.groupOrdinal,
       })),
-      statementResults: statementResults.map((result) => ({
-        statement: presentStatement(result),
-        groupOrdinal: result.groupOrdinal,
-        kind: result.kind as AnalysisRunResponse["statementResults"][number]["kind"],
-        score: result.score,
-        rank: result.rank,
-      })),
+      viewerPoint: estimateViewerPoint(presentedGroups, presentedResults, viewerVotes),
+      statementResults: presentedResults,
     };
   }
 
   return {
-    async latest(topicId) {
+    async latest(topicId, viewerUserId) {
       const [run] = await database
         .select({ id: analysisRuns.id })
         .from(analysisRuns)
         .where(and(eq(analysisRuns.topicId, topicId), eq(analysisRuns.status, "COMPLETED")))
         .orderBy(desc(analysisRuns.createdAt))
         .limit(1);
-      return run ? getRun(topicId, run.id) : undefined;
+      return run ? getRun(topicId, run.id, viewerUserId) : undefined;
     },
     async listRuns(topicId) {
       const runs = await database

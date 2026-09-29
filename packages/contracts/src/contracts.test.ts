@@ -78,6 +78,12 @@ describe("analysis contracts", () => {
       createdAt: "2026-09-27T00:00:00.000Z",
       groups: [],
       points: [{ x: 0.5, y: -0.25, groupOrdinal: null, userId: "private-user" }],
+      viewerPoint: {
+        x: 0.5,
+        y: -0.25,
+        groupOrdinal: null,
+        userId: "current-user",
+      },
       statementResults: [
         {
           statement: {
@@ -98,6 +104,7 @@ describe("analysis contracts", () => {
     });
 
     expect(response.points[0]).not.toHaveProperty("userId");
+    expect(response.viewerPoint).not.toHaveProperty("userId");
     expect(response.statementResults[0]?.statement).not.toHaveProperty("authorUserId");
   });
 });
