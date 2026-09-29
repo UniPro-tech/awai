@@ -88,7 +88,7 @@ PostgreSQL 18 data is mounted at `/var/lib/postgresql`. Back up the persistent v
 
 - Liveness uses `/health/live` and does not query PostgreSQL.
 - Readiness uses `/health/ready` and verifies PostgreSQL connectivity.
-- Containers run without privilege escalation, drop Linux capabilities, and do not mount service account tokens by default.
+- Application, migration, and analysis containers declare numeric UID/GID `10001`, run without privilege escalation, drop Linux capabilities, and do not mount service account tokens by default. The numeric identity allows Kubernetes to enforce `runAsNonRoot` without relying on image-local user names.
 - Network policies allow the application ingress on port 3000 and restrict application and worker egress to DNS and PostgreSQL. Confirm that the cluster CNI enforces NetworkPolicy and adapt the policy if the external database uses a non-standard port.
 - Set resource requests and limits before enabling the HPA; CPU utilization targets require requests.
 - Use an external secrets controller or a pre-created Secret when possible. The inline `auth.secret` and `database.url` values are provided for development and chart rendering only.

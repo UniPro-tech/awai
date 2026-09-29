@@ -13,12 +13,13 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
 FROM python:3.14-slim-trixie AS analysis
-RUN addgroup --system privatepolis && adduser --system --ingroup privatepolis privatepolis
+RUN groupadd --gid 10001 privatepolis \
+    && useradd --uid 10001 --gid privatepolis --no-create-home --shell /usr/sbin/nologin privatepolis
 WORKDIR /app
-COPY --from=build --chown=privatepolis:privatepolis /app/.venv /app/.venv
+COPY --from=build --chown=10001:10001 /app/.venv /app/.venv
 
 ENV PATH=/app/.venv/bin:$PATH \
     PYTHONUNBUFFERED=1
 
-USER privatepolis
+USER 10001:10001
 CMD ["python", "-m", "private_polis_analysis.worker"]

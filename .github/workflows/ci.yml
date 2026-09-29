@@ -174,6 +174,8 @@ jobs:
           grep -Fq 'argocd.argoproj.io/hook: Sync' "$rendered"
           grep -Fq 'argocd.argoproj.io/sync-wave: "-5"' "$rendered"
           test "$(grep -Fc 'argocd.argoproj.io/sync-wave: "-10"' "$rendered")" -eq 4
+          test "$(grep -Fc 'runAsUser: 10001' "$rendered")" -eq 3
+          test "$(grep -Fc 'runAsGroup: 10001' "$rendered")" -eq 3
 
   publish-helm:
     name: Publish Helm chart
