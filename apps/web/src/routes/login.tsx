@@ -238,7 +238,28 @@ function LoginPage() {
                 {t("auth.useLocal")}
               </button>
             </>
-          ) : null}
+          ) : (
+            <>
+              <p className="sso-divider">
+                <span>{t("common.or")}</span>
+              </p>
+              <div className="sso-provider-list">
+                {(config.data?.ssoProviders ?? []).map((provider) => (
+                  <button
+                    className="sso-provider-button"
+                    type="button"
+                    key={provider.providerId}
+                    disabled={pending}
+                    onClick={() =>
+                      void startSso({ providerId: provider.providerId })
+                    }
+                  >
+                    {t("auth.signInWithProvider", { name: provider.name })}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </form>
       </section>
     </main>
