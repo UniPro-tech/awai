@@ -264,6 +264,32 @@ h2 {
   list-style: none;
   padding: 0;
 }
+.topic-list-header {
+  align-items: end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.topic-list-header h2 {
+  margin-bottom: 0;
+}
+.category-filter {
+  display: grid;
+  gap: 0.35rem;
+  min-width: min(18rem, 100%);
+}
+.category-filter > span {
+  align-items: center;
+  color: #526158;
+  display: flex;
+  font-size: 0.85rem;
+  font-weight: 700;
+  gap: 0.35rem;
+}
+.category-filter select {
+  background-color: #fff;
+  width: 100%;
+}
 .topic-list h2 {
   color: #1d2923 !important;
 }
@@ -627,6 +653,10 @@ h2 {
     align-items: flex-start;
     flex-direction: column;
     gap: 1rem;
+  }
+  .topic-list-header {
+    align-items: stretch;
+    flex-direction: column;
   }
   .form-row {
     align-items: stretch;

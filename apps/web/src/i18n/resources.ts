@@ -76,6 +76,10 @@ export const resources = {
         emptyBody: "最初の議論を作成しましょう。",
         start: "トピックを作成",
         category: "カテゴリ",
+        categoryFilter: "カテゴリで検索",
+        allCategories: "すべてのカテゴリ",
+        noCategoryResults: "該当するトピックはありません",
+        noCategoryResultsBody: "別のカテゴリを選択してください。",
         anonymousAuthor: "匿名の投稿者",
       },
       newTopic: {
@@ -332,6 +336,10 @@ export const resources = {
         emptyBody: "Create the first discussion for your community.",
         start: "Create topic",
         category: "Category",
+        categoryFilter: "Search by category",
+        allCategories: "All categories",
+        noCategoryResults: "No matching topics",
+        noCategoryResultsBody: "Choose another category to continue browsing.",
         anonymousAuthor: "Anonymous author",
       },
       newTopic: {

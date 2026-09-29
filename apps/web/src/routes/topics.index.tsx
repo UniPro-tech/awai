@@ -1,15 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui/button";
 import { AuthGate } from "../features/auth/auth-gate";
+import { listCategories } from "../features/taxonomy/api";
 import { listTopics } from "../features/topics/api";
 import { errorMessage } from "../lib/error-message";
 
 function TopicsPage() {
   const { t } = useTranslation();
-  const topics = useQuery({ queryKey: ["topics"], queryFn: listTopics });
+  const [categoryId, setCategoryId] = useState("");
+  const categories = useQuery({ queryKey: ["categories"], queryFn: listCategories });
+  const topics = useQuery({
+    queryKey: ["topics", { categoryId: categoryId || null }],
+    queryFn: () => listTopics(categoryId || undefined),
+  });
+  const hasCategoryFilter = categoryId.length > 0;
 
   return (
     <AuthGate>
@@ -27,15 +35,35 @@ function TopicsPage() {
           </Button>
         </header>
         <section aria-labelledby="topic-list-heading">
-          <h2 id="topic-list-heading">{t("topics.listHeading")}</h2>
+          <div className="topic-list-header">
+            <h2 id="topic-list-heading">{t("topics.listHeading")}</h2>
+            <label className="category-filter">
+              <span>
+                <Search aria-hidden="true" size={16} /> {t("topics.categoryFilter")}
+              </span>
+              <select
+                value={categoryId}
+                onChange={(event) => setCategoryId(event.target.value)}
+                disabled={categories.isPending || Boolean(categories.error)}
+              >
+                <option value="">{t("topics.allCategories")}</option>
+                {categories.data?.items.map((category) => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          {categories.error ? (
+            <p role="alert">{errorMessage(categories.error, t)}</p>
+          ) : null}
           {topics.isPending ? <p>{t("topics.loading")}</p> : null}
           {topics.error ? (
             <p role="alert">{errorMessage(topics.error, t)}</p>
           ) : null}
           {topics.data?.items.length === 0 ? (
             <div className="panel empty-state">
-              <h2>{t("topics.emptyTitle")}</h2>
-              <p>{t("topics.emptyBody")}</p>
+              <h2>{t(hasCategoryFilter ? "topics.noCategoryResults" : "topics.emptyTitle")}</h2>
+              <p>{t(hasCategoryFilter ? "topics.noCategoryResultsBody" : "topics.emptyBody")}</p>
             </div>
           ) : null}
           <ul className="topic-list">

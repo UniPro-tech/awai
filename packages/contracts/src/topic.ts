@@ -39,6 +39,12 @@ export const ChangeTopicOwnerRequestSchema = z.object({
 
 export type ChangeTopicOwnerRequest = z.infer<typeof ChangeTopicOwnerRequestSchema>;
 
+export const TopicListQuerySchema = z.object({
+  categoryId: IdSchema.optional(),
+});
+
+export type TopicListQuery = z.infer<typeof TopicListQuerySchema>;
+
 export const TopicResponseSchema = z.object({
   id: IdSchema,
   title: z.string(),

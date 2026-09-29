@@ -8,6 +8,7 @@ import {
   IdSchema,
   StatementListResponseSchema,
   TopicListResponseSchema,
+  TopicListQuerySchema,
   UpdateTopicRequestSchema,
 } from "@private-polis/contracts";
 import { Hono } from "hono";
@@ -15,12 +16,17 @@ import type { AppEnvironment } from "../http/context.js";
 import { presentTopic } from "../presenters/topic.js";
 import { presentStatement } from "../presenters/statement.js";
 import type { ApplicationServices } from "../services/services.js";
-import { jsonValidator } from "../http/validation.js";
+import { jsonValidator, queryValidator } from "../http/validation.js";
 
 export function createTopicsRoute(services: ApplicationServices) {
   return new Hono<AppEnvironment>()
-  .get("/", async (c) =>
-    c.json(TopicListResponseSchema.parse({ items: (await services.topics.list()).map(presentTopic) }), 200),
+  .get("/", queryValidator(TopicListQuerySchema), async (c) =>
+    c.json(
+      TopicListResponseSchema.parse({
+        items: (await services.topics.list(c.req.valid("query"))).map(presentTopic),
+      }),
+      200,
+    ),
   )
   .post("/", jsonValidator(CreateTopicRequestSchema), async (c) => {
     const topic = await services.topics.create(c.req.valid("json"), c.get("currentUser"));

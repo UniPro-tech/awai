@@ -17,7 +17,7 @@ import {
 import type { TopicRecord } from "../presenters/topic.js";
 
 export interface TopicService {
-  list(): Promise<TopicRecord[]>;
+  list(options?: TopicListOptions): Promise<TopicRecord[]>;
   get(id: string, options?: { includeDeleted?: boolean }): Promise<TopicRecord | undefined>;
   create(input: CreateTopicRequest, user: AuthenticatedUser): Promise<TopicRecord>;
   update(id: string, input: UpdateTopicRequest, user: AuthenticatedUser): Promise<TopicUpdateResult>;
@@ -28,6 +28,10 @@ export interface TopicService {
   ): Promise<TopicUpdateResult>;
   delete(id: string, user: AuthenticatedUser, reason: string): Promise<TopicModerationResult>;
   restore(id: string, user: AuthenticatedUser): Promise<TopicModerationResult>;
+}
+
+export interface TopicListOptions {
+  categoryId?: string;
 }
 
 export type TopicModerationResult =
@@ -83,13 +87,17 @@ export function createPostgresTopicService(database: Database): TopicService {
   }
 
   return {
-    async list() {
+    async list(options) {
       const rows = await database
         .select(topicSelection)
         .from(topics)
         .innerJoin(appUsers, eq(topics.createdByUserId, appUsers.id))
         .leftJoin(categories, eq(topics.categoryId, categories.id))
-        .where(isNull(topics.deletedAt))
+        .where(
+          options?.categoryId
+            ? and(isNull(topics.deletedAt), eq(topics.categoryId, options.categoryId))
+            : isNull(topics.deletedAt),
+        )
         .orderBy(desc(topics.createdAt));
       return hydrateTags(rows);
     },
@@ -300,9 +308,13 @@ export interface MemoryTopicService extends TopicService {
 export function createMemoryTopicService(): MemoryTopicService {
   const records = new Map<string, TopicRecord>();
   return {
-    async list() {
+    async list(options) {
       return [...records.values()]
-        .filter((topic) => !topic.deletedAt)
+        .filter(
+          (topic) =>
+            !topic.deletedAt &&
+            (!options?.categoryId || topic.category?.id === options.categoryId),
+        )
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     },
     async get(id, options) {

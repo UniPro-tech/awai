@@ -20,3 +20,22 @@ export function jsonValidator<T extends ZodType>(schema: T) {
     );
   });
 }
+
+export function queryValidator<T extends ZodType>(schema: T) {
+  return zValidator("query", schema, (result, c) => {
+    if (result.success) return;
+    return c.json(
+      ApiErrorSchema.parse({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "The request query is invalid.",
+          details: {
+            issues: result.error.issues.map(({ code, message, path }) => ({ code, message, path })),
+          },
+          requestId: c.get("requestId"),
+        },
+      }),
+      400,
+    );
+  });
+}

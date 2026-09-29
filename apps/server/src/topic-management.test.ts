@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "./app.js";
 import { createMemoryServices, type ApplicationServices } from "./services/services.js";
 
@@ -44,6 +44,32 @@ describe("topic management", () => {
 
   beforeEach(() => {
     services = createMemoryServices();
+  });
+
+  it("filters the topic list by category", async () => {
+    const categoryId = "00000000-0000-4000-8000-000000000010";
+    const list = vi.fn().mockResolvedValue([]);
+    services.topics.list = list;
+
+    const response = await appFor(services, owner).request(
+      `/api/v1/topics?categoryId=${categoryId}`,
+    );
+
+    expect(response.status).toBe(200);
+    expect(list).toHaveBeenCalledWith({ categoryId });
+  });
+
+  it("rejects an invalid category filter", async () => {
+    const list = vi.fn().mockResolvedValue([]);
+    services.topics.list = list;
+
+    const response = await appFor(services, owner).request(
+      "/api/v1/topics?categoryId=not-a-uuid",
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ error: { code: "VALIDATION_ERROR" } });
+    expect(list).not.toHaveBeenCalled();
   });
 
   it("lets the topic owner update status and identity policy", async () => {

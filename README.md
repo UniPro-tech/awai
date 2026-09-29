@@ -8,7 +8,7 @@ Awai 0.1.0 is an early release. It provides local and enterprise authentication,
 
 Successful `main` and semantic-version CI builds publish the application, migration, and analysis container images plus the OCI Helm chart to GitHub Container Registry. See [Kubernetes deployment](docs/kubernetes.md) for package names and installation instructions.
 
-The web application provides Japanese and English interfaces, a responsive dashboard layout, randomized one-at-a-time voting that prioritizes unanswered statements and discloses aggregates only after voting, a private viewer-position estimate, grouped findings, downloadable detailed PDF reports, and searchable category/tag selectors that can create missing taxonomy entries while a topic is composed. Language choice is stored in the browser and defaults to the browser language with Japanese as the fallback.
+The web application provides Japanese and English interfaces, a responsive dashboard layout, category-filtered topic browsing, randomized one-at-a-time voting that prioritizes unanswered statements and discloses aggregates only after voting, a private viewer-position estimate, grouped findings, downloadable detailed PDF reports, and searchable category/tag selectors that can create missing taxonomy entries while a topic is composed. Language choice is stored in the browser and defaults to the browser language with Japanese as the fallback.
 
 ## Principles
 

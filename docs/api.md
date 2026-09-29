@@ -18,7 +18,7 @@ The response deliberately excludes email addresses, authentication-provider iden
 
 | Method   | Path                                      | Purpose                                                                     |
 | -------- | ----------------------------------------- | --------------------------------------------------------------------------- |
-| `GET`    | `/api/v1/topics`                          | List non-deleted topics                                                     |
+| `GET`    | `/api/v1/topics`                          | List non-deleted topics; optionally filter with `categoryId`                 |
 | `POST`   | `/api/v1/topics`                          | Create a topic                                                              |
 | `GET`    | `/api/v1/topics/:topicId`                 | Read a topic                                                                |
 | `PATCH`  | `/api/v1/topics/:topicId`                 | Change status or statement identity policy as the owner or an administrator |
@@ -29,6 +29,8 @@ The response deliberately excludes email addresses, authentication-provider iden
 | `POST`   | `/api/v1/topics/:topicId/restore`         | Restore a soft-deleted topic                                                |
 | `DELETE` | `/api/v1/statements/:statementId`         | Soft-delete a statement as its author, topic owner, or an administrator     |
 | `POST`   | `/api/v1/statements/:statementId/restore` | Restore a soft-deleted statement                                            |
+
+`GET /api/v1/topics?categoryId=<uuid>` returns only topics assigned to the specified category. Omitting `categoryId` returns topics from every category, including uncategorized topics.
 
 Deletion requests require a reason:
 

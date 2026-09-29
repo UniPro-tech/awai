@@ -5,6 +5,7 @@ import {
   CurrentTopicVoteListResponseSchema,
   CurrentUserResponseSchema,
   DeletionRequestSchema,
+  TopicListQuerySchema,
   TopicResponseSchema,
 } from "./index.js";
 
@@ -29,6 +30,12 @@ describe("topic contracts", () => {
         tags: Array.from({ length: 11 }, (_, index) => `tag-${index}`),
       }),
     ).toThrow();
+  });
+
+  it("accepts only UUID category filters", () => {
+    const categoryId = "00000000-0000-4000-8000-000000000010";
+    expect(TopicListQuerySchema.parse({ categoryId })).toEqual({ categoryId });
+    expect(() => TopicListQuerySchema.parse({ categoryId: "governance" })).toThrow();
   });
 
   it("strips internal identity fields at the response boundary", () => {
