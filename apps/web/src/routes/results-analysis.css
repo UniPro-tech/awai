@@ -18,7 +18,7 @@
   content: counter(list-item, decimal-leading-zero);
   position: absolute;
   top: 1.2rem;
-  left: -0.35rem;
+  left: 0.7rem;
   color: #809087;
   font-size: 0.75rem;
   font-weight: 700;
