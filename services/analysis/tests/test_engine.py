@@ -44,3 +44,26 @@ def test_requires_enough_data() -> None:
         RedDwarfAnalysisEngine().analyze(
             [VoteInput(participant_id="one", statement_id="only", value="PASS")]
         )
+
+
+def test_requires_distinct_vote_patterns() -> None:
+    values: tuple[VoteValue, ...] = ("AGREE", "DISAGREE")
+    votes = [
+        VoteInput(participant_id=participant, statement_id=f"statement-{index}", value=value)
+        for participant in ("participant-a", "participant-b", "participant-c")
+        for index, value in enumerate(values)
+    ]
+
+    with pytest.raises(InsufficientDataError, match="two distinct vote patterns"):
+        RedDwarfAnalysisEngine().analyze(votes)
+
+
+def test_automatic_group_search_avoids_impossible_group_counts() -> None:
+    result = RedDwarfAnalysisEngine().analyze(sample_votes())
+
+    assert sorted(group.participant_count for group in result.groups) == [2, 2]
+
+
+def test_rejects_forced_group_count_that_the_data_cannot_support() -> None:
+    with pytest.raises(InsufficientDataError, match="between 2 and 2"):
+        RedDwarfAnalysisEngine(force_group_count=3).analyze(sample_votes())

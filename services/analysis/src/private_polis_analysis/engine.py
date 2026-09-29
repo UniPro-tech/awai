@@ -21,6 +21,30 @@ class AnalysisEngine(Protocol):
     def analyze(self, votes: list[VoteInput]) -> AnalysisResult: ...
 
 
+def _maximum_meaningful_group_count(
+    votes: list[VoteInput], participant_ids: list[str], statement_ids: list[str]
+) -> int:
+    votes_by_participant: dict[str, dict[str, str]] = {
+        participant_id: {} for participant_id in participant_ids
+    }
+    for vote in votes:
+        votes_by_participant[vote.participant_id][vote.statement_id] = vote.value
+
+    unique_vote_patterns = {
+        tuple(
+            votes_by_participant[participant_id].get(statement_id)
+            for statement_id in statement_ids
+        )
+        for participant_id in participant_ids
+    }
+    maximum = min(5, len(participant_ids) - 1, len(unique_vote_patterns))
+    if maximum < 2:
+        raise InsufficientDataError(
+            "At least three participants with two distinct vote patterns are required."
+        )
+    return maximum
+
+
 class RedDwarfAnalysisEngine:
     """Adapts Awai UUID-based votes to Red Dwarf's integer identifiers."""
 
@@ -30,9 +54,19 @@ class RedDwarfAnalysisEngine:
     def analyze(self, votes: list[VoteInput]) -> AnalysisResult:
         participant_ids = sorted({vote.participant_id for vote in votes})
         statement_ids = sorted({vote.statement_id for vote in votes})
-        if len(participant_ids) < 2 or len(statement_ids) < 2:
+        if len(participant_ids) < 3 or len(statement_ids) < 2:
             raise InsufficientDataError(
-                "At least two participants and two statements are required."
+                "At least three participants and two statements are required."
+            )
+
+        maximum_group_count = _maximum_meaningful_group_count(
+            votes, participant_ids, statement_ids
+        )
+        if self._force_group_count is not None and not (
+            2 <= self._force_group_count <= maximum_group_count
+        ):
+            raise InsufficientDataError(
+                f"Forced group count must be between 2 and {maximum_group_count} for this data."
             )
 
         participant_to_int = {value: index for index, value in enumerate(participant_ids)}
@@ -52,6 +86,7 @@ class RedDwarfAnalysisEngine:
         pipeline_result = run_pipeline(
             votes=red_dwarf_votes,
             min_user_vote_threshold=1,
+            max_group_count=maximum_group_count,
             force_group_count=self._force_group_count,
             random_state=0,
         )
