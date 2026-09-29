@@ -41,9 +41,9 @@ describe("rate limiting", () => {
   it("uses the cloudflare address if no forwarded address is present", () => {
     expect(
       requestAddress(
-        new Headers({ "cf-connecting-ip": "203. 0.113.9, 10.0.0.2" }),
+        new Headers({ "cf-connecting-ip": "203.0.113.9, 10.0.0.2" }),
       ),
-    ).toBe("203. 0.113.9");
+    ).toBe("203.0.113.9");
   });
 
   it("returns the shared API error after the per-user limit", async () => {
