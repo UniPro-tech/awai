@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   AnalysisRunResponseSchema,
   CreateTopicRequestSchema,
+  CurrentTopicVoteListResponseSchema,
   CurrentUserResponseSchema,
   DeletionRequestSchema,
   TopicResponseSchema,
@@ -62,6 +63,29 @@ describe("current user contract", () => {
       id: "00000000-0000-4000-8000-000000000001",
       displayName: "Member",
       role: "USER",
+    });
+  });
+});
+
+describe("vote contracts", () => {
+  it("contains only the current user's statement choices", () => {
+    expect(
+      CurrentTopicVoteListResponseSchema.parse({
+        items: [
+          {
+            statementId: "0198f38e-c18a-7e9f-a005-629e4c37ae40",
+            value: "PASS",
+            userId: "private-user",
+          },
+        ],
+      }),
+    ).toEqual({
+      items: [
+        {
+          statementId: "0198f38e-c18a-7e9f-a005-629e4c37ae40",
+          value: "PASS",
+        },
+      ],
     });
   });
 });

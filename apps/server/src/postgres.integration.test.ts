@@ -111,6 +111,9 @@ describe.runIf(shouldRun)("PostgreSQL integration", () => {
       owner.id,
       "AGREE",
     );
+    await expect(services.votes.listCurrentUserVotes(topic.id, owner.id)).resolves.toEqual([
+      { statementId: created.statement.id, value: "AGREE" },
+    ]);
     const [run] = await runtime.db
       .insert(analysisRuns)
       .values({

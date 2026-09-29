@@ -11,8 +11,10 @@ import { getTopic } from "../features/topics/api";
 import {
   getCurrentVote,
   getVoteStatistics,
+  listCurrentTopicVotes,
   setVote,
 } from "../features/votes/api";
+import { orderStatementsForVoting } from "../features/votes/voting-order";
 import { errorMessage } from "../lib/error-message";
 import "./topic-voting.css";
 
@@ -90,7 +92,23 @@ function TopicPage() {
   const [hasAnswered, setHasAnswered] = useState(false);
   const markAnswered = useCallback(() => setHasAnswered(true), []);
   const topic = useQuery({ queryKey: ["topic", topicId], queryFn: () => getTopic(topicId) });
-  const statements = useQuery({ queryKey: ["statements", topicId], queryFn: () => listStatements(topicId) });
+  const statements = useQuery({
+    queryKey: ["statements", topicId],
+    queryFn: async () => {
+      const [statementList, currentVotes] = await Promise.all([
+        listStatements(topicId),
+        listCurrentTopicVotes(topicId),
+      ]);
+      const votedStatementIds = new Set(
+        currentVotes.items.map(({ statementId }) => statementId),
+      );
+      return {
+        ...statementList,
+        items: orderStatementsForVoting(statementList.items, votedStatementIds),
+        hasExistingVote: votedStatementIds.size > 0,
+      };
+    },
+  });
   const analysis = useQuery({
     queryKey: ["analysis", topicId, "latest"],
     queryFn: () => getLatestAnalysis(topicId),
@@ -105,6 +123,9 @@ function TopicPage() {
       await queryClient.invalidateQueries({ queryKey: ["statements", topicId] });
     },
   });
+  useEffect(() => {
+    if (statements.data?.hasExistingVote) setHasAnswered(true);
+  }, [statements.data?.hasExistingVote]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

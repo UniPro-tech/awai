@@ -68,9 +68,17 @@ const analysis = {
   ],
 };
 
-async function mockOpinionApp(page: Page) {
-  const votes = new Map<string, string | null>(statements.map((item) => [item.id, null]));
-  await page.addInitScript(() => localStorage.setItem("private-polis-language", "ja"));
+async function mockOpinionApp(
+  page: Page,
+  initialVotes: Readonly<Record<string, string>> = {},
+) {
+  const votes = new Map<string, string | null>(
+    statements.map((item) => [item.id, initialVotes[item.id] ?? null]),
+  );
+  await page.addInitScript(() => {
+    localStorage.setItem("private-polis-language", "ja");
+    Math.random = () => 0.999_999;
+  });
   await page.route("**/api/auth/get-session", (route) =>
     route.fulfill({
       json: {
@@ -121,6 +129,15 @@ async function mockOpinionApp(page: Page) {
   await page.route(`**/api/v1/topics/${topicId}/statements`, (route) =>
     route.fulfill({ json: { items: statements } }),
   );
+  await page.route(`**/api/v1/topics/${topicId}/votes`, (route) =>
+    route.fulfill({
+      json: {
+        items: [...votes.entries()]
+          .filter((entry): entry is [string, string] => entry[1] !== null)
+          .map(([statementId, value]) => ({ statementId, value })),
+      },
+    }),
+  );
   await page.route("**/api/v1/statements/*/vote", async (route) => {
     const statementId = route.request().url().split("/").at(-2)!;
     if (route.request().method() === "PUT") {
@@ -159,6 +176,14 @@ test("shows one statement and reveals counts and position only after voting", as
   await expect(page.getByText("あなたの推定位置")).toBeVisible();
 
   await page.getByRole("button", { name: "次の意見" }).click();
+  await expect(page.getByText(statements[1].body)).toBeVisible();
+  await expect(page.getByText(statements[0].body)).toHaveCount(0);
+});
+
+test("prioritizes an unanswered statement over an answered statement", async ({ page }) => {
+  await mockOpinionApp(page, { [statementOneId]: "AGREE" });
+  await page.goto(`/topics/${topicId}`);
+
   await expect(page.getByText(statements[1].body)).toBeVisible();
   await expect(page.getByText(statements[0].body)).toHaveCount(0);
 });

@@ -6,7 +6,7 @@ Awai is a private-first, self-hosted platform for discovering opinion groups and
 
 Awai 0.1.0 is an early release. It provides local and enterprise authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, privacy-safe result APIs and visualization, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application.
 
-The web application provides Japanese and English interfaces, a responsive dashboard layout, one-at-a-time voting with post-vote aggregate disclosure, a private viewer-position estimate, grouped findings, downloadable detailed PDF reports, and searchable category/tag selectors that can create missing taxonomy entries while a topic is composed. Language choice is stored in the browser and defaults to the browser language with Japanese as the fallback.
+The web application provides Japanese and English interfaces, a responsive dashboard layout, randomized one-at-a-time voting that prioritizes unanswered statements and discloses aggregates only after voting, a private viewer-position estimate, grouped findings, downloadable detailed PDF reports, and searchable category/tag selectors that can create missing taxonomy entries while a topic is composed. Language choice is stored in the browser and defaults to the browser language with Japanese as the fallback.
 
 ## Principles
 

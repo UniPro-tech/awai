@@ -25,3 +25,11 @@ export async function getCurrentVote(statementId: string) {
   if (!response.ok) throw await toApiError(response);
   return response.json();
 }
+
+export async function listCurrentTopicVotes(topicId: string) {
+  const response = await api.api.v1.topics[":topicId"].votes.$get({
+    param: { topicId },
+  });
+  if (!response.ok) throw await toApiError(response);
+  return response.json();
+}

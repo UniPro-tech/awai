@@ -100,6 +100,34 @@ describe("statements and votes", () => {
     expect(await response.json()).toEqual({ value: null });
   });
 
+  it("lists only the current user's votes for a topic", async () => {
+    const topic = await createTopic();
+    const first = (await (await createStatement(topic.id)).json()) as { id: string };
+    await createStatement(topic.id);
+    await app.request(`/api/v1/statements/${first.id}/vote`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ value: "AGREE" }),
+    });
+
+    const response = await app.request(`/api/v1/topics/${topic.id}/votes`);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      items: [{ statementId: first.id, value: "AGREE" }],
+    });
+
+    const secondUserApp = createApp({
+      services,
+      authenticate: async () => ({
+        status: "authenticated",
+        user: { ...testUser, id: "00000000-0000-4000-8000-000000000002" },
+      }),
+    });
+    expect(
+      await (await secondUserApp.request(`/api/v1/topics/${topic.id}/votes`)).json(),
+    ).toEqual({ items: [] });
+  });
+
   it("returns aggregates without raw voter data", async () => {
     const topic = await createTopic();
     const created = await createStatement(topic.id);

@@ -48,9 +48,10 @@ Topic settings updates accept one or both of `status` and `statementIdentityPoli
 | ------ | --------------------------------------- | ----------------------------------------- |
 | `PUT`  | `/api/v1/statements/:statementId/vote`  | Create or replace the current user's vote |
 | `GET`  | `/api/v1/statements/:statementId/vote`  | Read the current user's vote              |
+| `GET`  | `/api/v1/topics/:topicId/votes`         | List the current user's votes in a topic  |
 | `GET`  | `/api/v1/statements/:statementId/stats` | Read aggregate counts after voting        |
 
-The statistics endpoint returns `VOTE_REQUIRED` until the current user has voted on that statement. No endpoint lists raw votes, voters, or votes by user. Topic owners and administrators receive the same aggregate-only response as other users.
+The topic vote endpoint returns only the authenticated user's own statement IDs and choices so the client can prioritize unanswered statements. The statistics endpoint returns `VOTE_REQUIRED` until the current user has voted on that statement. No endpoint lists other users' raw votes, voters, or votes by user. Topic owners and administrators receive the same aggregate-only response as other users.
 
 ## Categories and tags
 

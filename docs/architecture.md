@@ -19,7 +19,7 @@ contracts <- api-client <- web
 
 The browser is a React and Vite SPA. TanStack Router generates a typed route tree from `apps/web/src/routes`, and TanStack Query owns remote server state. Feature API functions isolate Hono RPC transport calls from UI components. Tailwind CSS supplies utility styles, while reusable source-owned components under `apps/web/src/components/ui` follow the shadcn/ui model.
 
-The primary routes are `/login`, `/topics`, `/topics/new`, `/topics/:topicId`, `/topics/:topicId/results`, `/topics/:topicId/settings`, `/profile`, and the `/admin/*` management screens. The minimal `/api/v1/me` response supplies role-aware navigation without exposing authentication-provider data. Authentication and authorization remain enforced by each API; client-side gates improve navigation but are not a security boundary.
+The primary routes are `/login`, `/topics`, `/topics/new`, `/topics/:topicId`, `/topics/:topicId/results`, `/topics/:topicId/settings`, `/profile`, and the `/admin/*` management screens. The voting route fetches the current member's own answered statement IDs, shuffles answered and unanswered statements separately, and places the unanswered queue first. The order remains stable until the statement query is refreshed. The minimal `/api/v1/me` response supplies role-aware navigation without exposing authentication-provider data. Authentication and authorization remain enforced by each API; client-side gates improve navigation but are not a security boundary.
 
 ## Public response boundary
 
@@ -27,7 +27,7 @@ Database models, domain models, and API response models are separate. Presenters
 
 ## Privacy invariants
 
-- A vote can be created or replaced and read by its voter. Aggregate counts become available to that voter only after answering the statement; APIs that list voters or votes by user do not exist.
+- A vote can be created or replaced and read by its voter. A member may list only their own choices within a topic so the browser can prioritize unanswered statements. Aggregate counts become available to that voter only after answering the statement; no API exposes voter identities or another member's choices.
 - Topic owners and administrators have no special access to raw votes.
 - The identity policy stored on a topic affects future statements only. Each statement retains the author visibility selected at creation.
 - Anonymous responses contain `displayName: null` regardless of the caller's role.

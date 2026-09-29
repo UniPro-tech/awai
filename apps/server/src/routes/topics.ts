@@ -3,6 +3,7 @@ import {
   ChangeTopicOwnerRequestSchema,
   CreateStatementRequestSchema,
   CreateTopicRequestSchema,
+  CurrentTopicVoteListResponseSchema,
   DeletionRequestSchema,
   IdSchema,
   StatementListResponseSchema,
@@ -93,6 +94,24 @@ export function createTopicsRoute(services: ApplicationServices) {
     return c.json(
       StatementListResponseSchema.parse({
         items: (await services.statements.listByTopic(topicId.data)).map(presentStatement),
+      }),
+      200,
+    );
+  })
+  .get("/:topicId/votes", async (c) => {
+    const topicId = IdSchema.safeParse(c.req.param("topicId"));
+    if (!topicId.success || !(await services.topics.get(topicId.data))) {
+      return c.json(
+        ApiErrorSchema.parse({ error: { code: "TOPIC_NOT_FOUND", message: "Topic not found." } }),
+        404,
+      );
+    }
+    return c.json(
+      CurrentTopicVoteListResponseSchema.parse({
+        items: await services.votes.listCurrentUserVotes(
+          topicId.data,
+          c.get("currentUser").id,
+        ),
       }),
       200,
     );

@@ -1,7 +1,7 @@
 import type { VoteStatisticsResponse } from "@private-polis/contracts";
 import { and, eq } from "drizzle-orm";
 import type { Database } from "../db/client.js";
-import { votes } from "../db/schema.js";
+import { statements, votes } from "../db/schema.js";
 import type { AnalysisQueue } from "./analysis-queue.js";
 
 export type VoteValue = "AGREE" | "DISAGREE" | "PASS";
@@ -9,6 +9,10 @@ export type VoteValue = "AGREE" | "DISAGREE" | "PASS";
 export interface VoteService {
   setVote(statementId: string, topicId: string, userId: string, value: VoteValue): Promise<void>;
   getCurrentUserVote(statementId: string, userId: string): Promise<VoteValue | null>;
+  listCurrentUserVotes(
+    topicId: string,
+    userId: string,
+  ): Promise<Array<{ statementId: string; value: VoteValue }>>;
   getVoteStatistics(statementId: string): Promise<VoteStatisticsResponse>;
 }
 
@@ -48,6 +52,14 @@ export function createPostgresVoteService(
       return vote?.value ?? null;
     },
 
+    async listCurrentUserVotes(topicId, userId) {
+      return database
+        .select({ statementId: votes.statementId, value: votes.value })
+        .from(votes)
+        .innerJoin(statements, eq(votes.statementId, statements.id))
+        .where(and(eq(statements.topicId, topicId), eq(votes.userId, userId)));
+    },
+
     async getVoteStatistics(statementId) {
       const rows = await database
         .select({ value: votes.value })
@@ -63,15 +75,23 @@ export interface MemoryVoteService extends VoteService {
 }
 
 export function createMemoryVoteService(analysisQueue: AnalysisQueue): MemoryVoteService {
-  const records = new Map<string, { statementId: string; userId: string; value: VoteValue }>();
+  const records = new Map<
+    string,
+    { statementId: string; topicId: string; userId: string; value: VoteValue }
+  >();
   const key = (statementId: string, userId: string) => `${statementId}:${userId}`;
   return {
     async setVote(statementId, topicId, userId, value) {
-      records.set(key(statementId, userId), { statementId, userId, value });
+      records.set(key(statementId, userId), { statementId, topicId, userId, value });
       await analysisQueue.enqueue(topicId);
     },
     async getCurrentUserVote(statementId, userId) {
       return records.get(key(statementId, userId))?.value ?? null;
+    },
+    async listCurrentUserVotes(topicId, userId) {
+      return [...records.values()]
+        .filter((vote) => vote.topicId === topicId && vote.userId === userId)
+        .map(({ statementId, value }) => ({ statementId, value }));
     },
     async getVoteStatistics(statementId) {
       return statistics(
