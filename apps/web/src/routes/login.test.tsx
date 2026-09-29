@@ -84,7 +84,7 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.click(await screen.findByRole("button", { name: "Sign in with OIDC / SAML SSO" }));
+    await user.click(await screen.findByRole("button", { name: "Sign in with other OIDC / SAML SSO" }));
 
     expect(screen.getByRole("heading", { name: "OIDC / SAML single sign-on" })).toBeInTheDocument();
     expect(screen.getByLabelText("Organization email")).toHaveAttribute("type", "email");
@@ -100,8 +100,9 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.click(await screen.findByRole("button", { name: "Sign in with OIDC / SAML SSO" }));
-    await user.click(screen.getByRole("button", { name: "Sign in with UniProject ID" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Sign in with UniProject ID" }),
+    );
 
     expect(signInSso).toHaveBeenCalledWith({
       providerId: "uniproject",

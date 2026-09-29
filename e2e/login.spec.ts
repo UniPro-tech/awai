@@ -5,14 +5,14 @@ test("login and registration modes render in the browser", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Language").selectOption("en");
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign in with UniProject ID" })).toBeVisible();
 
   await page.getByRole("button", { name: "Create an account" }).click();
   await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
 
-  await page.getByRole("button", { name: "Sign in with OIDC / SAML SSO" }).click();
+  await page.getByRole("button", { name: "Sign in with other OIDC / SAML SSO" }).click();
   await expect(page.getByRole("heading", { name: "OIDC / SAML single sign-on" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Sign in with UniProject ID" })).toBeVisible();
   await expect(page.getByLabel("Organization email")).toBeVisible();
 });
 

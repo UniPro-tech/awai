@@ -190,40 +190,38 @@ function LoginPage() {
                   : t("auth.ssoContinue")}
           </button>
           {mode !== "sso" ? (
-            (config.data?.ssoProviders ?? []).length > 0 ? (
-              <>
-                <p className="sso-divider">
-                  <span>{t("common.or")}</span>
-                </p>
-                <div className="sso-provider-list">
-                  {config.data.ssoProviders.map((provider) => (
-                    <button
-                      className="sso-provider-button"
-                      type="button"
-                      key={provider.providerId}
-                      disabled={pending}
-                      onClick={() =>
-                        void startSso({ providerId: provider.providerId })
-                      }
-                    >
-                      {t("auth.signInWithProvider", { name: provider.name })}
-                    </button>
-                  ))}
+            <>
+              <p className="sso-divider">
+                <span>{t("common.or")}</span>
+              </p>
+              <div className="sso-provider-list">
+                {(config.data?.ssoProviders ?? []).map((provider) => (
                   <button
                     className="sso-provider-button"
                     type="button"
+                    key={provider.providerId}
                     disabled={pending}
-                    onClick={() => {
-                      setError(undefined);
-                      setMode("sso");
-                    }}
+                    onClick={() =>
+                      void startSso({ providerId: provider.providerId })
+                    }
                   >
-                    {t("auth.useSso")}
+                    {t("auth.signInWithProvider", { name: provider.name })}
                   </button>
-                </div>
-              </>
-            ) : null
-          ) : (
+                ))}
+                <button
+                  className="sso-provider-button"
+                  type="button"
+                  disabled={pending}
+                  onClick={() => {
+                    setError(undefined);
+                    setMode("sso");
+                  }}
+                >
+                  {t("auth.useSso")}
+                </button>
+              </div>
+            </>
+          ) : config.data?.localAuthEnabled ? (
             <>
               <p className="sso-divider">
                 <span>{t("common.or")}</span>
@@ -240,7 +238,7 @@ function LoginPage() {
                 {t("auth.useLocal")}
               </button>
             </>
-          )}
+          ) : null}
         </form>
       </section>
     </main>
