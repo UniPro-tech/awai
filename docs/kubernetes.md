@@ -15,6 +15,12 @@ helm upgrade --install awai oci://ghcr.io/unipro-tech/charts/private-polis \
 
 Every successful `main` build also publishes immutable `sha-<commit>` image tags and a uniquely versioned `0.0.0-main.<run>.<attempt>` development chart. Release tags additionally publish semantic-version and `latest` image tags; `main` publishes the mutable `edge` tag.
 
+### Argo CD
+
+Use `ghcr.io/unipro-tech/charts` as the OCI repository URL without an `oci://` prefix, `private-polis` as the chart name, and an exact published chart version as `targetRevision`. The migration Job is an Argo CD `Sync` hook at wave `-5`. Chart-managed prerequisites—the ServiceAccount, Secret, and optional PostgreSQL resources—use wave `-10`, so they are available and healthy before migration starts. Application and analysis Deployments remain at the default wave `0` and are applied only after migration succeeds.
+
+An `existingSecret`, externally managed ServiceAccount, or image pull Secret is outside this ordering contract and must already exist or be synchronized by an earlier wave or separate Application.
+
 External PostgreSQL is the production default. To use another registry, build and publish the three image targets before installing the chart, then override their repositories and immutable tags:
 
 ```sh

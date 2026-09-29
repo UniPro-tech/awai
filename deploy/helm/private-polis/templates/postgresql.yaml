@@ -6,6 +6,8 @@ metadata:
   labels:
     {{- include "private-polis.labels" . | nindent 4 }}
     app.kubernetes.io/component: postgresql
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
 spec:
   clusterIP: None
   ports:
@@ -23,6 +25,8 @@ metadata:
   labels:
     {{- include "private-polis.labels" . | nindent 4 }}
     app.kubernetes.io/component: postgresql
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
 spec:
   serviceName: {{ include "private-polis.fullname" . }}-postgresql
   replicas: 1

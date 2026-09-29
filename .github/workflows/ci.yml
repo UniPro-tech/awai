@@ -163,6 +163,17 @@ jobs:
       - run: helm lint deploy/helm/private-polis --set postgresql.enabled=true --set postgresql.auth.password=ci-password --set auth.secret=ci-secret-at-least-32-characters
       - run: helm lint deploy/helm/private-polis --values deploy/helm/private-polis/examples/ingress-values.yaml --set existingSecret=private-polis-ci
       - run: helm lint deploy/helm/private-polis --values deploy/helm/private-polis/examples/gateway-values.yaml --set existingSecret=private-polis-ci
+      - name: Verify Argo CD migration ordering
+        shell: bash
+        run: |
+          rendered="$RUNNER_TEMP/private-polis-argocd.yaml"
+          helm template private-polis deploy/helm/private-polis \
+            --set postgresql.enabled=true \
+            --set postgresql.auth.password=ci-password \
+            --set auth.secret=ci-secret-at-least-32-characters > "$rendered"
+          grep -Fq 'argocd.argoproj.io/hook: Sync' "$rendered"
+          grep -Fq 'argocd.argoproj.io/sync-wave: "-5"' "$rendered"
+          test "$(grep -Fc 'argocd.argoproj.io/sync-wave: "-10"' "$rendered")" -eq 4
 
   publish-helm:
     name: Publish Helm chart
