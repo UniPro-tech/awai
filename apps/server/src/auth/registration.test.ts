@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { localAuthEnabled, registrationEnabled } from "./registration.js";
+import { localAuthEnabled, publicSsoProviders, registrationEnabled } from "./registration.js";
 
 describe("registrationEnabled", () => {
   it.each([undefined, "", "true", "1", "yes", "on"])("allows registration for %s", (value) => {
@@ -18,5 +18,22 @@ describe("localAuthEnabled", () => {
 
   it.each(["false", "FALSE", "0", "no", "off"])("disables local auth for %s", (value) => {
     expect(localAuthEnabled(value)).toBe(false);
+  });
+});
+
+describe("publicSsoProviders", () => {
+  it("returns an empty list when no buttons are configured", () => {
+    expect(publicSsoProviders(undefined)).toEqual([]);
+  });
+
+  it("parses provider IDs and public display names", () => {
+    expect(publicSsoProviders('[{"providerId":"uniproject","name":"UniProject ID"}]')).toEqual([
+      { providerId: "uniproject", name: "UniProject ID" },
+    ]);
+  });
+
+  it("rejects invalid JSON and duplicate provider IDs", () => {
+    expect(() => publicSsoProviders("not-json")).toThrow("valid JSON");
+    expect(() => publicSsoProviders('[{"providerId":"idp","name":"One"},{"providerId":"idp","name":"Two"}]')).toThrow("duplicate");
   });
 });

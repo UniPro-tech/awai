@@ -12,6 +12,19 @@
         "initialAdminEmail": { "type": "string" },
         "registrationEnabled": { "type": "boolean" },
         "localAuthEnabled": { "type": "boolean" },
+        "publicSsoProviders": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["providerId", "name"],
+            "properties": {
+              "providerId": { "type": "string", "minLength": 1, "maxLength": 100 },
+              "name": { "type": "string", "minLength": 1, "maxLength": 100 }
+            }
+          }
+        },
         "trustedOrigins": {
           "type": "array",
           "items": { "type": "string", "format": "uri" },

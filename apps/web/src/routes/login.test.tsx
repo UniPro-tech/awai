@@ -12,14 +12,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import i18n from "../i18n";
 import { Route } from "./login";
 
-const { getPublicConfig } = vi.hoisted(() => ({ getPublicConfig: vi.fn() }));
+const { getPublicConfig, signInSso } = vi.hoisted(() => ({
+  getPublicConfig: vi.fn(),
+  signInSso: vi.fn(),
+}));
 
 const LoginPage = Route.options.component;
 if (!LoginPage) throw new Error("Login route component is missing");
 
 vi.mock("../features/auth/client", () => ({
   authClient: {
-    signIn: { username: vi.fn(), sso: vi.fn() },
+    signIn: { username: vi.fn(), sso: signInSso },
     signUp: { email: vi.fn() },
   },
 }));
@@ -42,7 +45,8 @@ function renderLogin() {
 
 describe("LoginPage", () => {
   beforeEach(async () => {
-    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: true });
+    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: true, ssoProviders: [] });
+    signInSso.mockResolvedValue({ error: null });
     await i18n.changeLanguage("en");
   });
 
@@ -61,16 +65,17 @@ describe("LoginPage", () => {
   });
 
   it("hides account creation when registration is disabled", async () => {
-    getPublicConfig.mockResolvedValue({ registrationEnabled: false, localAuthEnabled: true });
+    getPublicConfig.mockResolvedValue({ registrationEnabled: false, localAuthEnabled: true, ssoProviders: [] });
     renderLogin();
     expect(await screen.findByText("New account registration is currently closed. Ask an administrator for access.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Create an account" })).not.toBeInTheDocument();
   });
 
   it("shows only SSO when local authentication is disabled", async () => {
-    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: false });
+    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: false, ssoProviders: [] });
     renderLogin();
-    expect(await screen.findByRole("heading", { name: "Single sign-on" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "OIDC / SAML single sign-on" })).toBeInTheDocument();
+    expect(screen.getByText("Enter your organization email to use its registered OIDC or SAML provider.")).toBeInTheDocument();
     expect(screen.queryByLabelText("Username")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Use local sign in" })).not.toBeInTheDocument();
   });
@@ -79,10 +84,29 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.click(await screen.findByRole("button", { name: "Sign in with SSO" }));
+    await user.click(await screen.findByRole("button", { name: "Sign in with OIDC / SAML SSO" }));
 
-    expect(screen.getByRole("heading", { name: "Single sign-on" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Work email")).toHaveAttribute("type", "email");
-    expect(screen.getByRole("button", { name: "Continue with SSO" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "OIDC / SAML single sign-on" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Organization email")).toHaveAttribute("type", "email");
+    expect(screen.getByRole("button", { name: "Continue with OIDC / SAML SSO" })).toBeInTheDocument();
+  });
+
+  it("starts SSO directly from a configured provider button", async () => {
+    getPublicConfig.mockResolvedValue({
+      registrationEnabled: true,
+      localAuthEnabled: true,
+      ssoProviders: [{ providerId: "uniproject", name: "UniProject ID" }],
+    });
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.click(await screen.findByRole("button", { name: "Sign in with OIDC / SAML SSO" }));
+    await user.click(screen.getByRole("button", { name: "Sign in with UniProject ID" }));
+
+    expect(signInSso).toHaveBeenCalledWith({
+      providerId: "uniproject",
+      callbackURL: "/topics",
+      errorCallbackURL: "/login",
+    });
   });
 });

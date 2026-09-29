@@ -77,6 +77,7 @@ PostgreSQL 18 data is mounted at `/var/lib/postgresql`. Back up the persistent v
 - Cookie-authenticated mutations enforce exact Origin matching. `auth.baseUrl` is trusted automatically; add only operator-controlled extra origins to `auth.trustedOrigins`. Wildcards are not supported.
 - Set `auth.registrationEnabled=false` after bootstrapping members to reject new local and SSO accounts. Existing accounts continue to sign in.
 - Set `auth.localAuthEnabled=false` only after verifying OIDC or SAML sign-in. It disables username/password sign-in and registration; a deployment without working SSO will become inaccessible.
+- Add `{providerId, name}` objects to `auth.publicSsoProviders` to render direct login buttons. The ID must match a registered Better Auth SSO provider. This list is public and must not contain credentials.
 
 Validate changes before upgrading:
 

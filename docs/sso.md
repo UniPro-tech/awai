@@ -46,6 +46,8 @@ curl --fail-with-body \
 
 Better Auth performs OIDC discovery and validates issuer metadata. Users choose **Sign in with SSO** and enter an email in a registered domain.
 
+For a direct provider button, add the registered ID and its public label to `PUBLIC_SSO_PROVIDERS` (Compose) or `auth.publicSsoProviders` (Helm). The login page calls Better Auth with `providerId` directly, while the email form continues to resolve providers by domain.
+
 ## SAML 2.0
 
 Use these Service Provider endpoints for a provider ID such as `corporate-saml`:

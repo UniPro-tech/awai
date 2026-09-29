@@ -43,11 +43,16 @@ describe("application", () => {
       authenticate: async () => ({ status: "unauthenticated" }),
       registrationEnabled: false,
       localAuthEnabled: false,
+      ssoProviders: [{ providerId: "uniproject", name: "UniProject ID" }],
     });
 
     const response = await configured.request("/api/config");
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ registrationEnabled: false, localAuthEnabled: false });
+    expect(await response.json()).toEqual({
+      registrationEnabled: false,
+      localAuthEnabled: false,
+      ssoProviders: [{ providerId: "uniproject", name: "UniProject ID" }],
+    });
   });
 
   it("requires authentication for versioned API routes", async () => {

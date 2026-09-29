@@ -26,6 +26,14 @@ Local and SSO account creation is enabled by default. After the initial users an
 
 Username/password authentication is enabled by default. To enforce SSO-only access, first configure and verify OIDC or SAML, then set `LOCAL_AUTH_ENABLED=false` and restart the application. This disables local sign-in, local registration, and username availability endpoints. Disabling local authentication before a working SSO provider exists can lock every user out.
 
+To show direct provider buttons on the login page, set `PUBLIC_SSO_PROVIDERS` to a JSON array. `providerId` must exactly match the ID used when registering the provider; `name` is public UI text. This setting contains no client secrets:
+
+```dotenv
+PUBLIC_SSO_PROVIDERS=[{"providerId":"uniproject","name":"UniProject ID"}]
+```
+
+Users can then select **Sign in with UniProject ID** without entering an email address. The email-based OIDC/SAML discovery form remains available for other registered domains.
+
 The comparison is case-insensitive and is evaluated only when a new account is created. It does not promote an existing account. After bootstrap, use the Administration page to assign additional administrators or suspend accounts. Keep the variable set to the intended bootstrap address or remove it after the account has been created.
 
 Authentication and versioned API requests are rate-limited in each application process. The defaults are a 60-second window with 20 authentication requests per source address and 300 API requests per authenticated user. Override `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_AUTH_MAX`, and `RATE_LIMIT_API_MAX` when needed. Caddy supplies the client forwarding headers used for the authentication key; if the application is placed behind another proxy, overwrite—not append untrusted client values—to those headers.

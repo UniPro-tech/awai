@@ -25,21 +25,29 @@ function LoginPage() {
       setMode("sso");
   }, [config.data, mode]);
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function startSso(input: { email?: string; providerId?: string }) {
     setPending(true);
     setError(undefined);
+    const result = await authClient.signIn.sso({
+      ...input,
+      callbackURL: "/topics",
+      errorCallbackURL: "/login",
+    });
+    setPending(false);
+    if (result.error) setError(t("auth.ssoError"));
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     const form = new FormData(event.currentTarget);
     if (mode === "sso") {
-      const result = await authClient.signIn.sso({
-        email: String(form.get("email")),
-        callbackURL: "/topics",
-        errorCallbackURL: "/login",
-      });
-      setPending(false);
-      if (result.error) setError(t("auth.ssoError"));
+      // Email resolves a registered provider by domain; a provider button supplies providerId directly.
+      await startSso({ email: String(form.get("email")) });
       return;
     }
+
+    setPending(true);
+    setError(undefined);
 
     const username = String(form.get("username"));
     const password = String(form.get("password"));
@@ -93,9 +101,34 @@ function LoginPage() {
               : t("auth.ssoTitle")}
         </h1>
         <p>{t("auth.subtitle")}</p>
+        {mode === "sso" ? (
+          <p className="auth-sso-description">{t("auth.ssoDescription")}</p>
+        ) : null}
         <form onSubmit={submit} className="auth-form">
           {mode === "sso" ? (
             <>
+              {(config.data?.ssoProviders ?? []).length > 0 ? (
+                <>
+                  <div className="sso-provider-list">
+                    {config.data?.ssoProviders.map((provider) => (
+                      <button
+                        className="sso-provider-button"
+                        type="button"
+                        key={provider.providerId}
+                        disabled={pending}
+                        onClick={() =>
+                          void startSso({ providerId: provider.providerId })
+                        }
+                      >
+                        {t("auth.signInWithProvider", { name: provider.name })}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="sso-divider">
+                    <span>{t("auth.orUseEmail")}</span>
+                  </p>
+                </>
+              ) : null}
               <label htmlFor="email">{t("auth.workEmail")}</label>
               <input
                 id="email"

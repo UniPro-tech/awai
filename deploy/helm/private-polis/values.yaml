@@ -58,6 +58,7 @@ auth:
   initialAdminEmail: ""
   registrationEnabled: true
   localAuthEnabled: true
+  publicSsoProviders: []
   trustedOrigins: []
 
 rateLimit:
