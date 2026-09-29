@@ -93,7 +93,7 @@ function LoginPage() {
           <p className="brand">Awai</p>
           <LanguageSwitcher compact />
         </div>
-        <h1>
+        <h1 className="mb-2">
           {mode === "sign-in"
             ? t("auth.signInTitle")
             : mode === "sign-up"
@@ -103,6 +103,27 @@ function LoginPage() {
         <p>{t("auth.subtitle")}</p>
         {mode === "sso" ? (
           <p className="auth-sso-description">{t("auth.ssoDescription")}</p>
+        ) : null}
+        {config.data?.localAuthEnabled && config.data.registrationEnabled ? (
+          <p>
+            {mode === "sign-up"
+              ? t("auth.doYouHaveAccount")
+              : t("auth.youDontHaveAccount")}{" "}
+            <button
+              className="button-link"
+              type="button"
+              onClick={() => {
+                setError(undefined);
+                setMode(mode === "sign-in" ? "sign-up" : "sign-in");
+              }}
+            >
+              {mode === "sign-up"
+                ? t("auth.haveAccount")
+                : t("auth.needAccount")}
+            </button>
+          </p>
+        ) : config.data?.localAuthEnabled && mode === "sign-in" ? (
+          <p className="notice">{t("auth.registrationClosed")}</p>
         ) : null}
         <form onSubmit={submit} className="auth-form">
           {mode === "sso" ? (
@@ -179,27 +200,6 @@ function LoginPage() {
                 }
               />
             </>
-          ) : null}
-          {config.data?.localAuthEnabled && config.data.registrationEnabled ? (
-            <p>
-              {mode === "sign-up"
-                ? t("auth.haveAccount")
-                : t("auth.needAccount")}{" "}
-              <button
-                className="button-link"
-                type="button"
-                onClick={() => {
-                  setError(undefined);
-                  setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-                }}
-              >
-                {mode === "sign-up"
-                  ? t("auth.haveAccount")
-                  : t("auth.needAccount")}
-              </button>
-            </p>
-          ) : config.data?.localAuthEnabled && mode === "sign-in" ? (
-            <p className="notice">{t("auth.registrationClosed")}</p>
           ) : null}
           {error ? <p role="alert">{error}</p> : null}
           <button type="submit" disabled={pending}>

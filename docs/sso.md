@@ -21,16 +21,16 @@ https://consensus.example.com/api/auth/sso/callback/corporate-oidc
 
 Create a mode-0600 JSON file outside the repository:
 
-```json
+```jsonc
 {
   "providerId": "corporate-oidc",
   "issuer": "https://id.example.com",
-  "domain": "example.com",
+  "domain": "example.com" /* e-mail Domain */,
   "oidcConfig": {
     "clientId": "private-polis",
     "clientSecret": "replace-me",
-    "scopes": ["openid", "email", "profile"]
-  }
+    "scopes": ["openid", "email", "profile"],
+  },
 }
 ```
 
