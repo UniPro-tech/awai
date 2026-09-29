@@ -48,6 +48,18 @@ Better Auth performs OIDC discovery and validates issuer metadata. Users choose 
 
 For a direct provider button, add the registered ID and its public label to `PUBLIC_SSO_PROVIDERS` (Compose) or `auth.publicSsoProviders` (Helm). The login page calls Better Auth with `providerId` directly, while the email form continues to resolve providers by domain.
 
+### Link an existing account
+
+Better Auth refuses automatic linking with `account_not_linked` when an SSO provider does not supply a trusted verified-email signal. After registering and testing a provider that you control, its provider ID can be explicitly trusted:
+
+```dotenv
+ACCOUNT_LINKING_ALLOWED_PROVIDERS=["corporate-oidc"]
+```
+
+For Helm, use `auth.accountLinkingAllowedProviders: [corporate-oidc]`.
+
+This setting allows the listed provider to link to an existing account only when the normalized email addresses match. Different-email linking remains disabled. Trusting a provider bypasses its missing `email_verified` signal, so include only operator-controlled providers that authenticate ownership of every returned email. An account already linked to another user is not reassigned.
+
 ## SAML 2.0
 
 Use these Service Provider endpoints for a provider ID such as `corporate-saml`:
@@ -78,7 +90,7 @@ Submit the file to the same `/api/auth/sso/register` endpoint. Awai requires tim
 
 - Successful first-time SSO authentication provisions both a Better Auth user and a corresponding `core.app_users` row with the `USER` role.
 - An administrator must promote SSO users through the Administration page; upstream claims never grant the Awai `ADMIN` role automatically.
-- Account linking follows Better Auth's verified-provider rules. Test migrations from local login with a staging account before enabling an existing email domain.
+- Account linking follows Better Auth's verified-provider rules unless a provider ID is explicitly listed in `ACCOUNT_LINKING_ALLOWED_PROVIDERS`. Test migrations from local login with a staging account before allowing a provider.
 - Suspension is enforced by Awai on every `/api/v1` request, including sessions established through SSO.
 - Removing a provider prevents new SSO sessions but does not automatically delete provisioned users or historical content.
 - Provider update and removal remain available only while the administrator that registered the provider is still an active Awai administrator. Register operational providers with a durable break-glass administrator account.

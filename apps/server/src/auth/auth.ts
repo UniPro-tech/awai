@@ -7,6 +7,10 @@ import { eq } from "drizzle-orm";
 import { appUsers } from "../db/schema.js";
 import * as authSchema from "../db/auth-schema.js";
 import { databaseRuntime } from "../db/runtime.js";
+import {
+  accountLinkingAllowedProviders,
+  createSsoUserResolver,
+} from "./account-linking.js";
 import { configuredTrustedOrigins } from "./origins.js";
 import { localAuthEnabled, registrationEnabled } from "./registration.js";
 
@@ -79,6 +83,7 @@ export const auth = betterAuth({
     sso({
       providersLimit: ssoProviderLimit,
       guardProviderMutation: guardSsoProviderMutation,
+      resolveUser: createSsoUserResolver(accountLinkingAllowedProviders()),
       saml: {
         requireTimestamps: true,
         algorithms: { onDeprecated: "reject" },

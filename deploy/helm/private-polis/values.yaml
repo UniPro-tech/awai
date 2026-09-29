@@ -59,6 +59,7 @@ auth:
   registrationEnabled: true
   localAuthEnabled: true
   publicSsoProviders: []
+  accountLinkingAllowedProviders: []
   trustedOrigins: []
 
 rateLimit:

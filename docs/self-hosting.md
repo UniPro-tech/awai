@@ -34,6 +34,14 @@ PUBLIC_SSO_PROVIDERS=[{"providerId":"uniproject","name":"UniProject ID"}]
 
 Users can then select **Sign in with UniProject ID** without entering an email address. The email-based OIDC/SAML discovery form remains available for other registered domains.
 
+If a controlled SSO provider cannot assert `email_verified` and an existing same-email user receives `account_not_linked`, register the provider first and then explicitly trust its provider ID:
+
+```dotenv
+ACCOUNT_LINKING_ALLOWED_PROVIDERS=["uniproject"]
+```
+
+This permits linking only when the provider email matches the existing account. It does not permit different-email linking. Only trust providers that reliably authenticate ownership of the returned email; see [OIDC and SAML single sign-on](sso.md#link-an-existing-account).
+
 The comparison is case-insensitive and is evaluated only when a new account is created. It does not promote an existing account. After bootstrap, use the Administration page to assign additional administrators or suspend accounts. Keep the variable set to the intended bootstrap address or remove it after the account has been created.
 
 Authentication and versioned API requests are rate-limited in each application process. The defaults are a 60-second window with 20 authentication requests per source address and 300 API requests per authenticated user. Override `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_AUTH_MAX`, and `RATE_LIMIT_API_MAX` when needed. Caddy supplies the client forwarding headers used for the authentication key; if the application is placed behind another proxy, overwrite—not append untrusted client values—to those headers.
