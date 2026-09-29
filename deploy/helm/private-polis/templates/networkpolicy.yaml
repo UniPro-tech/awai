@@ -26,6 +26,13 @@ spec:
     - ports:
         - protocol: TCP
           port: 5432
+    # OIDC and SAML require outbound HTTPS for discovery, metadata, token,
+    # certificate, and user-info endpoints. Standard NetworkPolicy resources
+    # cannot restrict destinations by DNS name, so constrain this access by
+    # port and use a CNI-specific FQDN policy when stricter control is needed.
+    - ports:
+        - protocol: TCP
+          port: 443
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
