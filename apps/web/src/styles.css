@@ -261,7 +261,6 @@ h2 {
 }
 .topic-list {
   display: grid;
-  gap: 0.75rem;
   list-style: none;
   padding: 0;
 }
@@ -307,6 +306,9 @@ h2 {
 }
 .statement-card > p:first-child {
   font-size: 1.05rem;
+}
+.vote-actions {
+  margin-top: 0.75rem;
 }
 .vote-actions button {
   background: #e3eee7;
