@@ -2,8 +2,8 @@ apiVersion: v2
 name: private-polis
 description: Private-first, self-hosted consensus platform
 type: application
-version: 0.8.0 # x-release-please-version
-appVersion: "0.8.0" # x-release-please-version
+version: 0.8.1 # x-release-please-version
+appVersion: "0.8.1" # x-release-please-version
 home: https://github.com/UniPro-tech/awai
 sources:
   - https://github.com/UniPro-tech/awai
