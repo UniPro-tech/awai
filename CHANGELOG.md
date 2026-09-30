@@ -2,6 +2,13 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0](https://github.com/UniPro-tech/awai/compare/v0.6.0...v0.7.0) (2026-09-30)
+
+
+### Features
+
+* 意見入力形式のガイドを追加 ([9b240ad](https://github.com/UniPro-tech/awai/commit/9b240adeaaacf0f6efcc34067d5555be3eec470f))
+
 ## [0.6.0](https://github.com/UniPro-tech/awai/compare/v0.5.0...v0.6.0) (2026-09-30)
 
 
