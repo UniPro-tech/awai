@@ -53,7 +53,7 @@ function VoteBar({
               />
             ))}
           </div>
-          <ul className="vote-breakdown__counts" aria-hidden="true">
+          <ul className="vote-breakdown__counts">
             {values.map((value) => (
               <li className={value.className} key={value.key}>
                 <span />
