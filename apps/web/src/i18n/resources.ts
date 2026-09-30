@@ -75,13 +75,14 @@ export const resources = {
         voteEyebrow: "意見に回答する",
         voteTitle: "ひとつずつ、率直に答える",
         voteBody:
-          "意見はランダムに一件ずつ表示されます。「賛成」「反対」「パス」から、今の考えに近いものを選んでください。未回答の意見が優先されます。",
+          "意見は未回答のものを優先的にランダムに一件ずつ表示されます。「賛成」「反対」「わからない/どちらでもない」から、今の考えに近いものを選んでください。",
         voteNote: "ほかの参加者の回答は、あなたが回答した後に表示されます。",
         discoverEyebrow: "共通点を見つける",
         discoverTitle: "意見の地図を眺める",
         discoverBody:
           "回答が集まると、似た考え方のグループや、グループを越えて共有されている意見が見えてきます。結果は誰かを分類するためではなく、対話のきっかけとして使います。",
-        discoverNote: "あなたの推定位置は本人だけに表示され、ほかの参加者は匿名です。",
+        discoverNote:
+          "あなたの推定位置は本人だけに表示され、ほかの参加者は匿名です。",
         pagination: "オンボーディングのページ",
         goToPage: "{{page}}ページ目を表示",
         dontShowAgain: "今後は表示しない",
@@ -128,7 +129,8 @@ export const resources = {
         identifiedRequired: "常に表示名を公開",
         submit: "トピックを作成",
         createCategory: "「{{name}}」をカテゴリに追加",
-        categoryAdminOnly: "新しいカテゴリを作成できるのは管理者のみです。既存のカテゴリは選択できます。",
+        categoryAdminOnly:
+          "新しいカテゴリを作成できるのは管理者のみです。既存のカテゴリは選択できます。",
         createTag: "「{{name}}」をタグに追加",
         selectedTags: "選択中のタグ",
       },
@@ -146,8 +148,9 @@ export const resources = {
         voteLabel: "この意見に投票",
         agree: "賛成",
         disagree: "反対",
-        pass: "パス",
-        stats: "賛成 {{agree}}・反対 {{disagree}}・パス {{pass}}",
+        pass: "わからない/どちらでもない",
+        stats:
+          "賛成 {{agree}}・反対 {{disagree}}・わからない/どちらでもない {{pass}}",
         statsLocked: "回答すると、みんなの投票結果が表示されます。",
         statementProgress: "{{current}} / {{total}}",
         statementNavigation: "意見の移動",
@@ -188,15 +191,18 @@ export const resources = {
         yourPosition: "意見マップ上のあなた",
         yourPositionHelp:
           "回答が増えるほど、各グループの特徴との近さから推定位置が更新されます。",
-        positionPending: "回答を分析しています。位置は分析完了後に表示されます。",
+        positionPending:
+          "回答を分析しています。位置は分析完了後に表示されます。",
         positionLearning:
           "位置を推定するには、グループを特徴づける意見への回答がもう少し必要です。",
         group: "グループ {{number}}：{{count}}人",
         findings: "注目すべき意見",
         commonOpinions: "共通の意見",
-        commonOpinionsHelp: "グループをまたいで賛成または反対が集まった意見です。",
+        commonOpinionsHelp:
+          "グループをまたいで賛成または反対が集まった意見です。",
         groupOpinions: "グループ {{number}}の意見",
-        groupOpinionsHelp: "このグループをほかのグループから特徴づける意見です。",
+        groupOpinionsHelp:
+          "このグループをほかのグループから特徴づける意見です。",
         agreeFinding: "賛成が特徴的",
         disagreeFinding: "反対が特徴的",
         noRanked: "順位付けされた意見はありません。",
@@ -363,12 +369,14 @@ export const resources = {
         voteTitle: "Answer honestly, one at a time",
         voteBody:
           "Statements appear one at a time in a random order. Choose Agree, Disagree, or Pass based on what you think now. Unanswered statements are shown first.",
-        voteNote: "You will see how others responded after casting your own vote.",
+        voteNote:
+          "You will see how others responded after casting your own vote.",
         discoverEyebrow: "Find common ground",
         discoverTitle: "Explore the opinion map",
         discoverBody:
           "As responses accumulate, Awai reveals groups with similar perspectives and ideas shared across those groups. The results are a starting point for dialogue, not a label for anyone.",
-        discoverNote: "Only you can see your estimated position; other participants remain anonymous.",
+        discoverNote:
+          "Only you can see your estimated position; other participants remain anonymous.",
         pagination: "Onboarding pages",
         goToPage: "Go to page {{page}}",
         dontShowAgain: "Don't show this again",
@@ -394,7 +402,8 @@ export const resources = {
         tagFilter: "Search by tag",
         allTags: "All tags",
         noFilterResults: "No matching topics",
-        noFilterResultsBody: "Choose another category or tag to continue browsing.",
+        noFilterResultsBody:
+          "Choose another category or tag to continue browsing.",
         anonymousAuthor: "Anonymous author",
       },
       newTopic: {
@@ -417,7 +426,8 @@ export const resources = {
         identifiedRequired: "Display name required",
         submit: "Create topic",
         createCategory: "Add “{{name}}” as a category",
-        categoryAdminOnly: "Only administrators can create categories. You can still select an existing category.",
+        categoryAdminOnly:
+          "Only administrators can create categories. You can still select an existing category.",
         createTag: "Add “{{name}}” as a tag",
         selectedTags: "Selected tags",
       },
