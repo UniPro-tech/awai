@@ -2,6 +2,15 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/UniPro-tech/awai/compare/v0.2.7...v0.3.0) (2026-09-30)
+
+
+### Features
+
+* カテゴリ作成を管理者に制限可能にする ([e45eb9f](https://github.com/UniPro-tech/awai/commit/e45eb9f3f613a3a8193e5f1de2db60ab1a59a61a))
+* カテゴリ別のトピック検索を追加 ([e8ab5ae](https://github.com/UniPro-tech/awai/commit/e8ab5ae118e63d6ff56a8f3930af795da8592ed1))
+* タグ別のトピック検索を追加 ([3de407b](https://github.com/UniPro-tech/awai/commit/3de407bc8e51539a50372029f5b50aaa75516102))
+
 ## 0.1.0 - 2026-09-28
 
 ### Added
