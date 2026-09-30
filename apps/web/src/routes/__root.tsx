@@ -10,6 +10,7 @@ import {
   MessageSquareMore,
   PlusCircle,
   Settings,
+  TriangleAlert,
   UserRound,
   X,
 } from "lucide-react";
@@ -65,6 +66,11 @@ function RootLayout() {
         <Link className="brand" to="/topics">
           Awai
         </Link>
+        <div className="beta-alert" role="status">
+          <TriangleAlert aria-hidden="true" size={15} />
+          <strong>{t("nav.betaLabel")}</strong>
+          <span>{t("nav.betaMessage")}</span>
+        </div>
         <div className="header-actions">
           <LanguageSwitcher compact />
           <Link className="profile-link" to="/profile">

@@ -69,6 +69,8 @@ export const resources = {
         feedbackOptions: "フィードバックの種類",
         reportBug: "不具合を報告",
         requestFeature: "機能を提案",
+        betaLabel: "ベータ版",
+        betaMessage: "機能や表示は改善中です",
       },
       onboarding: {
         welcomeEyebrow: "Awaiへようこそ",
@@ -369,6 +371,8 @@ export const resources = {
         feedbackOptions: "Feedback options",
         reportBug: "Report a bug",
         requestFeature: "Suggest a feature",
+        betaLabel: "Beta",
+        betaMessage: "Features and interface are still being improved",
       },
       onboarding: {
         welcomeEyebrow: "Welcome to Awai",

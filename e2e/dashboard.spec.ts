@@ -44,6 +44,8 @@ test("desktop dashboard starts with the sidebar open and can collapse it", async
   const sidebar = page.getByLabel("メインナビゲーション");
   await expect(sidebar).toBeInViewport();
   await expect(page.getByRole("heading", { name: "トピック", exact: true })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("ベータ版");
+  await expect(page.getByRole("status")).toContainText("機能や表示は改善中です");
   await page.getByRole("button", { name: "メニューを開閉" }).click();
   await expect(sidebar).not.toBeInViewport();
 });
@@ -77,4 +79,5 @@ test("mobile dashboard starts closed and opens as a drawer", async ({ page }) =>
   await page.getByRole("button", { name: "メニューを開閉" }).click();
   await expect(sidebar).toBeInViewport();
   await expect(sidebar.getByRole("button", { name: "メニューを閉じる" })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("ベータ版");
 });

@@ -4,7 +4,7 @@ Awai is a private-first, self-hosted platform for discovering opinion groups and
 
 ## Project status
 
-Awai is an early release. It provides local and enterprise authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, privacy-safe result APIs and visualization, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application.
+Awai is currently in beta. It provides local and enterprise authentication, PostgreSQL-backed topics, statements and votes, a CPU analysis worker, privacy-safe result APIs and visualization, shared runtime-validated API contracts, a typed Hono RPC client, and a React/Vite web application. The web interface displays a persistent beta notice because features and presentation may continue to change.
 
 Successful `main` and semantic-version CI builds publish the application, migration, and analysis container images plus the OCI Helm chart to GitHub Container Registry. Release Please maintains the version files, changelog, release pull request, GitHub Release, and semantic-version tag; see [release automation](docs/releases.md) for the one-time repository setup and workflow. See [Kubernetes deployment](docs/kubernetes.md) for package names and installation instructions.
 
