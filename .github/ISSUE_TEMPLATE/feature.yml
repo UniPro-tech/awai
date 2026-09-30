@@ -1,0 +1,52 @@
+name: 💡 Feature request / 機能リクエスト
+description: Request for a new feature / 新機能のリクエスト
+labels: ["kind/enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for requesting a new feature! Please fill out the following information.<br/>
+        機能の提案ありがとうございます。以下の情報を記入してください。
+
+  - type: markdown
+    attributes:
+      value: |
+        > [!IMPORTANT]
+        > You must check if the same request already exists in [Issues](https://github.com/UniPro-tech/Awai/issues). Duplicate requests may be closed.
+        > 必ず既に[Issues](https://github.com/UniPro-tech/Awai/issues)に同じ内容のリクエストがないか確認してください。重複するリクエストは閉じられる場合があります。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Related problem / 関連する問題
+      description: Please describe the problem related to this feature request / この機能リクエストに関連する問題を記述してください
+      placeholder: e.g. The operation is cumbersome / 例：操作が煩雑である
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution / 提案する解決策
+      description: Please describe the proposed solution / 提案する解決策を記述してください
+      placeholder: e.g. Add a new button to simplify the process / 例：プロセスを簡略化するための新しいボタンを追加
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / 代替案
+      description: Please describe any alternative solutions or features you've considered / 考えられた他の解決策や機能を記述してください
+      placeholder: e.g. Modify the existing interface / 例：既存のインターフェースを変更
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context / 追加情報
+      description: Add any other context about the problem here / 問題に関するその他の情報をここに追加してください
+      placeholder: Screenshots can be added later / スクリーンショットは後ほど追加できます。
+    validations:
+      required: false

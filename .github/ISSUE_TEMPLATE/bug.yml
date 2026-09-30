@@ -1,0 +1,81 @@
+name: 🐛 Bug report / バグ報告
+description: Report a bug / バグを報告する
+labels: ["kind/bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the following information.<br/>
+        バグ報告ありがとうございます。以下の情報を記入してください。
+
+  - type: markdown
+    attributes:
+      value: |
+        > [!IMPORTANT]
+        > You must check if the same request already exists in [Issues](https://github.com/UniPro-tech/Awai/issues). Duplicate requests may be closed.
+        > 必ず既に[Issues](https://github.com/UniPro-tech/Awai/issues)に同じ内容のリクエストがないか確認してください。重複するリクエストは閉じられる場合があります。
+
+        > [!CAUTION]
+        > Security-related issues should be reported according to the [Security Policy](https://github.com/UniPro-tech/Awai/blob/main/SECURITY.md).
+        > セキュリティに関する問題は、[Security Policy](https://github.com/UniPro-tech/Awai/blob/main/SECURITY.md)に従って報告してください。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description / バグの説明
+      description: Please describe the bug in detail / バグの詳細を記述してください
+      placeholder: Please be as specific as possible / できるだけ具体的に記述してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps / 再現手順
+      description: Please describe the steps to reproduce the bug / バグを再現するための手順を記述してください
+      placeholder: |
+        1. Move to'...' ('...' に移動)
+        2. Click '....' ('....' をクリック)
+        4. The error occurs ('....' というエラーが発生する)
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 期待する動作
+      description: Please describe the expected behavior / 本来期待される動作を記述してください
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Browsers / 発生したブラウザ
+      description: If the bug occurs outside of web, you don't need to select / Web以外の部分で発生している場合は選択不要です
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Other / その他
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context / 追加情報
+      description: Add any other context about the problem here / 問題に関するその他の情報をここに追加してください
+
+  - type: upload
+    id: screenshot
+    attributes:
+      label: Screenshot / スクリーンショット
+      description: If applicable, add screenshots to help explain your problem / 可能であれば、問題の説明に役立つスクリーンショットを追加してください
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / バージョン
+      description: Please specify the version of the software you are using if you know it / 分かる場合は使用しているソフトウェアのバージョンを指定してください
+      placeholder: "e.g. 0.2.7 / 例: 0.2.7"
