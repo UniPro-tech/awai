@@ -28,6 +28,18 @@ def test_red_dwarf_adapter_finds_opinion_groups() -> None:
     assert len(result.points) == 4
     assert sorted(group.participant_count for group in result.groups) == [2, 2]
     assert {item.group_ordinal for item in result.statement_results} == {0, 1}
+    overall = [counts for counts in result.vote_counts if counts.group_ordinal is None]
+    assert len(overall) == 3
+    assert all(counts.agree_count == 2 for counts in overall)
+    assert all(counts.disagree_count == 2 for counts in overall)
+    assert all(counts.pass_count == 0 for counts in overall)
+
+    grouped = [counts for counts in result.vote_counts if counts.group_ordinal is not None]
+    assert len(grouped) == 6
+    assert all(
+        counts.agree_count + counts.disagree_count + counts.pass_count == 2
+        for counts in grouped
+    )
 
 
 def test_analysis_result_does_not_persist_participant_identity() -> None:

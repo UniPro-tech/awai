@@ -76,7 +76,7 @@ Members can create taxonomy entries while composing a topic by default; category
 | `GET`  | `/api/v1/topics/:topicId/analysis/runs`        | List analysis run metadata         |
 | `GET`  | `/api/v1/topics/:topicId/analysis/runs/:runId` | Read a specific analysis snapshot  |
 
-Analysis points contain coordinates and an optional group ordinal only. They never contain an account, user, or participant identifier. A run response also includes `viewerPoint`, which is either `null` or a request-time estimate derived from the current user's votes and anonymous group centroids. The estimate is not persisted and never includes an identity field.
+Analysis points contain coordinates and an optional group ordinal only. They never contain an account, user, or participant identifier. A run response includes `voteDistributions`, with `AGREE`, `DISAGREE`, and `PASS` counts for each statement across all participants and for each anonymous opinion group. Unlike live statement statistics, these completed-analysis aggregates do not require the viewer to vote first. Counts are captured with the analysis snapshot and do not expose voter identities. A run response also includes `viewerPoint`, which is either `null` or a request-time estimate derived from the current user's votes and anonymous group centroids. The estimate is not persisted and never includes an identity field.
 
 The web client separates statement results into common opinions and per-group opinions. Detailed PDF reports are rendered and downloaded entirely in the browser from the authenticated response; the server does not create or retain report files.
 

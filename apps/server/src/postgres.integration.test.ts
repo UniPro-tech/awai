@@ -8,6 +8,7 @@ import {
   analysisPoints,
   analysisRuns,
   analysisStatementResults,
+  analysisStatementVoteCounts,
   appUsers,
   auditLogs,
   categories,
@@ -57,6 +58,10 @@ describe.runIf(shouldRun)("PostgreSQL integration", () => {
 
   afterAll(async () => {
     if (topicId) {
+      await runtime.db.execute(sql`
+        delete from analysis.statement_vote_counts
+        where analysis_run_id in (select id from analysis.runs where topic_id = ${topicId})
+      `);
       await runtime.db.execute(sql`
         delete from analysis.statement_results
         where analysis_run_id in (select id from analysis.runs where topic_id = ${topicId})
@@ -185,11 +190,39 @@ describe.runIf(shouldRun)("PostgreSQL integration", () => {
         rank: 1,
       })),
     );
+    await runtime.db.insert(analysisStatementVoteCounts).values([
+      {
+        analysisRunId: run.id,
+        statementId: created.statement.id,
+        groupId: null,
+        agreeCount: 1,
+        disagreeCount: 1,
+        passCount: 0,
+      },
+      ...groups.map((group) => ({
+        analysisRunId: run.id,
+        statementId: created.statement.id,
+        groupId: group.id,
+        agreeCount: group.ordinal === 0 ? 1 : 0,
+        disagreeCount: group.ordinal === 1 ? 1 : 0,
+        passCount: 0,
+      })),
+    ]);
 
     const viewerAnalysis = await services.analysis.latest(topic.id, owner.id);
     expect(viewerAnalysis?.viewerPoint).toMatchObject({ groupOrdinal: 0 });
     expect(viewerAnalysis?.viewerPoint?.x).toBeLessThan(-0.9);
     expect(viewerAnalysis?.points[0]).not.toHaveProperty("userId");
+    expect(viewerAnalysis?.voteDistributions).toMatchObject([
+      {
+        statement: { id: created.statement.id },
+        overall: { agree: 1, disagree: 1, pass: 0, total: 2 },
+        groups: [
+          { groupOrdinal: 0, agree: 1, disagree: 0, pass: 0, total: 1 },
+          { groupOrdinal: 1, agree: 0, disagree: 1, pass: 0, total: 1 },
+        ],
+      },
+    ]);
 
     await expect(
       runtime.db.select({ authorUserId: statements.authorUserId }).from(statements)

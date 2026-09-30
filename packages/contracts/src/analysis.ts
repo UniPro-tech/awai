@@ -47,11 +47,35 @@ export const AnalysisStatementResultSchema = z.object({
   rank: z.int().positive(),
 });
 
+export const AnalysisVoteCountsSchema = z.object({
+  agree: z.int().nonnegative(),
+  disagree: z.int().nonnegative(),
+  pass: z.int().nonnegative(),
+  total: z.int().nonnegative(),
+});
+
+export type AnalysisVoteCounts = z.infer<typeof AnalysisVoteCountsSchema>;
+
+export const AnalysisGroupVoteDistributionSchema = AnalysisVoteCountsSchema.extend({
+  groupOrdinal: z.int().nonnegative(),
+});
+
+export const AnalysisStatementVoteDistributionSchema = z.object({
+  statement: StatementResponseSchema,
+  overall: AnalysisVoteCountsSchema,
+  groups: z.array(AnalysisGroupVoteDistributionSchema),
+});
+
+export type AnalysisStatementVoteDistribution = z.infer<
+  typeof AnalysisStatementVoteDistributionSchema
+>;
+
 export const AnalysisRunResponseSchema = AnalysisRunSummarySchema.extend({
   groups: z.array(AnalysisGroupSchema),
   points: z.array(AnalysisPointSchema),
   viewerPoint: AnalysisPointSchema.nullable(),
   statementResults: z.array(AnalysisStatementResultSchema),
+  voteDistributions: z.array(AnalysisStatementVoteDistributionSchema),
 });
 
 export type AnalysisRunResponse = z.infer<typeof AnalysisRunResponseSchema>;
