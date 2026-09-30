@@ -48,6 +48,26 @@ test("desktop dashboard starts with the sidebar open and can collapse it", async
   await expect(sidebar).not.toBeInViewport();
 });
 
+test("feedback menu links to the GitHub issue templates", async ({ page }) => {
+  await mockSignedInApp(page);
+  await page.goto("/topics");
+
+  await page.getByText("フィードバック", { exact: true }).click();
+  const bugReport = page.getByRole("link", { name: "不具合を報告" });
+  const featureRequest = page.getByRole("link", { name: "機能を提案" });
+
+  await expect(bugReport).toHaveAttribute(
+    "href",
+    "https://github.com/UniPro-tech/awai/issues/new?template=bug.yml",
+  );
+  await expect(featureRequest).toHaveAttribute(
+    "href",
+    "https://github.com/UniPro-tech/awai/issues/new?template=feature.yml",
+  );
+  await expect(bugReport).toHaveAttribute("target", "_blank");
+  await expect(featureRequest).toHaveAttribute("target", "_blank");
+});
+
 test("mobile dashboard starts closed and opens as a drawer", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockSignedInApp(page);

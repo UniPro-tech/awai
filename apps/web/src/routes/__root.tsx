@@ -1,6 +1,18 @@
 import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FolderKanban, Menu, PlusCircle, Settings, UserRound, X } from "lucide-react";
+import {
+  Bug,
+  ChevronUp,
+  ExternalLink,
+  FolderKanban,
+  Lightbulb,
+  Menu,
+  MessageSquareMore,
+  PlusCircle,
+  Settings,
+  UserRound,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/language-switcher";
@@ -109,6 +121,37 @@ function RootLayout() {
             </Link>
           ) : null}
         </nav>
+        <details className="sidebar-feedback">
+          <summary>
+            <MessageSquareMore aria-hidden="true" size={19} />
+            <span>{t("nav.feedback")}</span>
+            <ChevronUp className="feedback-chevron" aria-hidden="true" size={16} />
+          </summary>
+          <div
+            className="feedback-menu"
+            role="group"
+            aria-label={t("nav.feedbackOptions")}
+          >
+            <a
+              href="https://github.com/UniPro-tech/awai/issues/new?template=bug.yml"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Bug aria-hidden="true" size={18} />
+              <span>{t("nav.reportBug")}</span>
+              <ExternalLink aria-hidden="true" size={14} />
+            </a>
+            <a
+              href="https://github.com/UniPro-tech/awai/issues/new?template=feature.yml"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Lightbulb aria-hidden="true" size={18} />
+              <span>{t("nav.requestFeature")}</span>
+              <ExternalLink aria-hidden="true" size={14} />
+            </a>
+          </div>
+        </details>
       </aside>
       <div className="dashboard-content">
         <Outlet />

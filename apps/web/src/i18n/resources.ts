@@ -65,6 +65,10 @@ export const resources = {
         menu: "メニュー",
         toggle: "メニューを開閉",
         close: "メニューを閉じる",
+        feedback: "フィードバック",
+        feedbackOptions: "フィードバックの種類",
+        reportBug: "不具合を報告",
+        requestFeature: "機能を提案",
       },
       onboarding: {
         welcomeEyebrow: "Awaiへようこそ",
@@ -358,6 +362,10 @@ export const resources = {
         menu: "Menu",
         toggle: "Toggle menu",
         close: "Close menu",
+        feedback: "Feedback",
+        feedbackOptions: "Feedback options",
+        reportBug: "Report a bug",
+        requestFeature: "Suggest a feature",
       },
       onboarding: {
         welcomeEyebrow: "Welcome to Awai",

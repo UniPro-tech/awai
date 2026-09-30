@@ -131,6 +131,8 @@ textarea {
   background: #fff;
   border-right: 1px solid #dbe2dd;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
   left: 0;
   padding: 0.8rem;
   position: fixed;
@@ -174,6 +176,67 @@ textarea {
 }
 .sidebar-nav a[aria-current="page"] {
   background: #e4f1e9;
+  color: #135c39;
+}
+.sidebar-feedback {
+  margin-top: auto;
+  position: relative;
+}
+.sidebar-feedback summary {
+  align-items: center;
+  border: 1px solid #dbe2dd;
+  border-radius: 0.45rem;
+  color: #3e4c44;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.9rem;
+  font-weight: 650;
+  gap: 0.65rem;
+  list-style: none;
+  padding: 0.65rem 0.7rem;
+}
+.sidebar-feedback summary::-webkit-details-marker {
+  display: none;
+}
+.sidebar-feedback summary:hover,
+.sidebar-feedback[open] summary {
+  background: #f0f4f1;
+  border-color: #c7d3cb;
+}
+.feedback-chevron {
+  margin-left: auto;
+  transition: transform 180ms ease;
+}
+.sidebar-feedback[open] .feedback-chevron {
+  transform: rotate(180deg);
+}
+.feedback-menu {
+  background: #fff;
+  border: 1px solid #dbe2dd;
+  border-radius: 0.55rem;
+  bottom: calc(100% + 0.55rem);
+  box-shadow: 0 12px 32px rgb(22 35 27 / 14%);
+  display: grid;
+  gap: 0.2rem;
+  left: 0;
+  padding: 0.35rem;
+  position: absolute;
+  right: 0;
+}
+.feedback-menu a {
+  align-items: center;
+  border-radius: 0.38rem;
+  color: #34443b;
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 650;
+  gap: 0.55rem;
+  grid-template-columns: auto 1fr auto;
+  padding: 0.65rem;
+  text-decoration: none;
+}
+.feedback-menu a:hover {
+  background: #eef4ef;
   color: #135c39;
 }
 .sidebar-backdrop {
