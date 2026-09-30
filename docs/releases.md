@@ -10,14 +10,19 @@ Merging that pull request creates the corresponding GitHub Release and `vX.Y.Z` 
 
 ## Repository setup
 
-Create a fine-grained personal access token for a release automation account with access to this repository and these repository permissions:
+Create a GitHub App for release automation with these repository permissions:
 
 - Contents: read and write
 - Issues: read and write
 - Pull requests: read and write
 - Metadata: read
 
-Store it as the Actions repository secret `RELEASE_PLEASE_TOKEN`. A dedicated token is required because pull requests and tags created with the built-in `GITHUB_TOKEN` do not trigger subsequent GitHub Actions workflows. If organization policy requires it, also allow GitHub Actions to create pull requests under **Settings → Actions → General**.
+Install the App on this repository, generate a private key, and configure:
+
+- Actions repository variable `RELEASE_APP_CLIENT_ID`: the App's Client ID
+- Actions repository secret `RELEASE_APP_PRIVATE_KEY`: the complete PEM private key, including its begin and end lines
+
+The workflow creates a repository-scoped installation token for each run and revokes it when the job finishes. No personal access token is required. The App token is also required because pull requests and tags created with the built-in `GITHUB_TOKEN` do not trigger subsequent GitHub Actions workflows. If organization policy requires it, allow the installed App to create pull requests.
 
 Branch protection should require the normal CI checks on the release pull request. Merge the release pull request only after those checks pass.
 
