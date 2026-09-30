@@ -47,6 +47,6 @@ body:
     attributes:
       label: Additional context / 追加情報
       description: Add any other context about the problem here / 問題に関するその他の情報をここに追加してください
-      placeholder: Screenshots can be added later / スクリーンショットは後ほど追加できます。
+      placeholder: e.g. Screenshots, logs, or references to related issues / 例：スクリーンショット、ログ、関連する問題への参照
     validations:
       required: false
