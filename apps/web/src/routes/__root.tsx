@@ -4,6 +4,7 @@ import { FolderKanban, Menu, PlusCircle, Settings, UserRound, X } from "lucide-r
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../components/language-switcher";
+import { OnboardingDialog } from "../components/onboarding-dialog";
 import { getCurrentUser } from "../features/auth/api";
 import { authClient } from "../features/auth/client";
 
@@ -112,6 +113,7 @@ function RootLayout() {
       <div className="dashboard-content">
         <Outlet />
       </div>
+      {currentUser.data ? <OnboardingDialog userId={currentUser.data.id} /> : null}
     </div>
   );
 }

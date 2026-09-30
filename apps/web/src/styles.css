@@ -193,6 +193,128 @@ textarea {
   transition: margin-left 180ms ease;
 }
 
+.onboarding-backdrop {
+  align-items: center;
+  background: rgb(18 29 23 / 56%);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: fixed;
+  z-index: 100;
+}
+.onboarding-dialog {
+  background: #fff;
+  border: 1px solid #dbe2dd;
+  border-radius: 0.85rem;
+  box-shadow: 0 24px 64px rgb(15 35 23 / 24%);
+  max-width: 38rem;
+  overflow: hidden;
+  padding: clamp(1.35rem, 4vw, 2rem);
+  position: relative;
+  width: 100%;
+}
+.onboarding-close {
+  position: absolute;
+  right: 0.8rem;
+  top: 0.8rem;
+  z-index: 1;
+}
+.onboarding-viewport {
+  overflow: hidden;
+}
+.onboarding-track {
+  display: flex;
+  transition: transform 280ms ease;
+}
+.onboarding-page {
+  flex: 0 0 100%;
+  padding: 0.35rem 0.35rem 0;
+}
+.onboarding-page h1 {
+  font-size: clamp(1.65rem, 5vw, 2.1rem);
+  margin-top: 0.35rem;
+  max-width: 28rem;
+}
+.onboarding-illustration {
+  align-items: center;
+  background: linear-gradient(145deg, #e3f1e8, #f4f8f5);
+  border: 1px solid #d3e4d9;
+  border-radius: 1rem;
+  color: #17633f;
+  display: flex;
+  height: 5.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  width: 5.5rem;
+}
+.onboarding-body {
+  color: #3f4e45;
+  line-height: 1.75;
+  margin: 1rem 0 0;
+}
+.onboarding-note {
+  background: #eef4ef;
+  border-left: 3px solid #6c9b7e;
+  color: #405047;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin: 1rem 0 0;
+  padding: 0.65rem 0.8rem;
+}
+.onboarding-pagination {
+  display: flex;
+  gap: 0.45rem;
+  justify-content: center;
+  margin: 1.25rem 0;
+}
+.onboarding-pagination button {
+  background: #c8d3cc;
+  border: 0;
+  border-radius: 999px;
+  height: 0.48rem;
+  padding: 0;
+  transition: background-color 180ms ease, width 180ms ease;
+  width: 0.48rem;
+}
+.onboarding-pagination button.is-current {
+  background: #17633f;
+  width: 1.5rem;
+}
+.onboarding-dismiss-choice {
+  align-items: center;
+  color: #526158;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.88rem;
+  gap: 0.55rem;
+  width: fit-content;
+}
+.onboarding-dismiss-choice input {
+  accent-color: #17633f;
+  height: 1rem;
+  margin: 0;
+  width: 1rem;
+}
+.onboarding-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+.onboarding-actions button {
+  min-width: 6.5rem;
+}
+.onboarding-actions .onboarding-secondary {
+  background: #fff;
+  border-color: #b9c4bd;
+  color: #34443b;
+}
+.onboarding-actions .onboarding-secondary:disabled {
+  cursor: default;
+  opacity: 0;
+}
+
 .shell {
   margin: 0 auto;
   padding: 2.25rem 1.5rem 4rem;
@@ -684,5 +806,20 @@ h2 {
   .profile-details dl > div,
   .settings-list dl > div {
     grid-template-columns: 1fr;
+  }
+  .onboarding-dialog {
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+  .onboarding-illustration {
+    height: 4.5rem;
+    margin-bottom: 1rem;
+    width: 4.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-track {
+    transition: none;
   }
 }

@@ -1,7 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 
-async function mockSignedInApp(page: Page) {
-  await page.addInitScript(() => localStorage.setItem("private-polis-language", "ja"));
+async function mockSignedInApp(page: Page, onboardingDismissed = true) {
+  await page.addInitScript((dismissed) => {
+    localStorage.setItem("private-polis-language", "ja");
+    if (dismissed) {
+      localStorage.setItem(
+        "private-polis:onboarding:v1:00000000-0000-4000-8000-000000000001",
+        "dismissed",
+      );
+    }
+  }, onboardingDismissed);
   await page.route("**/api/auth/get-session", (route) => route.fulfill({ json: {
     user: { id: "auth-user", name: "テストユーザー", email: "user@example.com", emailVerified: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
     session: { id: "session", userId: "auth-user", token: "test", expiresAt: new Date(Date.now() + 3600000).toISOString(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -11,6 +19,24 @@ async function mockSignedInApp(page: Page) {
   await page.route("**/api/v1/tags", (route) => route.fulfill({ json: { items: [] } }));
   await page.route("**/api/v1/topics", (route) => route.fulfill({ json: { items: [] } }));
 }
+
+test("first-time users can complete and dismiss onboarding", async ({ page }) => {
+  await mockSignedInApp(page, false);
+  await page.goto("/topics");
+
+  await expect(page.getByRole("heading", { name: "違いを、対話の入り口に" })).toBeVisible();
+  await page.getByRole("button", { name: "次へ" }).click();
+  await expect(page.getByRole("heading", { name: "ひとつずつ、率直に答える" })).toBeVisible();
+  await page.getByRole("button", { name: "次へ" }).click();
+  await expect(page.getByRole("heading", { name: "意見の地図を眺める" })).toBeVisible();
+
+  await page.getByRole("checkbox", { name: "今後は表示しない" }).check();
+  await page.getByRole("button", { name: "はじめる" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
 
 test("desktop dashboard starts with the sidebar open and can collapse it", async ({ page }) => {
   await mockSignedInApp(page);

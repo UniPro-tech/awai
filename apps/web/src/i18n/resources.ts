@@ -66,6 +66,30 @@ export const resources = {
         toggle: "メニューを開閉",
         close: "メニューを閉じる",
       },
+      onboarding: {
+        welcomeEyebrow: "Awaiへようこそ",
+        welcomeTitle: "違いを、対話の入り口に",
+        welcomeBody:
+          "Awaiは、多数決で勝ち負けを決める場所ではありません。一人ひとりの意見を集め、考え方の違いと、まだ見えていない共通点を探すための場です。",
+        welcomeNote: "まずは関心のあるトピックを選び、参加してみましょう。",
+        voteEyebrow: "意見に回答する",
+        voteTitle: "ひとつずつ、率直に答える",
+        voteBody:
+          "意見はランダムに一件ずつ表示されます。「賛成」「反対」「パス」から、今の考えに近いものを選んでください。未回答の意見が優先されます。",
+        voteNote: "ほかの参加者の回答は、あなたが回答した後に表示されます。",
+        discoverEyebrow: "共通点を見つける",
+        discoverTitle: "意見の地図を眺める",
+        discoverBody:
+          "回答が集まると、似た考え方のグループや、グループを越えて共有されている意見が見えてきます。結果は誰かを分類するためではなく、対話のきっかけとして使います。",
+        discoverNote: "あなたの推定位置は本人だけに表示され、ほかの参加者は匿名です。",
+        pagination: "オンボーディングのページ",
+        goToPage: "{{page}}ページ目を表示",
+        dontShowAgain: "今後は表示しない",
+        back: "戻る",
+        next: "次へ",
+        finish: "はじめる",
+        close: "オンボーディングを閉じる",
+      },
       topics: {
         eyebrow: "合意形成",
         title: "トピック",
@@ -328,6 +352,30 @@ export const resources = {
         menu: "Menu",
         toggle: "Toggle menu",
         close: "Close menu",
+      },
+      onboarding: {
+        welcomeEyebrow: "Welcome to Awai",
+        welcomeTitle: "Let differences open the conversation",
+        welcomeBody:
+          "Awai is not a place to decide winners by majority vote. It gathers individual viewpoints so a community can see where perspectives differ and discover common ground that was previously hidden.",
+        welcomeNote: "Start by choosing a topic that matters to you.",
+        voteEyebrow: "Respond to viewpoints",
+        voteTitle: "Answer honestly, one at a time",
+        voteBody:
+          "Statements appear one at a time in a random order. Choose Agree, Disagree, or Pass based on what you think now. Unanswered statements are shown first.",
+        voteNote: "You will see how others responded after casting your own vote.",
+        discoverEyebrow: "Find common ground",
+        discoverTitle: "Explore the opinion map",
+        discoverBody:
+          "As responses accumulate, Awai reveals groups with similar perspectives and ideas shared across those groups. The results are a starting point for dialogue, not a label for anyone.",
+        discoverNote: "Only you can see your estimated position; other participants remain anonymous.",
+        pagination: "Onboarding pages",
+        goToPage: "Go to page {{page}}",
+        dontShowAgain: "Don't show this again",
+        back: "Back",
+        next: "Next",
+        finish: "Get started",
+        close: "Close onboarding",
       },
       topics: {
         eyebrow: "Consensus",

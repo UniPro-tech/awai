@@ -77,6 +77,10 @@ async function mockOpinionApp(
   );
   await page.addInitScript(() => {
     localStorage.setItem("private-polis-language", "ja");
+    localStorage.setItem(
+      "private-polis:onboarding:v1:00000000-0000-4000-8000-000000000001",
+      "dismissed",
+    );
     Math.random = () => 0.999_999;
   });
   await page.route("**/api/auth/get-session", (route) =>
