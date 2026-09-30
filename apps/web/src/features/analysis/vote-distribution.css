@@ -61,6 +61,12 @@
   transition: flex-grow 180ms ease;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .vote-bar > span {
+    transition: none;
+  }
+}
+
 .vote-bar__agree {
   background: #3c8b67;
 }
