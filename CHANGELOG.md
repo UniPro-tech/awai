@@ -2,6 +2,13 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0](https://github.com/UniPro-tech/awai/compare/v0.3.0...v0.4.0) (2026-09-30)
+
+
+### Features
+
+* 初回オンボーディングを追加 ([215b613](https://github.com/UniPro-tech/awai/commit/215b613761dd756b961ed10b7601aa64c54e127e))
+
 ## [0.3.0](https://github.com/UniPro-tech/awai/compare/v0.2.7...v0.3.0) (2026-09-30)
 
 
