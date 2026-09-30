@@ -171,11 +171,15 @@ test("shows one statement and reveals counts and position only after voting", as
 
   await expect(page.getByText(statements[0].body)).toBeVisible();
   await expect(page.getByText(statements[1].body)).toHaveCount(0);
-  await expect(page.getByText("賛成 5・反対 2・パス 1")).toHaveCount(0);
+  await expect(
+    page.getByText("賛成 5・反対 2・わからない/どちらでもない 1"),
+  ).toHaveCount(0);
   await expect(page.getByText("回答すると、みんなの投票結果が表示されます。")).toBeVisible();
 
   await page.getByRole("button", { name: "賛成" }).click();
-  await expect(page.getByText("賛成 5・反対 2・パス 1")).toBeVisible();
+  await expect(
+    page.getByText("賛成 5・反対 2・わからない/どちらでもない 1"),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "意見マップ上のあなた" })).toBeVisible();
   await expect(page.getByText("あなたの推定位置")).toBeVisible();
 
