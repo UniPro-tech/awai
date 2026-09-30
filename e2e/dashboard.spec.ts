@@ -7,6 +7,8 @@ async function mockSignedInApp(page: Page) {
     session: { id: "session", userId: "auth-user", token: "test", expiresAt: new Date(Date.now() + 3600000).toISOString(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   } }));
   await page.route("**/api/v1/me", (route) => route.fulfill({ json: { id: "00000000-0000-4000-8000-000000000001", displayName: "テストユーザー", role: "USER" } }));
+  await page.route("**/api/v1/categories", (route) => route.fulfill({ json: { items: [] } }));
+  await page.route("**/api/v1/tags", (route) => route.fulfill({ json: { items: [] } }));
   await page.route("**/api/v1/topics", (route) => route.fulfill({ json: { items: [] } }));
 }
 

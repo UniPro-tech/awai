@@ -45,7 +45,7 @@ function renderLogin() {
 
 describe("LoginPage", () => {
   beforeEach(async () => {
-    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: true, ssoProviders: [] });
+    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: true, categoryCreationAdminOnly: false, ssoProviders: [] });
     signInSso.mockResolvedValue({ error: null });
     await i18n.changeLanguage("en");
   });
@@ -65,14 +65,14 @@ describe("LoginPage", () => {
   });
 
   it("hides account creation when registration is disabled", async () => {
-    getPublicConfig.mockResolvedValue({ registrationEnabled: false, localAuthEnabled: true, ssoProviders: [] });
+    getPublicConfig.mockResolvedValue({ registrationEnabled: false, localAuthEnabled: true, categoryCreationAdminOnly: false, ssoProviders: [] });
     renderLogin();
     expect(await screen.findByText("New account registration is currently closed. Ask an administrator for access.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Create an account" })).not.toBeInTheDocument();
   });
 
   it("shows only SSO when local authentication is disabled", async () => {
-    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: false, ssoProviders: [] });
+    getPublicConfig.mockResolvedValue({ registrationEnabled: true, localAuthEnabled: false, categoryCreationAdminOnly: false, ssoProviders: [] });
     renderLogin();
     expect(await screen.findByRole("heading", { name: "OIDC / SAML single sign-on" })).toBeInTheDocument();
     expect(screen.getByText("Enter your organization email to use its registered OIDC or SAML provider.")).toBeInTheDocument();
@@ -95,6 +95,7 @@ describe("LoginPage", () => {
     getPublicConfig.mockResolvedValue({
       registrationEnabled: true,
       localAuthEnabled: true,
+      categoryCreationAdminOnly: false,
       ssoProviders: [{ providerId: "uniproject", name: "UniProject ID" }],
     });
     const user = userEvent.setup();
