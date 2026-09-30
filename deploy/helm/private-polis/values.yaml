@@ -67,6 +67,9 @@ auth:
   accountLinkingAllowedProviders: []
   trustedOrigins: []
 
+taxonomy:
+  categoryCreationAdminOnly: false
+
 rateLimit:
   windowSeconds: 60
   authMax: 20

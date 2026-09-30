@@ -35,7 +35,7 @@ Database models, domain models, and API response models are separate. Presenters
 - Analysis APIs expose anonymous coordinates and aggregate group sizes, never participant identifiers. A viewer-only position estimate is computed from that viewer's votes and anonymous group centroids without persisting a point-to-user mapping.
 - Topic and statement deletion is logical. Delete and restore operations are authorized and audited, while historical analysis snapshots remain unchanged.
 - Categories are optional and tags are many-to-many. Removing taxonomy data never removes its topics.
-- Authenticated members can create categories and tags from the topic editor; only administrators can delete shared taxonomy.
+- Authenticated members can create categories and tags from the topic editor by default; deployments can reserve category creation for administrators. Only administrators can delete shared taxonomy.
 
 ## Authentication, persistence, and analysis
 

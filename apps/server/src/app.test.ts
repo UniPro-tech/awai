@@ -43,6 +43,7 @@ describe("application", () => {
       authenticate: async () => ({ status: "unauthenticated" }),
       registrationEnabled: false,
       localAuthEnabled: false,
+      categoryCreationAdminOnly: true,
       ssoProviders: [{ providerId: "uniproject", name: "UniProject ID" }],
     });
 
@@ -51,6 +52,7 @@ describe("application", () => {
     expect(await response.json()).toEqual({
       registrationEnabled: false,
       localAuthEnabled: false,
+      categoryCreationAdminOnly: true,
       ssoProviders: [{ providerId: "uniproject", name: "UniProject ID" }],
     });
   });

@@ -5,6 +5,7 @@ import {
   CurrentTopicVoteListResponseSchema,
   CurrentUserResponseSchema,
   DeletionRequestSchema,
+  PublicConfigResponseSchema,
   TopicListQuerySchema,
   TopicResponseSchema,
 } from "./index.js";
@@ -55,6 +56,17 @@ describe("topic contracts", () => {
 
     expect(response).not.toHaveProperty("createdByUserId");
     expect(response.author.displayName).toBeNull();
+  });
+});
+
+describe("public configuration contract", () => {
+  it("exposes the category creation policy", () => {
+    expect(PublicConfigResponseSchema.parse({
+      registrationEnabled: true,
+      localAuthEnabled: true,
+      categoryCreationAdminOnly: true,
+      ssoProviders: [],
+    })).toMatchObject({ categoryCreationAdminOnly: true });
   });
 });
 

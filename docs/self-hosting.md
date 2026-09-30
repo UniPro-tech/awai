@@ -26,6 +26,8 @@ Local and SSO account creation is enabled by default. After the initial users an
 
 Username/password authentication is enabled by default. To enforce SSO-only access, first configure and verify OIDC or SAML, then set `LOCAL_AUTH_ENABLED=false` and restart the application. This disables local sign-in, local registration, and username availability endpoints. Disabling local authentication before a working SSO provider exists can lock every user out.
 
+Category creation is available to all authenticated members by default. Set `CATEGORY_CREATION_ADMIN_ONLY=true` to reserve creation for administrators; members can continue selecting existing categories. This does not restrict tag creation.
+
 To show direct provider buttons on the login page, set `PUBLIC_SSO_PROVIDERS` to a JSON array. `providerId` must exactly match the ID used when registering the provider; `name` is public UI text. This setting contains no client secrets:
 
 ```dotenv

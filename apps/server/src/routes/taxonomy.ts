@@ -26,12 +26,23 @@ function mutationError(c: Context<AppEnvironment>, result: TaxonomyMutationResul
   );
 }
 
-export function createCategoriesRoute(services: ApplicationServices) {
+export function createCategoriesRoute(
+  services: ApplicationServices,
+  categoryCreationAdminOnly = false,
+) {
   return new Hono<AppEnvironment>()
     .get("/", async (c) =>
       c.json(TaxonomyListResponseSchema.parse({ items: await services.taxonomy.listCategories() })),
     )
     .post("/", jsonValidator(CreateCategoryRequestSchema), async (c) => {
+      if (categoryCreationAdminOnly && c.get("currentUser").role !== "ADMIN") {
+        return c.json(
+          ApiErrorSchema.parse({
+            error: { code: "PERMISSION_DENIED", message: "Administrator access is required." },
+          }),
+          403,
+        );
+      }
       const result = await services.taxonomy.createCategory(
         c.req.valid("json").name,
         c.get("currentUser"),

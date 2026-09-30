@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { CreatableMultiSelect, CreatableSelect, type SelectOption } from "../components/creatable-select";
 import { AuthGate } from "../features/auth/auth-gate";
+import { getCurrentUser } from "../features/auth/api";
+import { getPublicConfig } from "../features/auth/config-api";
 import { createCategory, createTag, listCategories, listTags } from "../features/taxonomy/api";
 import { createTopic } from "../features/topics/api";
 import { errorMessage } from "../lib/error-message";
@@ -20,6 +22,8 @@ function NewTopicPage() {
   const [tags, setTags] = useState<SelectOption[]>([]);
   const categories = useQuery({ queryKey: ["categories"], queryFn: listCategories });
   const availableTags = useQuery({ queryKey: ["tags"], queryFn: listTags });
+  const currentUser = useQuery({ queryKey: ["current-user"], queryFn: getCurrentUser });
+  const publicConfig = useQuery({ queryKey: ["public-config"], queryFn: getPublicConfig });
   const addCategory = useMutation({ mutationFn: createCategory, onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["categories"] }) });
   const addTag = useMutation({ mutationFn: createTag, onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["tags"] }) });
   const create = useMutation({
@@ -29,6 +33,8 @@ function NewTopicPage() {
       await navigate({ to: "/topics/$topicId", params: { topicId: topic.id } });
     },
   });
+  const canCreateCategory = publicConfig.data !== undefined
+    && (!publicConfig.data.categoryCreationAdminOnly || currentUser.data?.role === "ADMIN");
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,7 +61,10 @@ function NewTopicPage() {
             <label htmlFor="topic-description">{t("newTopic.description")}</label>
             <textarea id="topic-description" value={description} onChange={(event) => setDescription(event.target.value)} maxLength={10000} />
             <label>{t("newTopic.category")}</label>
-            <CreatableSelect options={categories.data?.items ?? []} value={category} onChange={setCategory} emptyLabel={t("newTopic.noCategory")} placeholder={t("newTopic.categoryPlaceholder")} createLabel={(name) => t("newTopic.createCategory", { name })} onCreate={(name) => addCategory.mutateAsync(name)} disabled={addCategory.isPending} />
+            <CreatableSelect options={categories.data?.items ?? []} value={category} onChange={setCategory} emptyLabel={t("newTopic.noCategory")} placeholder={t("newTopic.categoryPlaceholder")} createLabel={(name) => t("newTopic.createCategory", { name })} onCreate={(name) => addCategory.mutateAsync(name)} canCreate={canCreateCategory} disabled={addCategory.isPending} />
+            {publicConfig.data?.categoryCreationAdminOnly && currentUser.data?.role !== "ADMIN" ? (
+              <p className="field-help">{t("newTopic.categoryAdminOnly")}</p>
+            ) : null}
             <label>{t("newTopic.tags")}</label>
             <CreatableMultiSelect options={availableTags.data?.items ?? []} values={tags} onChange={setTags} selectedLabel={t("newTopic.selectedTags")} placeholder={t("newTopic.tagsPlaceholder")} createLabel={(name) => t("newTopic.createTag", { name })} onCreate={(name) => addTag.mutateAsync(name)} disabled={addTag.isPending} />
             <label htmlFor="topic-author-visibility">{t("newTopic.topicAuthor")}</label>
@@ -70,6 +79,8 @@ function NewTopicPage() {
             {create.error ? <p role="alert">{errorMessage(create.error, t)}</p> : null}
             {addCategory.error ? <p role="alert">{errorMessage(addCategory.error, t)}</p> : null}
             {addTag.error ? <p role="alert">{errorMessage(addTag.error, t)}</p> : null}
+            {publicConfig.error ? <p role="alert">{errorMessage(publicConfig.error, t)}</p> : null}
+            {currentUser.error ? <p role="alert">{errorMessage(currentUser.error, t)}</p> : null}
           </form>
         </section>
       </main>

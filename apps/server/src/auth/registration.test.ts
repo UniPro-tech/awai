@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { localAuthEnabled, publicSsoProviders, registrationEnabled } from "./registration.js";
+import {
+  categoryCreationAdminOnly,
+  localAuthEnabled,
+  publicSsoProviders,
+  registrationEnabled,
+} from "./registration.js";
 
 describe("registrationEnabled", () => {
   it.each([undefined, "", "true", "1", "yes", "on"])("allows registration for %s", (value) => {
@@ -19,6 +24,22 @@ describe("localAuthEnabled", () => {
   it.each(["false", "FALSE", "0", "no", "off"])("disables local auth for %s", (value) => {
     expect(localAuthEnabled(value)).toBe(false);
   });
+});
+
+describe("categoryCreationAdminOnly", () => {
+  it.each([undefined, "", "false", "0", "no", "off", "invalid"])(
+    "allows member category creation for %s",
+    (value) => {
+      expect(categoryCreationAdminOnly(value)).toBe(false);
+    },
+  );
+
+  it.each(["true", "TRUE", "1", "yes", "on"])(
+    "restricts category creation for %s",
+    (value) => {
+      expect(categoryCreationAdminOnly(value)).toBe(true);
+    },
+  );
 });
 
 describe("publicSsoProviders", () => {

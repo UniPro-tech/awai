@@ -8,6 +8,7 @@ export const PublicSsoProviderSchema = z.object({
 export const PublicConfigResponseSchema = z.object({
   registrationEnabled: z.boolean(),
   localAuthEnabled: z.boolean(),
+  categoryCreationAdminOnly: z.boolean(),
   ssoProviders: z.array(PublicSsoProviderSchema).max(20),
 });
 

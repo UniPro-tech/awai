@@ -38,6 +38,13 @@
         }
       }
     },
+    "taxonomy": {
+      "type": "object",
+      "required": ["categoryCreationAdminOnly"],
+      "properties": {
+        "categoryCreationAdminOnly": { "type": "boolean" }
+      }
+    },
     "rateLimit": {
       "type": "object",
       "required": ["windowSeconds", "authMax", "apiMax"],

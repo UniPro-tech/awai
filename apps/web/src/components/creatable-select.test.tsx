@@ -13,6 +13,19 @@ describe("creatable taxonomy selectors", () => {
     expect(onChange).toHaveBeenCalledWith({ id: "1", name: "Governance" });
   });
 
+  it("keeps existing options selectable while hiding category creation", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onCreate = vi.fn();
+    render(<CreatableSelect options={[{ id: "1", name: "Governance" }]} value={null} onChange={onChange} emptyLabel="No category" placeholder="Search categories" createLabel={(name) => `Create ${name}`} onCreate={onCreate} canCreate={false} />);
+
+    await user.click(screen.getByRole("button", { name: "No category" }));
+    await user.type(screen.getByLabelText("Search categories"), "New category");
+
+    expect(screen.queryByRole("button", { name: "Create New category" })).not.toBeInTheDocument();
+    expect(onCreate).not.toHaveBeenCalled();
+  });
+
   it("creates and selects a tag from the dropdown", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

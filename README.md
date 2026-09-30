@@ -54,6 +54,8 @@ Set `REGISTRATION_ENABLED=false` after bootstrapping the community to reject eve
 
 Set `LOCAL_AUTH_ENABLED=false` to remove username/password sign-in and registration and require configured OIDC or SAML single sign-on. Verify SSO before disabling local authentication to avoid locking out all users.
 
+Set `CATEGORY_CREATION_ADMIN_ONLY=true` to let members select existing categories while reserving new category creation for administrators. With Helm, set `taxonomy.categoryCreationAdminOnly=true`.
+
 If a controlled SSO provider needs to link to existing same-email accounts without an `email_verified` signal, add its registered ID to `ACCOUNT_LINKING_ALLOWED_PROVIDERS`. Keep the list empty by default and see [docs/sso.md](docs/sso.md#link-an-existing-account) before enabling it.
 
 The analysis worker is managed separately:

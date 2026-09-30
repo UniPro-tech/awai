@@ -8,6 +8,7 @@ interface BaseProps {
   placeholder: string;
   createLabel: (name: string) => string;
   onCreate: (name: string) => Promise<SelectOption>;
+  canCreate?: boolean;
   disabled?: boolean;
 }
 
@@ -21,7 +22,7 @@ export function CreatableSelect({ options, value, onChange, emptyLabel, ...props
   const [creating, setCreating] = useState(false);
   const listId = useId();
   const filtered = useFilteredOptions(options, query);
-  const canCreate = canCreateOption(options, query);
+  const canCreate = props.canCreate !== false && canCreateOption(options, query);
 
   async function create() {
     setCreating(true);
@@ -62,7 +63,7 @@ export function CreatableMultiSelect({ options, values, onChange, selectedLabel,
   const [creating, setCreating] = useState(false);
   const listId = useId();
   const filtered = useFilteredOptions(options, query).filter((option) => !values.some((value) => value.id === option.id));
-  const canCreate = values.length < max && canCreateOption(options, query);
+  const canCreate = props.canCreate !== false && values.length < max && canCreateOption(options, query);
 
   async function create() {
     setCreating(true);

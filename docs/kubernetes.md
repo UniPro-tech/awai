@@ -98,6 +98,7 @@ PostgreSQL 18 data is mounted at `/var/lib/postgresql`. Back up the persistent v
 - Set `auth.localAuthEnabled=false` only after verifying OIDC or SAML sign-in. It disables username/password sign-in and registration; a deployment without working SSO will become inaccessible.
 - Add `{providerId, name}` objects to `auth.publicSsoProviders` to render direct login buttons. The ID must match a registered Better Auth SSO provider. This list is public and must not contain credentials.
 - Add an operator-controlled provider ID to `auth.accountLinkingAllowedProviders` only when it may link to an existing account with the same email despite a missing verified-email signal. Different-email linking remains disabled.
+- Set `taxonomy.categoryCreationAdminOnly=true` to reserve new category creation for administrators while keeping existing categories selectable by members. Tag creation is unaffected.
 
 Validate changes before upgrading:
 

@@ -24,7 +24,12 @@ import {
 } from "./http/rate-limit.js";
 import { configuredTrustedOrigins } from "./auth/origins.js";
 import { requireSameOrigin } from "./http/same-origin.js";
-import { localAuthEnabled, publicSsoProviders, registrationEnabled } from "./auth/registration.js";
+import {
+  categoryCreationAdminOnly,
+  localAuthEnabled,
+  publicSsoProviders,
+  registrationEnabled,
+} from "./auth/registration.js";
 import type { PublicSsoProvider } from "@private-polis/contracts";
 import { createConfigRoute } from "./routes/config.js";
 
@@ -37,6 +42,7 @@ export interface AppOptions {
   csrfTrustedOrigins?: string[];
   registrationEnabled?: boolean;
   localAuthEnabled?: boolean;
+  categoryCreationAdminOnly?: boolean;
   ssoProviders?: PublicSsoProvider[];
 }
 
@@ -52,6 +58,8 @@ export function createApp(options: AppOptions = {}) {
   const csrfTrustedOrigins = options.csrfTrustedOrigins ?? configuredTrustedOrigins();
   const isRegistrationEnabled = options.registrationEnabled ?? registrationEnabled();
   const isLocalAuthEnabled = options.localAuthEnabled ?? localAuthEnabled();
+  const isCategoryCreationAdminOnly = options.categoryCreationAdminOnly
+    ?? categoryCreationAdminOnly();
   const configuredSsoProviders = options.ssoProviders ?? publicSsoProviders();
   const windowMs = positiveInteger(process.env.RATE_LIMIT_WINDOW_SECONDS, 60) * 1_000;
   const authRateLimiter = options.authRateLimiter === false
@@ -68,7 +76,15 @@ export function createApp(options: AppOptions = {}) {
   if (authRateLimiter) {
     app.use("/api/auth/*", rateLimit(authRateLimiter, (c) => requestAddress(c.req.raw.headers)));
   }
-  app.route("/api/config", createConfigRoute(isRegistrationEnabled, isLocalAuthEnabled, configuredSsoProviders))
+  app.route(
+    "/api/config",
+    createConfigRoute(
+      isRegistrationEnabled,
+      isLocalAuthEnabled,
+      isCategoryCreationAdminOnly,
+      configuredSsoProviders,
+    ),
+  )
     .all("/api/auth/*", (c) => auth.handler(c.req.raw))
     .get("/health/live", (c) => c.json({ status: "ok" as const }))
     .get("/health/ready", async (c) => {
@@ -155,7 +171,10 @@ export function createApp(options: AppOptions = {}) {
     .route("/api/v1/topics", createAnalysisRoute(services))
     .route("/api/v1/topics", createTopicsRoute(services))
     .route("/api/v1/statements", createStatementsRoute(services))
-    .route("/api/v1/categories", createCategoriesRoute(services))
+    .route(
+      "/api/v1/categories",
+      createCategoriesRoute(services, isCategoryCreationAdminOnly),
+    )
     .route("/api/v1/tags", createTagsRoute(services))
     .route("/api/v1/admin", createAdminRoute(services));
 }

@@ -66,7 +66,7 @@ The topic vote endpoint returns only the authenticated user's own statement IDs 
 | `POST`   | `/api/v1/tags`                   | Create or return a tag as an authenticated member      |
 | `DELETE` | `/api/v1/tags/:tagId`            | Delete a tag as an administrator                       |
 
-Members can create taxonomy entries while composing a topic; deletion remains administrator-only. Deleting a category clears the optional category reference on existing topics. Deleting a tag removes its topic associations without deleting topics. Topic responses contain their public category and tags.
+Members can create taxonomy entries while composing a topic by default; category creation returns `PERMISSION_DENIED` for non-administrators when `CATEGORY_CREATION_ADMIN_ONLY=true`. Tag creation remains available to members, and deletion remains administrator-only. Deleting a category clears the optional category reference on existing topics. Deleting a tag removes its topic associations without deleting topics. Topic responses contain their public category and tags.
 
 ## Analysis
 

@@ -13,10 +13,15 @@ const admin = {
   role: "ADMIN" as const,
 };
 
-function appFor(services: ReturnType<typeof createMemoryServices>, currentUser: typeof user | typeof admin) {
+function appFor(
+  services: ReturnType<typeof createMemoryServices>,
+  currentUser: typeof user | typeof admin,
+  categoryCreationAdminOnly = false,
+) {
   return createApp({
     services,
     authenticate: async () => ({ status: "authenticated", user: currentUser }),
+    categoryCreationAdminOnly,
   });
 }
 
@@ -54,5 +59,28 @@ describe("categories and tags", () => {
     });
     expect((await adminApp.request(`/api/v1/categories/${categoryBody.id}`, { method: "DELETE" })).status).toBe(204);
     expect((await adminApp.request(`/api/v1/tags/${tagBody.id}`, { method: "DELETE" })).status).toBe(204);
+  });
+
+  it("restricts category creation to administrators when configured", async () => {
+    const services = createMemoryServices();
+    const request = {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "Governance" }),
+    };
+
+    const denied = await appFor(services, user, true).request("/api/v1/categories", request);
+    expect(denied.status).toBe(403);
+    expect(await denied.json()).toMatchObject({ error: { code: "PERMISSION_DENIED" } });
+
+    const memberTag = await appFor(services, user, true).request("/api/v1/tags", {
+      ...request,
+      body: JSON.stringify({ name: "budget" }),
+    });
+    expect(memberTag.status).toBe(201);
+
+    const created = await appFor(services, admin, true).request("/api/v1/categories", request);
+    expect(created.status).toBe(201);
+    expect(await created.json()).toMatchObject({ name: "Governance" });
   });
 });
