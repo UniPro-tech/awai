@@ -1,4 +1,4 @@
-# Awai
+# ⚖️ Awai (間 - where two distinct worlds soften and meet)
 
 Awai is a private-first, self-hosted platform for discovering opinion groups and consensus inside authenticated communities. It follows the statistical analysis model popularized by Polis and Agora without requiring generative AI.
 
