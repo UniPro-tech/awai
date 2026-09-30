@@ -354,7 +354,9 @@ textarea {
   border-radius: 999px;
   height: 0.48rem;
   padding: 0;
-  transition: background-color 180ms ease, width 180ms ease;
+  transition:
+    background-color 180ms ease,
+    width 180ms ease;
   width: 0.48rem;
 }
 .onboarding-pagination button.is-current {
@@ -831,6 +833,11 @@ h2 {
   justify-content: space-between;
   padding: 0.6rem;
   text-align: left;
+  max-width: 100%;
+  width: 100%;
+}
+.combobox-option:first-child {
+  margin-top: 0.3rem;
 }
 .combobox-option:hover {
   background: #eef4ef;
