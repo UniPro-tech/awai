@@ -2,6 +2,15 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0](https://github.com/UniPro-tech/awai/compare/v0.7.0...v0.8.0) (2026-09-30)
+
+
+### Features
+
+* モデレーターによる意見削除を追加 ([99f9b2c](https://github.com/UniPro-tech/awai/commit/99f9b2c966da84c5994b93c5ee5d781cd63f01a6))
+* 監査ログ閲覧APIを追加 ([b97e686](https://github.com/UniPro-tech/awai/commit/b97e686693598a6f71251263a0399b6c9024c39e))
+* 管理画面に監査ログ一覧を追加 ([6adf866](https://github.com/UniPro-tech/awai/commit/6adf8662d98cbfa45bc538ba9a9f6c28317347d3))
+
 ## [0.7.0](https://github.com/UniPro-tech/awai/compare/v0.6.0...v0.7.0) (2026-09-30)
 
 
