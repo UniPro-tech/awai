@@ -163,6 +163,17 @@ jobs:
       - run: helm lint deploy/helm/private-polis --set postgresql.enabled=true --set postgresql.auth.password=ci-password --set auth.secret=ci-secret-at-least-32-characters
       - run: helm lint deploy/helm/private-polis --values deploy/helm/private-polis/examples/ingress-values.yaml --set existingSecret=private-polis-ci
       - run: helm lint deploy/helm/private-polis --values deploy/helm/private-polis/examples/gateway-values.yaml --set existingSecret=private-polis-ci
+      - name: Verify release versions stay aligned
+        shell: bash
+        run: |
+          package_version="$(jq -r '.version' package.json)"
+          manifest_version="$(jq -r '.["."]' .release-please-manifest.json)"
+          chart_version="$(awk '$1 == "version:" { gsub(/"/, "", $2); print $2; exit }' deploy/helm/private-polis/Chart.yaml)"
+          app_version="$(awk '$1 == "appVersion:" { gsub(/"/, "", $2); print $2; exit }' deploy/helm/private-polis/Chart.yaml)"
+          if [[ "$package_version" != "$manifest_version" || "$package_version" != "$chart_version" || "$package_version" != "$app_version" ]]; then
+            echo "Release versions are not aligned: package=$package_version manifest=$manifest_version chart=$chart_version app=$app_version" >&2
+            exit 1
+          fi
       - name: Verify Argo CD migration ordering
         shell: bash
         run: |

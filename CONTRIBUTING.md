@@ -9,7 +9,7 @@ Thank you for helping build Awai.
 3. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` before submitting a change.
 4. Add privacy regression tests whenever a change affects identities, statements, votes, moderation, or analysis results.
 
-Use Conventional Commits. Changes must not expose raw votes through user, owner, or administrator APIs.
+Use Conventional Commits. `fix:` raises the patch version, `feat:` raises the minor version, and a `!` or `BREAKING CHANGE:` footer raises the major version through the automated release process. Do not edit release versions, `CHANGELOG.md`, or Git tags manually during a normal release; see [release automation](docs/releases.md). Changes must not expose raw votes through user, owner, or administrator APIs.
 
 Changes to the analysis worker must also pass `uv run ruff check .`, `uv run mypy`, and `uv run pytest` from `services/analysis`. The CI workflow additionally builds both production container targets and validates the Helm chart with external PostgreSQL, bundled PostgreSQL, Ingress, and Gateway API configurations.
 
