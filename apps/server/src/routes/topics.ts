@@ -23,14 +23,16 @@ export function createTopicsRoute(services: ApplicationServices) {
   .get("/", queryValidator(TopicListQuerySchema), async (c) =>
     c.json(
       TopicListResponseSchema.parse({
-        items: (await services.topics.list(c.req.valid("query"))).map(presentTopic),
+        items: (await services.topics.list(c.req.valid("query"))).map((topic) =>
+          presentTopic(topic, c.get("currentUser")),
+        ),
       }),
       200,
     ),
   )
   .post("/", jsonValidator(CreateTopicRequestSchema), async (c) => {
     const topic = await services.topics.create(c.req.valid("json"), c.get("currentUser"));
-    return c.json(presentTopic(topic), 201);
+    return c.json(presentTopic(topic, c.get("currentUser")), 201);
   })
   .patch("/:topicId", jsonValidator(UpdateTopicRequestSchema), async (c) => {
     const topicId = IdSchema.safeParse(c.req.param("topicId"));
@@ -56,7 +58,7 @@ export function createTopicsRoute(services: ApplicationServices) {
         result.error === "PERMISSION_DENIED" ? 403 : 404,
       );
     }
-    return c.json(presentTopic(result.topic), 200);
+    return c.json(presentTopic(result.topic, c.get("currentUser")), 200);
   })
   .patch(
     "/:topicId/owner",
@@ -86,7 +88,7 @@ export function createTopicsRoute(services: ApplicationServices) {
           result.error === "PERMISSION_DENIED" ? 403 : 404,
         );
       }
-      return c.json(presentTopic(result.topic), 200);
+      return c.json(presentTopic(result.topic, c.get("currentUser")), 200);
     },
   )
   .get("/:topicId/statements", async (c) => {
@@ -212,6 +214,6 @@ export function createTopicsRoute(services: ApplicationServices) {
         404,
       );
     }
-    return c.json(presentTopic(topic), 200);
+    return c.json(presentTopic(topic, c.get("currentUser")), 200);
   });
 }

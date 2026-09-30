@@ -55,6 +55,9 @@ export const TopicResponseSchema = z.object({
   status: TopicStatusSchema,
   category: TaxonomyItemResponseSchema.nullable().default(null),
   tags: z.array(TaxonomyItemResponseSchema).default([]),
+  permissions: z.object({
+    canModerateStatements: z.boolean(),
+  }),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

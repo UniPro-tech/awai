@@ -27,7 +27,7 @@ The response deliberately excludes email addresses, authentication-provider iden
 | `POST`   | `/api/v1/topics/:topicId/statements`      | Create a statement                                                          |
 | `DELETE` | `/api/v1/topics/:topicId`                 | Soft-delete a topic as its owner or an administrator                        |
 | `POST`   | `/api/v1/topics/:topicId/restore`         | Restore a soft-deleted topic                                                |
-| `DELETE` | `/api/v1/statements/:statementId`         | Soft-delete a statement as its author, topic owner, or an administrator     |
+| `DELETE` | `/api/v1/statements/:statementId`         | Soft-delete a statement as its author, topic owner, or an administrator; topic responses expose `permissions.canModerateStatements` for moderator UI |
 | `POST`   | `/api/v1/statements/:statementId/restore` | Restore a soft-deleted statement                                            |
 
 `GET /api/v1/topics?categoryId=<uuid>&tagId=<uuid>` returns topics matching both filters. Either filter can be used independently. Omitting both returns topics from every category and tag, including uncategorized and untagged topics.

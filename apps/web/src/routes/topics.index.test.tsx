@@ -46,6 +46,7 @@ function topic(
     author: { visibility: "IDENTIFIED", displayName: "Member" },
     statementIdentityPolicy: "OPTIONAL",
     status: "OPEN",
+    permissions: { canModerateStatements: false },
     category: { id: categoryId, name: categoryName },
     tags: [tag],
     createdAt: "2026-09-30T00:00:00.000Z",

@@ -1,12 +1,13 @@
 import type { StatementResponse } from "@private-polis/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { getLatestAnalysis } from "../features/analysis/api";
 import { OpinionMap } from "../features/analysis/opinion-map";
 import { AuthGate } from "../features/auth/auth-gate";
-import { createStatement, listStatements } from "../features/statements/api";
+import { createStatement, deleteStatement, listStatements } from "../features/statements/api";
 import { getTopic } from "../features/topics/api";
 import {
   getCurrentVote,
@@ -22,13 +23,19 @@ type VoteValue = "AGREE" | "DISAGREE" | "PASS";
 
 function StatementCard({
   statement,
+  canModerate,
   onAnswered,
+  onDeleted,
 }: {
   statement: StatementResponse;
+  canModerate: boolean;
   onAnswered: () => void;
+  onDeleted: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletionReason, setDeletionReason] = useState("");
   const currentVote = useQuery({
     queryKey: ["current-vote", statement.id],
     queryFn: () => getCurrentVote(statement.id),
@@ -49,6 +56,13 @@ function StatementCard({
         }),
         queryClient.invalidateQueries({ queryKey: ["analysis", statement.topicId] }),
       ]);
+    },
+  });
+  const remove = useMutation({
+    mutationFn: () => deleteStatement(statement.id, { reason: deletionReason }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["statements", statement.topicId] });
+      onDeleted();
     },
   });
   useEffect(() => {
@@ -78,6 +92,61 @@ function StatementCard({
       ) : null}
       {statistics.data ? <p className="meta">{t("topic.stats", statistics.data)}</p> : null}
       {vote.error ? <p role="alert">{errorMessage(vote.error, t)}</p> : null}
+      {canModerate ? (
+        <div className="statement-moderation">
+          {deleteOpen ? (
+            <form
+              className="moderation-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                remove.mutate();
+              }}
+            >
+              <label htmlFor={`deletion-reason-${statement.id}`}>
+                {t("topic.deletionReason")}
+              </label>
+              <textarea
+                id={`deletion-reason-${statement.id}`}
+                value={deletionReason}
+                onChange={(event) => setDeletionReason(event.target.value)}
+                maxLength={1000}
+                required
+              />
+              <p className="field-help">{t("topic.deletionHelp")}</p>
+              <div className="moderation-actions">
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => {
+                    setDeleteOpen(false);
+                    setDeletionReason("");
+                  }}
+                  disabled={remove.isPending}
+                >
+                  {t("topic.cancelDeletion")}
+                </button>
+                <button
+                  className="danger-button"
+                  type="submit"
+                  disabled={remove.isPending || deletionReason.trim().length === 0}
+                >
+                  {t(remove.isPending ? "topic.deletingStatement" : "topic.confirmDeletion")}
+                </button>
+              </div>
+              {remove.error ? <p role="alert">{errorMessage(remove.error, t)}</p> : null}
+            </form>
+          ) : (
+            <button
+              className="statement-delete-trigger"
+              type="button"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 aria-hidden="true" size={17} />
+              {t("topic.deleteStatement")}
+            </button>
+          )}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -223,7 +292,11 @@ function TopicPage() {
             <StatementCard
               key={currentStatement.id}
               statement={currentStatement}
+              canModerate={topic.data?.permissions.canModerateStatements ?? false}
               onAnswered={markAnswered}
+              onDeleted={() =>
+                setStatementIndex((index) => Math.max(0, index - 1))
+              }
             />
           ) : null}
           {statementItems.length > 1 ? (

@@ -59,6 +59,37 @@ describe("statements and votes", () => {
     });
   });
 
+  it("exposes statement moderation capability without exposing topic ownership", async () => {
+    const topic = await createTopic();
+    const otherUserApp = createApp({
+      services,
+      authenticate: async () => ({
+        status: "authenticated",
+        user: { ...testUser, id: "00000000-0000-4000-8000-000000000002" },
+      }),
+    });
+    const adminApp = createApp({
+      services,
+      authenticate: async () => ({
+        status: "authenticated",
+        user: {
+          ...testUser,
+          id: "00000000-0000-4000-8000-000000000003",
+          role: "ADMIN",
+        },
+      }),
+    });
+
+    const ownerView = await (await app.request(`/api/v1/topics/${topic.id}`)).json();
+    const memberView = await (await otherUserApp.request(`/api/v1/topics/${topic.id}`)).json();
+    const adminView = await (await adminApp.request(`/api/v1/topics/${topic.id}`)).json();
+
+    expect(ownerView.permissions).toEqual({ canModerateStatements: true });
+    expect(memberView.permissions).toEqual({ canModerateStatements: false });
+    expect(adminView.permissions).toEqual({ canModerateStatements: true });
+    expect(ownerView).not.toHaveProperty("ownerUserId");
+  });
+
   it("sets and replaces only the current user's vote", async () => {
     const topic = await createTopic();
     const created = await createStatement(topic.id);
@@ -149,13 +180,24 @@ describe("statements and votes", () => {
 
   it("soft-deletes and restores a statement with owner authorization", async () => {
     const topic = await createTopic();
-    const created = await createStatement(topic.id, "IDENTIFIED");
+    const authorApp = createApp({
+      services,
+      authenticate: async () => ({
+        status: "authenticated",
+        user: { ...testUser, id: "00000000-0000-4000-8000-000000000002" },
+      }),
+    });
+    const created = await authorApp.request(`/api/v1/topics/${topic.id}/statements`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ body: "A moderated proposal", authorVisibility: "IDENTIFIED" }),
+    });
     const statement = (await created.json()) as { id: string };
     const otherUserApp = createApp({
       services,
       authenticate: async () => ({
         status: "authenticated",
-        user: { ...testUser, id: "00000000-0000-4000-8000-000000000002" },
+        user: { ...testUser, id: "00000000-0000-4000-8000-000000000003" },
       }),
     });
 
@@ -169,7 +211,7 @@ describe("statements and votes", () => {
     const deleted = await app.request(`/api/v1/statements/${statement.id}`, {
       method: "DELETE",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ reason: "Author requested removal" }),
+      body: JSON.stringify({ reason: "Topic owner removed a duplicate" }),
     });
     expect(deleted.status).toBe(204);
     const afterDelete = await app.request(`/api/v1/topics/${topic.id}/statements`);
@@ -181,6 +223,33 @@ describe("statements and votes", () => {
     expect(restored.status).toBe(204);
     const afterRestore = await app.request(`/api/v1/topics/${topic.id}/statements`);
     expect((await afterRestore.json()).items).toHaveLength(1);
+  });
+
+  it("allows an administrator to soft-delete a statement", async () => {
+    const topic = await createTopic();
+    const statement = (await (await createStatement(topic.id)).json()) as { id: string };
+    const adminApp = createApp({
+      services,
+      authenticate: async () => ({
+        status: "authenticated",
+        user: {
+          ...testUser,
+          id: "00000000-0000-4000-8000-000000000004",
+          role: "ADMIN",
+        },
+      }),
+    });
+
+    const deleted = await adminApp.request(`/api/v1/statements/${statement.id}`, {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ reason: "Administrator moderation" }),
+    });
+
+    expect(deleted.status).toBe(204);
+    expect(
+      await (await app.request(`/api/v1/topics/${topic.id}/statements`)).json(),
+    ).toEqual({ items: [] });
   });
 
   it("soft-deletes and restores a topic without exposing it in between", async () => {

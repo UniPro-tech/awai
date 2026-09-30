@@ -34,6 +34,48 @@
   content: "🔒 ";
 }
 
+.statement-moderation {
+  border-top: 1px solid #e1e7e3;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+}
+
+.statement-delete-trigger {
+  align-items: center;
+  background: transparent;
+  border-color: #d8b8b2;
+  color: #7d3d32;
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.moderation-form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.moderation-form textarea {
+  min-height: 5rem;
+}
+
+.moderation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.moderation-actions .secondary-button {
+  background: #fff;
+  border-color: #b9c4bd;
+  color: #34443b;
+}
+
+.moderation-actions .danger-button {
+  background: #7d3d32;
+  border-color: #7d3d32;
+}
+
 .statement-pager {
   margin-top: 1rem;
 }

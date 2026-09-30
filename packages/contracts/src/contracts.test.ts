@@ -49,6 +49,7 @@ describe("topic contracts", () => {
       author: { visibility: "ANONYMOUS", displayName: null },
       statementIdentityPolicy: "OPTIONAL",
       status: "OPEN",
+      permissions: { canModerateStatements: false },
       createdAt: "2026-09-27T00:00:00.000Z",
       updatedAt: "2026-09-27T00:00:00.000Z",
       createdByUserId: "internal-user-id",

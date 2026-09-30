@@ -1,4 +1,5 @@
 import { TopicResponseSchema, type TopicResponse } from "@private-polis/contracts";
+import type { AuthenticatedUser } from "../auth/session.js";
 
 export interface TaxonomyRecord {
   id: string;
@@ -22,7 +23,7 @@ export interface TopicRecord {
   deletedAt: Date | null;
 }
 
-export function presentTopic(topic: TopicRecord): TopicResponse {
+export function presentTopic(topic: TopicRecord, viewer: AuthenticatedUser): TopicResponse {
   return TopicResponseSchema.parse({
     id: topic.id,
     title: topic.title,
@@ -35,6 +36,10 @@ export function presentTopic(topic: TopicRecord): TopicResponse {
     status: topic.status,
     category: topic.category,
     tags: topic.tags,
+    permissions: {
+      canModerateStatements:
+        viewer.role === "ADMIN" || topic.ownerUserId === viewer.id,
+    },
     createdAt: topic.createdAt.toISOString(),
     updatedAt: topic.updatedAt.toISOString(),
   });

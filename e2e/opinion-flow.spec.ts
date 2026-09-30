@@ -75,7 +75,9 @@ async function mockOpinionApp(
     | "OPTIONAL"
     | "ANONYMOUS_REQUIRED"
     | "IDENTIFIED_REQUIRED" = "OPTIONAL",
+  canModerateStatements = false,
 ) {
+  let visibleStatements = [...statements];
   const votes = new Map<string, string | null>(
     statements.map((item) => [item.id, initialVotes[item.id] ?? null]),
   );
@@ -127,6 +129,7 @@ async function mockOpinionApp(
         author: { visibility: "IDENTIFIED", displayName: "テストユーザー" },
         statementIdentityPolicy,
         status: "OPEN",
+        permissions: { canModerateStatements },
         category: null,
         tags: [],
         createdAt: now,
@@ -135,8 +138,17 @@ async function mockOpinionApp(
     }),
   );
   await page.route(`**/api/v1/topics/${topicId}/statements`, (route) =>
-    route.fulfill({ json: { items: statements } }),
+    route.fulfill({ json: { items: visibleStatements } }),
   );
+  await page.route(/\/api\/v1\/statements\/[^/]+$/, async (route) => {
+    if (route.request().method() !== "DELETE") {
+      await route.fallback();
+      return;
+    }
+    const statementId = route.request().url().split("/").at(-1)!;
+    visibleStatements = visibleStatements.filter((statement) => statement.id !== statementId);
+    await route.fulfill({ status: 204 });
+  });
   await page.route(`**/api/v1/topics/${topicId}/votes`, (route) =>
     route.fulfill({
       json: {
@@ -207,6 +219,31 @@ test("shows a static notice when statement display names are required", async ({
   expect((await requestPromise).postDataJSON()).toMatchObject({
     authorVisibility: "IDENTIFIED",
   });
+});
+
+test("allows a topic moderator to delete a statement with a reason", async ({ page }) => {
+  await mockOpinionApp(page, {}, "OPTIONAL", true);
+  await page.goto(`/topics/${topicId}`);
+
+  await page.getByRole("button", { name: "意見を削除" }).click();
+  await page.getByLabel("削除理由").fill("重複した意見のため");
+  const requestPromise = page.waitForRequest(
+    (request) =>
+      request.url().endsWith(`/api/v1/statements/${statementOneId}`)
+      && request.method() === "DELETE",
+  );
+  await page.getByRole("button", { name: "削除する" }).click();
+
+  expect((await requestPromise).postDataJSON()).toEqual({ reason: "重複した意見のため" });
+  await expect(page.getByText(statements[0].body)).toHaveCount(0);
+  await expect(page.getByText(statements[1].body)).toBeVisible();
+});
+
+test("does not show statement deletion controls to regular participants", async ({ page }) => {
+  await mockOpinionApp(page);
+  await page.goto(`/topics/${topicId}`);
+
+  await expect(page.getByRole("button", { name: "意見を削除" })).toHaveCount(0);
 });
 
 test("shows one statement and reveals counts and position only after voting", async ({
