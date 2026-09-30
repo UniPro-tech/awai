@@ -213,6 +213,20 @@ export const resources = {
         positionLearning:
           "位置を推定するには、グループを特徴づける意見への回答がもう少し必要です。",
         group: "グループ {{number}}：{{count}}人",
+        groupShort: "グループ {{number}}",
+        voteDistributionsEyebrow: "回答の内訳",
+        voteDistributions: "意見ごとの賛否割合",
+        voteDistributionsHelp:
+          "各意見への回答を、全体と意見グループごとに比較できます。割合は「わからない／どちらでもない」を含む回答数から算出しています。",
+        everyone: "全体",
+        agree: "賛成",
+        disagree: "反対",
+        pass: "わからない／どちらでもない",
+        responseCount: "{{count}}件の回答",
+        voteBarLabel:
+          "{{label}}：賛成 {{agree}}件、反対 {{disagree}}件、わからない／どちらでもない {{pass}}件",
+        noVotes: "この範囲の回答はありません。",
+        noVoteDistributions: "この分析には回答割合のデータがありません。",
         findings: "注目すべき意見",
         commonOpinions: "共通の意見",
         commonOpinionsHelp:
@@ -564,6 +578,20 @@ export const resources = {
         positionLearning:
           "Answer a few more group-defining statements to estimate your position.",
         group: "Group {{number}}: {{count}} participants",
+        groupShort: "Group {{number}}",
+        voteDistributionsEyebrow: "Response breakdown",
+        voteDistributions: "Agreement by statement",
+        voteDistributionsHelp:
+          "Compare responses to each statement overall and by opinion group. Percentages use all responses, including passes.",
+        everyone: "Overall",
+        agree: "Agree",
+        disagree: "Disagree",
+        pass: "Pass",
+        responseCount: "{{count}} responses",
+        voteBarLabel:
+          "{{label}}: {{agree}} agree, {{disagree}} disagree, {{pass}} pass",
+        noVotes: "No responses in this group.",
+        noVoteDistributions: "Response percentages are unavailable for this analysis.",
         findings: "Key statements",
         commonOpinions: "Common opinions",
         commonOpinionsHelp:

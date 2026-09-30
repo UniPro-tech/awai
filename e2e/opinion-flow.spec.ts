@@ -66,6 +66,24 @@ const analysis = {
       rank: 1,
     },
   ],
+  voteDistributions: [
+    {
+      statement: statements[0],
+      overall: { agree: 5, disagree: 2, pass: 1, total: 8 },
+      groups: [
+        { groupOrdinal: 0, agree: 3, disagree: 1, pass: 0, total: 4 },
+        { groupOrdinal: 1, agree: 2, disagree: 1, pass: 1, total: 4 },
+      ],
+    },
+    {
+      statement: statements[1],
+      overall: { agree: 2, disagree: 5, pass: 1, total: 8 },
+      groups: [
+        { groupOrdinal: 0, agree: 1, disagree: 3, pass: 0, total: 4 },
+        { groupOrdinal: 1, agree: 1, disagree: 2, pass: 1, total: 4 },
+      ],
+    },
+  ],
 };
 
 async function mockOpinionApp(
@@ -291,6 +309,13 @@ test("groups findings and downloads a detailed PDF", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "共通の意見" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "グループ 1の意見" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "グループ 2の意見" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "意見ごとの賛否割合" })).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "全体：賛成 5件、反対 2件、わからない／どちらでもない 1件" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "グループ 1：賛成 3件、反対 1件、わからない／どちらでもない 0件" }),
+  ).toBeVisible();
 
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "詳細分析PDFをダウンロード" }).click();
