@@ -6,6 +6,12 @@ on:
   push:
     branches: [main]
     tags: ["v*.*.*"]
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - "deploy/helm/private-polis/examples/**"
+      - "*.md"
+      - "renovate.json"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
