@@ -2,6 +2,18 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/UniPro-tech/awai/compare/v0.4.0...v0.5.0) (2026-09-30)
+
+
+### Features
+
+* サイドバーにフィードバック導線を追加 ([fca54ac](https://github.com/UniPro-tech/awai/commit/fca54ac455255acf9fbe10518e2f2a3756e1cd26))
+
+
+### Bug Fixes
+
+* 「パス」に関する説明と語順の最適化 ([f13aafc](https://github.com/UniPro-tech/awai/commit/f13aafcbf82d1716b9300d11e0d30d1113af3aae))
+
 ## [0.4.0](https://github.com/UniPro-tech/awai/compare/v0.3.0...v0.4.0) (2026-09-30)
 
 
