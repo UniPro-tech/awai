@@ -2,6 +2,12 @@ name: CI
 
 on:
   pull_request:
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - "deploy/helm/private-polis/examples/**"
+      - "*.md"
+      - "renovate.json"
   workflow_dispatch:
   push:
     branches: [main]
