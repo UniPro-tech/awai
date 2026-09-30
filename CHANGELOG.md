@@ -2,6 +2,16 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0](https://github.com/UniPro-tech/awai/compare/v0.8.1...v0.9.0) (2026-09-30)
+
+
+### Features
+
+* 分析ページに賛否割合グラフを追加 ([09ba376](https://github.com/UniPro-tech/awai/commit/09ba3767e828dc55337ecb70d407ee7682655b0a))
+* 分析ページに賛否割合グラフを追加 ([2f92824](https://github.com/UniPro-tech/awai/commit/2f92824e84e88b4ed3af66455751c7d46ef4c7da))
+* 動画バーのアニメーションを減速モーション設定に対応 ([fd59304](https://github.com/UniPro-tech/awai/commit/fd59304d4f1218e0d750dd12cd47971899b4b8f3))
+* 賛否割合の分析スナップショットを追加 ([a8eb67a](https://github.com/UniPro-tech/awai/commit/a8eb67ab913e6e7984bd7fc8ceb8be94aa08f6fc))
+
 ## [0.8.1](https://github.com/UniPro-tech/awai/compare/v0.8.0...v0.8.1) (2026-09-30)
 
 
