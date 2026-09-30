@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { OpinionMap } from "../features/analysis/opinion-map";
 import { groupColors } from "../features/analysis/palette";
+import { VoteDistribution } from "../features/analysis/vote-distribution";
 import { AuthGate } from "../features/auth/auth-gate";
 import { getLatestAnalysis, listAnalysisRuns } from "../features/analysis/api";
 import { downloadAnalysisPdf } from "../features/analysis/pdf";
@@ -138,6 +139,28 @@ export function ResultsPage() {
                 groups={analysis.data.groups}
                 viewerPoint={analysis.data.viewerPoint}
               />
+            </section>
+            <section
+              className="analysis-section"
+              aria-labelledby="vote-distributions-heading"
+            >
+              <p className="eyebrow">{t("analysis.voteDistributionsEyebrow")}</p>
+              <h2 id="vote-distributions-heading">
+                {t("analysis.voteDistributions")}
+              </h2>
+              <p>{t("analysis.voteDistributionsHelp")}</p>
+              {analysis.data.voteDistributions.length > 0 ? (
+                <div className="vote-distributions">
+                  {analysis.data.voteDistributions.map((distribution) => (
+                    <VoteDistribution
+                      distribution={distribution}
+                      key={distribution.statement.id}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="panel empty-state">{t("analysis.noVoteDistributions")}</p>
+              )}
             </section>
             <section className="analysis-section" aria-labelledby="common-opinions-heading">
               <p className="eyebrow">{t("analysis.findings")}</p>

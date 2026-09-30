@@ -6,6 +6,7 @@ import {
   analysisPoints,
   analysisRuns,
   analysisStatementResults,
+  analysisStatementVoteCounts,
   appUsers,
   statements,
   votes,
@@ -118,7 +119,7 @@ export function createPostgresAnalysisService(database: Database): AnalysisServi
       .limit(1);
     if (!run) return undefined;
 
-    const [groups, points, statementResults, viewerVotes] = await Promise.all([
+    const [groups, points, statementResults, voteCountRows, viewerVotes] = await Promise.all([
       database
         .select({
           ordinal: analysisGroups.ordinal,
@@ -161,6 +162,34 @@ export function createPostgresAnalysisService(database: Database): AnalysisServi
         .where(eq(analysisStatementResults.analysisRunId, runId))
         .orderBy(asc(analysisStatementResults.kind), asc(analysisStatementResults.rank)),
       database
+        .select({
+          id: statements.id,
+          topicId: statements.topicId,
+          authorUserId: statements.authorUserId,
+          authorDisplayName: appUsers.displayName,
+          body: statements.body,
+          authorVisibility: statements.authorVisibility,
+          createdAt: statements.createdAt,
+          updatedAt: statements.updatedAt,
+          deletedAt: statements.deletedAt,
+          groupOrdinal: analysisGroups.ordinal,
+          agree: analysisStatementVoteCounts.agreeCount,
+          disagree: analysisStatementVoteCounts.disagreeCount,
+          pass: analysisStatementVoteCounts.passCount,
+        })
+        .from(analysisStatementVoteCounts)
+        .innerJoin(
+          statements,
+          eq(analysisStatementVoteCounts.statementId, statements.id),
+        )
+        .innerJoin(appUsers, eq(statements.authorUserId, appUsers.id))
+        .leftJoin(
+          analysisGroups,
+          eq(analysisStatementVoteCounts.groupId, analysisGroups.id),
+        )
+        .where(eq(analysisStatementVoteCounts.analysisRunId, runId))
+        .orderBy(asc(statements.createdAt), asc(analysisGroups.ordinal)),
+      database
         .select({ statementId: votes.statementId, value: votes.value })
         .from(votes)
         .innerJoin(statements, eq(votes.statementId, statements.id))
@@ -179,6 +208,29 @@ export function createPostgresAnalysisService(database: Database): AnalysisServi
       score: result.score,
       rank: result.rank,
     }));
+    const voteDistributions = new Map<
+      string,
+      AnalysisRunResponse["voteDistributions"][number]
+    >();
+    for (const row of voteCountRows) {
+      const distribution = voteDistributions.get(row.id) ?? {
+        statement: presentStatement(row),
+        overall: { agree: 0, disagree: 0, pass: 0, total: 0 },
+        groups: [],
+      };
+      const counts = {
+        agree: row.agree,
+        disagree: row.disagree,
+        pass: row.pass,
+        total: row.agree + row.disagree + row.pass,
+      };
+      if (row.groupOrdinal === null) {
+        distribution.overall = counts;
+      } else {
+        distribution.groups.push({ groupOrdinal: row.groupOrdinal, ...counts });
+      }
+      voteDistributions.set(row.id, distribution);
+    }
 
     return {
       ...summarize(run),
@@ -190,6 +242,7 @@ export function createPostgresAnalysisService(database: Database): AnalysisServi
       })),
       viewerPoint: estimateViewerPoint(presentedGroups, presentedResults, viewerVotes),
       statementResults: presentedResults,
+      voteDistributions: [...voteDistributions.values()],
     };
   }
 

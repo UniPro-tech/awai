@@ -15,6 +15,7 @@ def empty_result() -> AnalysisResult:
         points=(),
         groups=(),
         statement_results=(),
+        vote_counts=(),
     )
 
 

@@ -42,9 +42,19 @@ class StatementResult:
 
 
 @dataclass(frozen=True)
+class StatementVoteCounts:
+    statement_id: str
+    group_ordinal: int | None
+    agree_count: int
+    disagree_count: int
+    pass_count: int
+
+
+@dataclass(frozen=True)
 class AnalysisResult:
     participant_count: int
     statement_count: int
     points: tuple[AnalysisPoint, ...]
     groups: tuple[AnalysisGroup, ...]
     statement_results: tuple[StatementResult, ...]
+    vote_counts: tuple[StatementVoteCounts, ...]

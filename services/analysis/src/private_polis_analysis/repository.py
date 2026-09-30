@@ -133,6 +133,27 @@ class AnalysisRepository:
                 )
                 cursor.executemany(
                     """
+                    INSERT INTO analysis.statement_vote_counts (
+                        analysis_run_id, statement_id, group_id,
+                        agree_count, disagree_count, pass_count
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    [
+                        (
+                            run_id,
+                            counts.statement_id,
+                            None
+                            if counts.group_ordinal is None
+                            else group_ids[counts.group_ordinal],
+                            counts.agree_count,
+                            counts.disagree_count,
+                            counts.pass_count,
+                        )
+                        for counts in result.vote_counts
+                    ],
+                )
+                cursor.executemany(
+                    """
                     INSERT INTO analysis.statement_results (
                         analysis_run_id, statement_id, group_id, kind, score, rank
                     ) VALUES (%s, %s, %s, %s, %s, %s)

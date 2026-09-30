@@ -2,7 +2,7 @@
 
 The worker claims due jobs from PostgreSQL with `FOR UPDATE SKIP LOCKED`, loads raw votes inside the worker boundary, runs the Red Dwarf PCA/K-means pipeline, and persists privacy-safe snapshots.
 
-Participant identifiers exist only while a job is running. Persisted `analysis.points` rows contain coordinates and an optional group identifier, never a user identifier or a reversible participant mapping.
+Participant identifiers exist only while a job is running. Persisted `analysis.points` rows contain coordinates and an optional group identifier, never a user identifier or a reversible participant mapping. The worker also stores per-statement response counts for the whole topic and each anonymous group. These snapshot rows contain only `AGREE`, `DISAGREE`, and `PASS` totals; they cannot be traced back to a participant.
 
 ## Development
 

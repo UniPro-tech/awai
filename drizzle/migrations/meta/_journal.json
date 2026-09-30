@@ -43,6 +43,13 @@
       "when": 1790748419129,
       "tag": "0005_melted_stingray",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790764790402,
+      "tag": "0006_normal_sir_ram",
+      "breakpoints": true
     }
   ]
 }

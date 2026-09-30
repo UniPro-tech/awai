@@ -242,3 +242,24 @@ export const analysisStatementResults = analysis.table(
     index("analysis_statement_results_group_idx").on(table.groupId),
   ],
 );
+
+export const analysisStatementVoteCounts = analysis.table(
+  "statement_vote_counts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    analysisRunId: uuid("analysis_run_id")
+      .notNull()
+      .references(() => analysisRuns.id, { onDelete: "cascade" }),
+    statementId: uuid("statement_id")
+      .notNull()
+      .references(() => statements.id, { onDelete: "restrict" }),
+    groupId: uuid("group_id").references(() => analysisGroups.id, { onDelete: "cascade" }),
+    agreeCount: integer("agree_count").default(0).notNull(),
+    disagreeCount: integer("disagree_count").default(0).notNull(),
+    passCount: integer("pass_count").default(0).notNull(),
+  },
+  (table) => [
+    index("analysis_statement_vote_counts_run_idx").on(table.analysisRunId),
+    index("analysis_statement_vote_counts_statement_idx").on(table.statementId),
+  ],
+);

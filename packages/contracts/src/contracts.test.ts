@@ -190,11 +190,29 @@ describe("analysis contracts", () => {
           rank: 1,
         },
       ],
+      voteDistributions: [
+        {
+          statement: {
+            id: "0198f38e-c18a-7e9f-a005-629e4c37ae41",
+            topicId: "0198f38e-c18a-7e9f-a005-629e4c37ae42",
+            body: "Shared ground",
+            author: { visibility: "ANONYMOUS", displayName: null },
+            createdAt: "2026-09-27T00:00:00.000Z",
+            updatedAt: "2026-09-27T00:00:00.000Z",
+            authorUserId: "private-user",
+          },
+          overall: { agree: 3, disagree: 1, pass: 1, total: 5 },
+          groups: [
+            { groupOrdinal: 0, agree: 2, disagree: 0, pass: 1, total: 3 },
+          ],
+        },
+      ],
     });
 
     expect(response.points[0]).not.toHaveProperty("userId");
     expect(response.viewerPoint).not.toHaveProperty("userId");
     expect(response.statementResults[0]?.statement).not.toHaveProperty("authorUserId");
+    expect(response.voteDistributions[0]?.statement).not.toHaveProperty("authorUserId");
   });
 });
 

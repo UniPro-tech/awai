@@ -38,6 +38,7 @@ describe("analysis results", () => {
       ],
       viewerPoint: { x: -1, y: 0, groupOrdinal: 0 },
       statementResults: [],
+      voteDistributions: [],
     };
     services.analysis = {
       latest: async () => run,

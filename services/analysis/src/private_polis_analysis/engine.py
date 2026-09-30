@@ -9,6 +9,7 @@ from .models import (
     AnalysisResult,
     ResultKind,
     StatementResult,
+    StatementVoteCounts,
     VoteInput,
 )
 
@@ -92,12 +93,14 @@ class RedDwarfAnalysisEngine:
         )
 
         points: list[AnalysisPoint] = []
+        participant_groups: dict[str, int | None] = {}
         group_counts: Counter[int] = Counter()
         group_coordinates: dict[int, list[tuple[float, float]]] = {}
-        for row in pipeline_result.participants_df.to_dict("records"):
+        for participant_index, row in pipeline_result.participants_df.iterrows():
             group = None if row["cluster_id"] is None else int(row["cluster_id"])
             x, y = float(row["x"]), float(row["y"])
             points.append(AnalysisPoint(x=x, y=y, group_ordinal=group))
+            participant_groups[participant_ids[int(participant_index)]] = group
             if group is not None:
                 group_counts[group] += 1
                 group_coordinates.setdefault(group, []).append((x, y))
@@ -138,10 +141,39 @@ class RedDwarfAnalysisEngine:
                     )
                 )
 
+        count_keys: list[tuple[str, int | None]] = [
+            (statement_id, None) for statement_id in statement_ids
+        ]
+        count_keys.extend(
+            (statement_id, group.ordinal)
+            for statement_id in statement_ids
+            for group in groups
+        )
+        vote_counts: dict[tuple[str, int | None], Counter[str]] = {
+            key: Counter() for key in count_keys
+        }
+        for vote in votes:
+            vote_counts[(vote.statement_id, None)][vote.value] += 1
+            group_ordinal = participant_groups.get(vote.participant_id)
+            if group_ordinal is not None:
+                vote_counts[(vote.statement_id, group_ordinal)][vote.value] += 1
+
+        statement_vote_counts = tuple(
+            StatementVoteCounts(
+                statement_id=statement_id,
+                group_ordinal=group_ordinal,
+                agree_count=counts["AGREE"],
+                disagree_count=counts["DISAGREE"],
+                pass_count=counts["PASS"],
+            )
+            for (statement_id, group_ordinal), counts in vote_counts.items()
+        )
+
         return AnalysisResult(
             participant_count=len(participant_ids),
             statement_count=len(statement_ids),
             points=tuple(points),
             groups=groups,
             statement_results=tuple(statement_results),
+            vote_counts=statement_vote_counts,
         )
