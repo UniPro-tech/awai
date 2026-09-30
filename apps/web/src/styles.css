@@ -525,6 +525,21 @@ h2 {
   font-size: 0.88rem;
   margin: -0.2rem 0 0;
 }
+.identity-policy-field {
+  display: grid;
+  gap: 0.35rem;
+}
+.identity-policy-field > span {
+  font-weight: 500;
+}
+.identity-policy-value {
+  background: #eef4ef;
+  border: 1px solid #d4e1d8;
+  border-radius: 0.4rem;
+  color: #405047;
+  margin: 0;
+  padding: 0.72rem 0.8rem;
+}
 .statement-card > p:first-child {
   font-size: 1.05rem;
 }

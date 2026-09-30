@@ -71,6 +71,10 @@ const analysis = {
 async function mockOpinionApp(
   page: Page,
   initialVotes: Readonly<Record<string, string>> = {},
+  statementIdentityPolicy:
+    | "OPTIONAL"
+    | "ANONYMOUS_REQUIRED"
+    | "IDENTIFIED_REQUIRED" = "OPTIONAL",
 ) {
   const votes = new Map<string, string | null>(
     statements.map((item) => [item.id, initialVotes[item.id] ?? null]),
@@ -121,7 +125,7 @@ async function mockOpinionApp(
         title: "まちの未来",
         description: "暮らしやすいまちを考える",
         author: { visibility: "IDENTIFIED", displayName: "テストユーザー" },
-        statementIdentityPolicy: "OPTIONAL",
+        statementIdentityPolicy,
         status: "OPEN",
         category: null,
         tags: [],
@@ -162,6 +166,48 @@ async function mockOpinionApp(
     route.fulfill({ json: { items: [analysis] } }),
   );
 }
+
+test("shows a static notice when statement authors must be anonymous", async ({ page }) => {
+  await mockOpinionApp(page, {}, "ANONYMOUS_REQUIRED");
+  await page.goto(`/topics/${topicId}`);
+
+  await expect(page.getByLabel("投稿者表示")).toHaveCount(0);
+  await expect(
+    page.getByText("このトピックでは、意見は常に匿名で投稿されます。"),
+  ).toBeVisible();
+
+  const requestPromise = page.waitForRequest(
+    (request) =>
+      request.url().endsWith(`/api/v1/topics/${topicId}/statements`)
+      && request.method() === "POST",
+  );
+  await page.getByRole("textbox", { name: "意見" }).fill("匿名で投稿する意見");
+  await page.getByRole("button", { name: "意見を追加" }).click();
+  expect((await requestPromise).postDataJSON()).toMatchObject({
+    authorVisibility: "ANONYMOUS",
+  });
+});
+
+test("shows a static notice when statement display names are required", async ({ page }) => {
+  await mockOpinionApp(page, {}, "IDENTIFIED_REQUIRED");
+  await page.goto(`/topics/${topicId}`);
+
+  await expect(page.getByLabel("投稿者表示")).toHaveCount(0);
+  await expect(
+    page.getByText("このトピックでは、意見に表示名を付けて投稿する必要があります。"),
+  ).toBeVisible();
+
+  const requestPromise = page.waitForRequest(
+    (request) =>
+      request.url().endsWith(`/api/v1/topics/${topicId}/statements`)
+      && request.method() === "POST",
+  );
+  await page.getByRole("textbox", { name: "意見" }).fill("表示名付きで投稿する意見");
+  await page.getByRole("button", { name: "意見を追加" }).click();
+  expect((await requestPromise).postDataJSON()).toMatchObject({
+    authorVisibility: "IDENTIFIED",
+  });
+});
 
 test("shows one statement and reveals counts and position only after voting", async ({
   page,

@@ -117,7 +117,14 @@ function TopicPage() {
     refetchInterval: hasAnswered ? 5_000 : false,
   });
   const create = useMutation({
-    mutationFn: () => createStatement(topicId, { body, authorVisibility: visibility }),
+    mutationFn: () => {
+      const authorVisibility = topic.data?.statementIdentityPolicy === "ANONYMOUS_REQUIRED"
+        ? "ANONYMOUS"
+        : topic.data?.statementIdentityPolicy === "IDENTIFIED_REQUIRED"
+          ? "IDENTIFIED"
+          : visibility;
+      return createStatement(topicId, { body, authorVisibility });
+    },
     onSuccess: async () => {
       setBody("");
       await queryClient.invalidateQueries({ queryKey: ["statements", topicId] });
@@ -160,11 +167,26 @@ function TopicPage() {
           <form className="stack" onSubmit={submit}>
             <label htmlFor="statement-body">{t("topic.statement")}</label>
             <textarea id="statement-body" value={body} onChange={(event) => setBody(event.target.value)} maxLength={5000} required />
-            <label htmlFor="statement-visibility">{t("topic.authorVisibility")}</label>
-            <select id="statement-visibility" value={visibility} onChange={(event) => setVisibility(event.target.value as typeof visibility)}>
-              <option value="ANONYMOUS">{t("common.anonymous")}</option><option value="IDENTIFIED">{t("common.identified")}</option>
-            </select>
-            <button type="submit" disabled={create.isPending}>{t("topic.add")}</button>
+            {topic.data?.statementIdentityPolicy === "OPTIONAL" ? (
+              <>
+                <label htmlFor="statement-visibility">{t("topic.authorVisibility")}</label>
+                <select id="statement-visibility" value={visibility} onChange={(event) => setVisibility(event.target.value as typeof visibility)}>
+                  <option value="ANONYMOUS">{t("common.anonymous")}</option><option value="IDENTIFIED">{t("common.identified")}</option>
+                </select>
+              </>
+            ) : topic.data?.statementIdentityPolicy ? (
+              <div className="identity-policy-field">
+                <span>{t("topic.authorVisibility")}</span>
+                <p className="identity-policy-value">
+                  {t(
+                    topic.data.statementIdentityPolicy === "ANONYMOUS_REQUIRED"
+                      ? "topic.anonymousRequiredNotice"
+                      : "topic.identifiedRequiredNotice",
+                  )}
+                </p>
+              </div>
+            ) : null}
+            <button type="submit" disabled={create.isPending || !topic.data}>{t("topic.add")}</button>
             {create.error ? <p role="alert">{errorMessage(create.error, t)}</p> : null}
           </form>
         </section>

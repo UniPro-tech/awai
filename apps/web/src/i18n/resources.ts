@@ -153,6 +153,9 @@ export const resources = {
         agree: "賛成",
         disagree: "反対",
         pass: "わからない/どちらでもない",
+        anonymousRequiredNotice: "このトピックでは、意見は常に匿名で投稿されます。",
+        identifiedRequiredNotice:
+          "このトピックでは、意見に表示名を付けて投稿する必要があります。",
         stats:
           "賛成 {{agree}}・反対 {{disagree}}・わからない/どちらでもない {{pass}}",
         statsLocked: "回答すると、みんなの投票結果が表示されます。",
@@ -454,6 +457,10 @@ export const resources = {
         agree: "Agree",
         disagree: "Disagree",
         pass: "Pass",
+        anonymousRequiredNotice:
+          "Statements in this topic are always posted anonymously.",
+        identifiedRequiredNotice:
+          "Your display name is required on statements in this topic.",
         stats: "{{agree}} agree · {{disagree}} disagree · {{pass}} pass",
         statsLocked: "Vote to reveal how everyone responded.",
         statementProgress: "{{current}} / {{total}}",
