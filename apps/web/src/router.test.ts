@@ -11,6 +11,7 @@ describe("file-based routes", () => {
     ["/admin/users", "/admin/users"],
     ["/admin/categories", "/admin/categories"],
     ["/admin/settings", "/admin/settings"],
+    ["/admin/audit-logs", "/admin/audit-logs"],
   ] as const)("builds %s", (to, expected) => {
     expect(router.buildLocation({ to, params: { topicId: "topic-1" } }).pathname).toBe(expected);
   });

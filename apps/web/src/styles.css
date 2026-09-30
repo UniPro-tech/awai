@@ -642,7 +642,7 @@ h2 {
 .admin-destinations {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   margin-top: 1.5rem;
 }
 .admin-destination {
@@ -722,6 +722,97 @@ h2 {
 }
 .settings-list + .settings-list {
   margin-top: 1rem;
+}
+.audit-toolbar {
+  align-items: end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+.audit-toolbar .topic-filter {
+  width: min(24rem, 100%);
+}
+.audit-list {
+  display: grid;
+  gap: 0.75rem;
+}
+.audit-entry {
+  margin-top: 0;
+}
+.audit-entry-heading {
+  align-items: baseline;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.audit-entry-heading strong {
+  color: #24583d;
+}
+.audit-entry-heading time {
+  color: #68766c;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.audit-entry-summary {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 1rem 0 0;
+}
+.audit-entry-summary > div {
+  min-width: 0;
+}
+.audit-entry-summary dt,
+.audit-metadata dt {
+  color: #68766c;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.audit-entry-summary dd,
+.audit-metadata dd {
+  margin: 0.25rem 0 0;
+}
+.audit-entry-summary code {
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+  overflow-wrap: anywhere;
+}
+.audit-metadata {
+  border-top: 1px solid #e1e7e3;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+}
+.audit-metadata summary {
+  color: #17633f;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.audit-metadata dl {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0;
+}
+.audit-metadata dl > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.3fr) 1fr;
+}
+.audit-metadata dd {
+  overflow-wrap: anywhere;
+}
+.audit-pagination {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+.audit-pagination .secondary-button {
+  background: #fff;
+  border-color: #b9c4bd;
+  color: #34443b;
 }
 
 .auth-shell {
@@ -915,8 +1006,26 @@ h2 {
     grid-template-columns: 1fr;
   }
   .profile-details dl > div,
-  .settings-list dl > div {
+  .settings-list dl > div,
+  .audit-entry-summary,
+  .audit-metadata dl > div {
     grid-template-columns: 1fr;
+  }
+  .audit-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .audit-entry-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .audit-pagination {
+    gap: 0.5rem;
+  }
+  .audit-pagination button {
+    min-width: 0;
+    padding-inline: 0.65rem;
   }
   .onboarding-dialog {
     max-height: calc(100vh - 2rem);

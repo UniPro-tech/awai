@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FolderTree, Settings, Users } from "lucide-react";
+import { FileClock, FolderTree, Settings, Users } from "lucide-react";
 import { AdminGate } from "../features/auth/admin-gate";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +9,7 @@ function AdminIndexPage() {
     { to: "/admin/users" as const, title: t("admin.users"), description: t("admin.usersDescription"), icon: Users },
     { to: "/admin/categories" as const, title: t("admin.taxonomy"), description: t("admin.taxonomyDescription"), icon: FolderTree },
     { to: "/admin/settings" as const, title: t("admin.settings"), description: t("admin.settingsDescription"), icon: Settings },
+    { to: "/admin/audit-logs" as const, title: t("admin.auditLogs"), description: t("admin.auditLogsDescription"), icon: FileClock },
   ];
   return (
     <AdminGate>
