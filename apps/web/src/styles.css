@@ -273,12 +273,17 @@ h2 {
 .topic-list-header h2 {
   margin-bottom: 0;
 }
-.category-filter {
+.topic-filters {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(36rem, 100%);
+}
+.topic-filter {
   display: grid;
   gap: 0.35rem;
-  min-width: min(18rem, 100%);
 }
-.category-filter > span {
+.topic-filter > span {
   align-items: center;
   color: #526158;
   display: flex;
@@ -286,7 +291,7 @@ h2 {
   font-weight: 700;
   gap: 0.35rem;
 }
-.category-filter select {
+.topic-filter select {
   background-color: #fff;
   width: 100%;
 }
@@ -657,6 +662,9 @@ h2 {
   .topic-list-header {
     align-items: stretch;
     flex-direction: column;
+  }
+  .topic-filters {
+    grid-template-columns: 1fr;
   }
   .form-row {
     align-items: stretch;

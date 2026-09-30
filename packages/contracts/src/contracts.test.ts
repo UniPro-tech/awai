@@ -32,10 +32,12 @@ describe("topic contracts", () => {
     ).toThrow();
   });
 
-  it("accepts only UUID category filters", () => {
+  it("accepts only UUID category and tag filters", () => {
     const categoryId = "00000000-0000-4000-8000-000000000010";
-    expect(TopicListQuerySchema.parse({ categoryId })).toEqual({ categoryId });
+    const tagId = "00000000-0000-4000-8000-000000000011";
+    expect(TopicListQuerySchema.parse({ categoryId, tagId })).toEqual({ categoryId, tagId });
     expect(() => TopicListQuerySchema.parse({ categoryId: "governance" })).toThrow();
+    expect(() => TopicListQuerySchema.parse({ tagId: "urgent" })).toThrow();
   });
 
   it("strips internal identity fields at the response boundary", () => {

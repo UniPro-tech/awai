@@ -1,9 +1,14 @@
-import type { ChangeTopicOwnerRequest, CreateTopicRequest, UpdateTopicRequest } from "@private-polis/contracts";
+import type {
+  ChangeTopicOwnerRequest,
+  CreateTopicRequest,
+  TopicListQuery,
+  UpdateTopicRequest,
+} from "@private-polis/contracts";
 import { api, toApiError } from "../../lib/api";
 
-export async function listTopics(categoryId?: string) {
+export async function listTopics(query: TopicListQuery = {}) {
   const response = await api.api.v1.topics.$get({
-    query: categoryId ? { categoryId } : {},
+    query,
   });
   if (!response.ok) throw await toApiError(response);
   return response.json();

@@ -5,19 +5,25 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui/button";
 import { AuthGate } from "../features/auth/auth-gate";
-import { listCategories } from "../features/taxonomy/api";
+import { listCategories, listTags } from "../features/taxonomy/api";
 import { listTopics } from "../features/topics/api";
 import { errorMessage } from "../lib/error-message";
 
 function TopicsPage() {
   const { t } = useTranslation();
   const [categoryId, setCategoryId] = useState("");
+  const [tagId, setTagId] = useState("");
   const categories = useQuery({ queryKey: ["categories"], queryFn: listCategories });
+  const tags = useQuery({ queryKey: ["tags"], queryFn: listTags });
   const topics = useQuery({
-    queryKey: ["topics", { categoryId: categoryId || null }],
-    queryFn: () => listTopics(categoryId || undefined),
+    queryKey: ["topics", { categoryId: categoryId || null, tagId: tagId || null }],
+    queryFn: () => listTopics({
+      ...(categoryId ? { categoryId } : {}),
+      ...(tagId ? { tagId } : {}),
+    }),
   });
-  const hasCategoryFilter = categoryId.length > 0;
+  const hasTaxonomyFilter = categoryId.length > 0 || tagId.length > 0;
+  const taxonomyError = categories.error ?? tags.error;
 
   return (
     <AuthGate>
@@ -37,24 +43,39 @@ function TopicsPage() {
         <section aria-labelledby="topic-list-heading">
           <div className="topic-list-header">
             <h2 id="topic-list-heading">{t("topics.listHeading")}</h2>
-            <label className="category-filter">
-              <span>
-                <Search aria-hidden="true" size={16} /> {t("topics.categoryFilter")}
-              </span>
-              <select
-                value={categoryId}
-                onChange={(event) => setCategoryId(event.target.value)}
-                disabled={categories.isPending || Boolean(categories.error)}
-              >
-                <option value="">{t("topics.allCategories")}</option>
-                {categories.data?.items.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                ))}
-              </select>
-            </label>
+            <div className="topic-filters" aria-label={t("topics.filters")}>
+              <label className="topic-filter">
+                <span>
+                  <Search aria-hidden="true" size={16} /> {t("topics.categoryFilter")}
+                </span>
+                <select
+                  value={categoryId}
+                  onChange={(event) => setCategoryId(event.target.value)}
+                  disabled={categories.isPending || Boolean(categories.error)}
+                >
+                  <option value="">{t("topics.allCategories")}</option>
+                  {categories.data?.items.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="topic-filter">
+                <span>{t("topics.tagFilter")}</span>
+                <select
+                  value={tagId}
+                  onChange={(event) => setTagId(event.target.value)}
+                  disabled={tags.isPending || Boolean(tags.error)}
+                >
+                  <option value="">{t("topics.allTags")}</option>
+                  {tags.data?.items.map((tag) => (
+                    <option key={tag.id} value={tag.id}>{tag.name}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
-          {categories.error ? (
-            <p role="alert">{errorMessage(categories.error, t)}</p>
+          {taxonomyError ? (
+            <p role="alert">{errorMessage(taxonomyError, t)}</p>
           ) : null}
           {topics.isPending ? <p>{t("topics.loading")}</p> : null}
           {topics.error ? (
@@ -62,8 +83,8 @@ function TopicsPage() {
           ) : null}
           {topics.data?.items.length === 0 ? (
             <div className="panel empty-state">
-              <h2>{t(hasCategoryFilter ? "topics.noCategoryResults" : "topics.emptyTitle")}</h2>
-              <p>{t(hasCategoryFilter ? "topics.noCategoryResultsBody" : "topics.emptyBody")}</p>
+              <h2>{t(hasTaxonomyFilter ? "topics.noFilterResults" : "topics.emptyTitle")}</h2>
+              <p>{t(hasTaxonomyFilter ? "topics.noFilterResultsBody" : "topics.emptyBody")}</p>
             </div>
           ) : null}
           <ul className="topic-list">

@@ -10,7 +10,9 @@ import {
   analysisStatementResults,
   appUsers,
   auditLogs,
+  categories,
   statements,
+  tags,
   topics,
   votes,
 } from "./db/schema.js";
@@ -37,6 +39,8 @@ const nextOwner = {
   role: "USER" as const,
 };
 let topicId: string | undefined;
+let categoryId: string | undefined;
+let tagId: string | undefined;
 
 describe.runIf(shouldRun)("PostgreSQL integration", () => {
   beforeAll(async () => {
@@ -80,23 +84,38 @@ describe.runIf(shouldRun)("PostgreSQL integration", () => {
       );
       await runtime.db.delete(topics).where(eq(topics.id, topicId));
     }
+    if (tagId) await runtime.db.delete(tags).where(eq(tags.id, tagId));
+    if (categoryId) await runtime.db.delete(categories).where(eq(categories.id, categoryId));
     await runtime.db.delete(appUsers).where(inArray(appUsers.id, [owner.id, administrator.id, nextOwner.id]));
     await runtime.pool.end();
   });
 
   it("preserves anonymous statements and records topic management audits", async () => {
+    const [category] = await runtime.db
+      .insert(categories)
+      .values({ name: `Integration category ${owner.id}` })
+      .returning({ id: categories.id });
+    if (!category) throw new Error("Category insertion failed.");
+    categoryId = category.id;
+    const tagName = `integration-${owner.id}`;
     const topic = await services.topics.create(
       {
         title: "PostgreSQL integration topic",
         description: "",
         authorVisibility: "ANONYMOUS",
         statementIdentityPolicy: "OPTIONAL",
-        categoryId: null,
-        tags: [],
+        categoryId,
+        tags: [tagName],
       },
       owner,
     );
     topicId = topic.id;
+    tagId = topic.tags[0]?.id;
+    if (!tagId) throw new Error("Tag insertion failed.");
+    await expect(services.topics.list({ categoryId, tagId })).resolves.toMatchObject([
+      { id: topic.id },
+    ]);
+    await expect(services.topics.list({ tagId: crypto.randomUUID() })).resolves.toEqual([]);
     const created = await services.statements.create(
       topic.id,
       { body: "The author must remain private.", authorVisibility: "ANONYMOUS" },

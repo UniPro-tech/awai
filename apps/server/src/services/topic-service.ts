@@ -32,6 +32,7 @@ export interface TopicService {
 
 export interface TopicListOptions {
   categoryId?: string;
+  tagId?: string;
 }
 
 export type TopicModerationResult =
@@ -94,9 +95,19 @@ export function createPostgresTopicService(database: Database): TopicService {
         .innerJoin(appUsers, eq(topics.createdByUserId, appUsers.id))
         .leftJoin(categories, eq(topics.categoryId, categories.id))
         .where(
-          options?.categoryId
-            ? and(isNull(topics.deletedAt), eq(topics.categoryId, options.categoryId))
-            : isNull(topics.deletedAt),
+          and(
+            isNull(topics.deletedAt),
+            options?.categoryId ? eq(topics.categoryId, options.categoryId) : undefined,
+            options?.tagId
+              ? inArray(
+                  topics.id,
+                  database
+                    .select({ topicId: topicTags.topicId })
+                    .from(topicTags)
+                    .where(eq(topicTags.tagId, options.tagId)),
+                )
+              : undefined,
+          ),
         )
         .orderBy(desc(topics.createdAt));
       return hydrateTags(rows);
@@ -313,7 +324,8 @@ export function createMemoryTopicService(): MemoryTopicService {
         .filter(
           (topic) =>
             !topic.deletedAt &&
-            (!options?.categoryId || topic.category?.id === options.categoryId),
+            (!options?.categoryId || topic.category?.id === options.categoryId) &&
+            (!options?.tagId || topic.tags.some((tag) => tag.id === options.tagId)),
         )
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     },

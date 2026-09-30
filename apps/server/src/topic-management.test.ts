@@ -46,17 +46,18 @@ describe("topic management", () => {
     services = createMemoryServices();
   });
 
-  it("filters the topic list by category", async () => {
+  it("filters the topic list by category and tag", async () => {
     const categoryId = "00000000-0000-4000-8000-000000000010";
+    const tagId = "00000000-0000-4000-8000-000000000011";
     const list = vi.fn().mockResolvedValue([]);
     services.topics.list = list;
 
     const response = await appFor(services, owner).request(
-      `/api/v1/topics?categoryId=${categoryId}`,
+      `/api/v1/topics?categoryId=${categoryId}&tagId=${tagId}`,
     );
 
     expect(response.status).toBe(200);
-    expect(list).toHaveBeenCalledWith({ categoryId });
+    expect(list).toHaveBeenCalledWith({ categoryId, tagId });
   });
 
   it("rejects an invalid category filter", async () => {
@@ -65,6 +66,19 @@ describe("topic management", () => {
 
     const response = await appFor(services, owner).request(
       "/api/v1/topics?categoryId=not-a-uuid",
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ error: { code: "VALIDATION_ERROR" } });
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it("rejects an invalid tag filter", async () => {
+    const list = vi.fn().mockResolvedValue([]);
+    services.topics.list = list;
+
+    const response = await appFor(services, owner).request(
+      "/api/v1/topics?tagId=not-a-uuid",
     );
 
     expect(response.status).toBe(400);
