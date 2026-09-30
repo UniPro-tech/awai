@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for requesting a new feature! Please fill out the following information.<br/>
+        Thanks for requesting a new feature! Please fill out the following information.
         機能の提案ありがとうございます。以下の情報を記入してください。
 
   - type: markdown
