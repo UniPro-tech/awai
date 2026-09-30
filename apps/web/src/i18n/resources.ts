@@ -145,6 +145,8 @@ export const resources = {
         settings: "トピック設定",
         addHeading: "意見を追加",
         statement: "意見",
+        statementHelp:
+          "Polisに適した、賛成・反対で答えやすい意見として、なるべく分割して記載してください。",
         authorVisibility: "投稿者表示",
         add: "意見を追加",
         statements: "意見一覧",
@@ -451,6 +453,8 @@ export const resources = {
         settings: "Topic settings",
         addHeading: "Add your viewpoint",
         statement: "Statement",
+        statementHelp:
+          "Use a Polis-friendly format: write statements that are easy to answer with agree or disagree, and split separate ideas whenever possible.",
         authorVisibility: "Author visibility",
         add: "Add statement",
         statements: "Statements",

@@ -216,6 +216,11 @@ test("shows one statement and reveals counts and position only after voting", as
   await page.goto(`/topics/${topicId}`);
 
   await expect(page.getByText(statements[0].body)).toBeVisible();
+  await expect(
+    page.getByText(
+      "Polisに適した、賛成・反対で答えやすい意見として、なるべく分割して記載してください。",
+    ),
+  ).toBeVisible();
   await expect(page.getByText(statements[1].body)).toHaveCount(0);
   await expect(
     page.getByText("賛成 5・反対 2・わからない/どちらでもない 1"),

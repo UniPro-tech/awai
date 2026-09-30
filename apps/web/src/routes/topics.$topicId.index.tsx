@@ -166,7 +166,17 @@ function TopicPage() {
           <h2 id="new-statement-heading">{t("topic.addHeading")}</h2>
           <form className="stack" onSubmit={submit}>
             <label htmlFor="statement-body">{t("topic.statement")}</label>
-            <textarea id="statement-body" value={body} onChange={(event) => setBody(event.target.value)} maxLength={5000} required />
+            <p id="statement-body-help" className="field-help">
+              {t("topic.statementHelp")}
+            </p>
+            <textarea
+              id="statement-body"
+              aria-describedby="statement-body-help"
+              value={body}
+              onChange={(event) => setBody(event.target.value)}
+              maxLength={5000}
+              required
+            />
             {topic.data?.statementIdentityPolicy === "OPTIONAL" ? (
               <>
                 <label htmlFor="statement-visibility">{t("topic.authorVisibility")}</label>
