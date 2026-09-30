@@ -146,7 +146,18 @@ export const auditLogs = core.table(
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index("audit_logs_entity_idx").on(table.entityType, table.entityId)],
+  (table) => [
+    index("audit_logs_entity_idx").on(table.entityType, table.entityId),
+    index("audit_logs_created_at_idx").on(
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
+    index("audit_logs_action_created_at_idx").on(
+      table.action,
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
+  ],
 );
 
 export const analysisJobs = analysis.table(

@@ -1,4 +1,6 @@
 import {
+  AdminAuditLogListResponseSchema,
+  AdminAuditLogQuerySchema,
   AdminUserListResponseSchema,
   AdminUserResponseSchema,
   ApiErrorSchema,
@@ -8,7 +10,7 @@ import {
 import { Hono } from "hono";
 import type { AppEnvironment } from "../http/context.js";
 import type { ApplicationServices } from "../services/services.js";
-import { jsonValidator } from "../http/validation.js";
+import { jsonValidator, queryValidator } from "../http/validation.js";
 
 function forbidden() {
   return ApiErrorSchema.parse({
@@ -23,6 +25,33 @@ export function createAdminRoute(services: ApplicationServices) {
       if (!Array.isArray(result)) return c.json(forbidden(), 403);
       return c.json(AdminUserListResponseSchema.parse({ items: result }), 200);
     })
+    .get(
+      "/audit-logs",
+      queryValidator(AdminAuditLogQuerySchema),
+      async (c) => {
+        const query = c.req.valid("query");
+        const result = await services.admin.listAuditLogs(
+          query,
+          c.get("currentUser"),
+        );
+        if ("error" in result) return c.json(forbidden(), 403);
+        return c.json(
+          AdminAuditLogListResponseSchema.parse({
+            items: result.items,
+            pagination: {
+              page: query.page,
+              pageSize: query.pageSize,
+              total: result.total,
+              totalPages:
+                result.total === 0
+                  ? 0
+                  : Math.ceil(result.total / query.pageSize),
+            },
+          }),
+          200,
+        );
+      },
+    )
     .patch(
       "/users/:userId",
       jsonValidator(UpdateAdminUserRequestSchema),

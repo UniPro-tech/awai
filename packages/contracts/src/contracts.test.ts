@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  AdminAuditLogListResponseSchema,
+  AdminAuditLogQuerySchema,
   AnalysisRunResponseSchema,
   CreateTopicRequestSchema,
   CurrentTopicVoteListResponseSchema,
@@ -68,6 +70,47 @@ describe("public configuration contract", () => {
       categoryCreationAdminOnly: true,
       ssoProviders: [],
     })).toMatchObject({ categoryCreationAdminOnly: true });
+  });
+});
+
+describe("admin audit log contracts", () => {
+  it("coerces pagination and validates action filters", () => {
+    expect(
+      AdminAuditLogQuerySchema.parse({
+        action: "STATEMENT_DELETE",
+        page: "2",
+        pageSize: "50",
+      }),
+    ).toEqual({ action: "STATEMENT_DELETE", page: 2, pageSize: 50 });
+    expect(() =>
+      AdminAuditLogQuerySchema.parse({ action: "UNKNOWN_ACTION" }),
+    ).toThrow();
+  });
+
+  it("exposes application actors without authentication identifiers", () => {
+    const response = AdminAuditLogListResponseSchema.parse({
+      items: [
+        {
+          id: "00000000-0000-4000-8000-000000000020",
+          actor: {
+            id: "00000000-0000-4000-8000-000000000001",
+            displayName: "Admin",
+            authUserId: "private-auth-id",
+          },
+          action: "STATEMENT_DELETE",
+          entityType: "statement",
+          entityId: "00000000-0000-4000-8000-000000000010",
+          metadata: { reason: "Duplicate" },
+          createdAt: "2026-09-30T00:00:00.000Z",
+        },
+      ],
+      pagination: { page: 1, pageSize: 25, total: 1, totalPages: 1 },
+    });
+
+    expect(response.items[0]?.actor).toEqual({
+      id: "00000000-0000-4000-8000-000000000001",
+      displayName: "Admin",
+    });
   });
 });
 

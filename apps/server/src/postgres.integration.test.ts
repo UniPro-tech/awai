@@ -224,5 +224,21 @@ describe.runIf(shouldRun)("PostgreSQL integration", () => {
       "TOPIC_STATUS_CHANGE",
       "TOPIC_OWNER_CHANGE",
     ]));
+
+    const auditResponse = await app.request(
+      "/api/v1/admin/audit-logs?action=TOPIC_STATUS_CHANGE&pageSize=1",
+    );
+    expect(auditResponse.status).toBe(200);
+    expect(await auditResponse.json()).toMatchObject({
+      items: [
+        {
+          actor: { id: administrator.id, displayName: administrator.displayName },
+          action: "TOPIC_STATUS_CHANGE",
+          entityType: "topic",
+          entityId: topic.id,
+        },
+      ],
+      pagination: { page: 1, pageSize: 1, total: 1, totalPages: 1 },
+    });
   });
 });

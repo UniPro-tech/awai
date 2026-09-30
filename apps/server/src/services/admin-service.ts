@@ -1,5 +1,11 @@
-import type { AdminUserResponse, UpdateAdminUserRequest } from "@private-polis/contracts";
-import { asc, eq } from "drizzle-orm";
+import {
+  AuditActionSchema,
+  type AdminAuditLogEntry,
+  type AdminAuditLogQuery,
+  type AdminUserResponse,
+  type UpdateAdminUserRequest,
+} from "@private-polis/contracts";
+import { asc, count, desc, eq } from "drizzle-orm";
 import type { AuthenticatedUser } from "../auth/session.js";
 import type { Database } from "../db/client.js";
 import { appUsers, auditLogs } from "../db/schema.js";
@@ -10,6 +16,13 @@ export type AdminUserMutationResult =
 
 export interface AdminService {
   listUsers(actor: AuthenticatedUser): Promise<AdminUserResponse[] | { error: "PERMISSION_DENIED" }>;
+  listAuditLogs(
+    query: AdminAuditLogQuery,
+    actor: AuthenticatedUser,
+  ): Promise<
+    | { items: AdminAuditLogEntry[]; total: number }
+    | { error: "PERMISSION_DENIED" }
+  >;
   updateUser(
     id: string,
     input: UpdateAdminUserRequest,
@@ -47,6 +60,48 @@ export function createPostgresAdminService(database: Database): AdminService {
       if (actor.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
       const users = await database.select(selection).from(appUsers).orderBy(asc(appUsers.createdAt));
       return users.map(present);
+    },
+    async listAuditLogs(query, actor) {
+      if (actor.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
+      const condition = query.action
+        ? eq(auditLogs.action, query.action)
+        : undefined;
+      const [summary] = await database
+        .select({ total: count() })
+        .from(auditLogs)
+        .where(condition);
+      const rows = await database
+        .select({
+          id: auditLogs.id,
+          actorId: appUsers.id,
+          actorDisplayName: appUsers.displayName,
+          action: auditLogs.action,
+          entityType: auditLogs.entityType,
+          entityId: auditLogs.entityId,
+          metadata: auditLogs.metadata,
+          createdAt: auditLogs.createdAt,
+        })
+        .from(auditLogs)
+        .leftJoin(appUsers, eq(auditLogs.actorUserId, appUsers.id))
+        .where(condition)
+        .orderBy(desc(auditLogs.createdAt), desc(auditLogs.id))
+        .limit(query.pageSize)
+        .offset((query.page - 1) * query.pageSize);
+      return {
+        items: rows.map((row) => ({
+          id: row.id,
+          actor:
+            row.actorId && row.actorDisplayName
+              ? { id: row.actorId, displayName: row.actorDisplayName }
+              : null,
+          action: AuditActionSchema.parse(row.action),
+          entityType: row.entityType,
+          entityId: row.entityId,
+          metadata: row.metadata,
+          createdAt: row.createdAt.toISOString(),
+        })),
+        total: summary?.total ?? 0,
+      };
     },
     async updateUser(id, input, actor) {
       if (actor.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
@@ -92,12 +147,31 @@ export function createPostgresAdminService(database: Database): AdminService {
   };
 }
 
-export function createMemoryAdminService(initialUsers: AdminUserResponse[] = []): AdminService {
+export function createMemoryAdminService(
+  initialUsers: AdminUserResponse[] = [],
+  initialAuditLogs: AdminAuditLogEntry[] = [],
+): AdminService {
   const users = new Map(initialUsers.map((user) => [user.id, user]));
   return {
     async listUsers(actor) {
       if (actor.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
       return [...users.values()];
+    },
+    async listAuditLogs(query, actor) {
+      if (actor.role !== "ADMIN") return { error: "PERMISSION_DENIED" };
+      const matching = initialAuditLogs
+        .filter((entry) => !query.action || entry.action === query.action)
+        .slice()
+        .sort(
+          (left, right) =>
+            right.createdAt.localeCompare(left.createdAt)
+            || right.id.localeCompare(left.id),
+        );
+      const start = (query.page - 1) * query.pageSize;
+      return {
+        items: matching.slice(start, start + query.pageSize),
+        total: matching.length,
+      };
     },
     async updateUser(id, input, actor) {
       if (actor.role !== "ADMIN") return { error: "PERMISSION_DENIED" };

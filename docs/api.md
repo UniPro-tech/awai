@@ -82,12 +82,15 @@ The web client separates statement results into common opinions and per-group op
 
 ## Administration
 
-| Method  | Path                          | Purpose                                                      |
-| ------- | ----------------------------- | ------------------------------------------------------------ |
-| `GET`   | `/api/v1/admin/users`         | List application users as an administrator                   |
-| `PATCH` | `/api/v1/admin/users/:userId` | Change a user's role or suspension state as an administrator |
+| Method  | Path                          | Purpose                                                               |
+| ------- | ----------------------------- | --------------------------------------------------------------------- |
+| `GET`   | `/api/v1/admin/users`         | List application users as an administrator                            |
+| `PATCH` | `/api/v1/admin/users/:userId` | Change a user's role or suspension state as an administrator          |
+| `GET`   | `/api/v1/admin/audit-logs`    | List audit events with optional `action`, `page`, and `pageSize` query |
 
 The update body accepts at least one of `role` (`USER` or `ADMIN`) and `suspended` (boolean). An administrator cannot demote or suspend their own account. Suspension is checked on every versioned API request, so it invalidates access even for an already-issued session cookie. Administrative changes are recorded in `core.audit_logs`; authentication identifiers and credentials are never returned.
+
+Audit logs are returned newest first and include the application actor, action, target entity, metadata, and event time. They never expose authentication-provider identifiers. The endpoint accepts only the documented action names, uses a default page size of 25, and limits `pageSize` to 100.
 
 ## Errors
 

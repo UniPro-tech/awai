@@ -1,4 +1,7 @@
-import type { AdminUserResponse } from "@private-polis/contracts";
+import type {
+  AdminAuditLogEntry,
+  AdminUserResponse,
+} from "@private-polis/contracts";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
 import { createMemoryAdminService } from "./services/admin-service.js";
@@ -22,9 +25,33 @@ const regularUser: AdminUserResponse = {
   updatedAt: createdAt,
 };
 
+const auditLogs: AdminAuditLogEntry[] = [
+  {
+    id: "00000000-0000-4000-8000-000000000020",
+    actor: { id: adminUser.id, displayName: adminUser.displayName },
+    action: "STATEMENT_DELETE",
+    entityType: "statement",
+    entityId: "00000000-0000-4000-8000-000000000010",
+    metadata: { reason: "Duplicate" },
+    createdAt: "2026-09-30T02:00:00.000Z",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000021",
+    actor: { id: adminUser.id, displayName: adminUser.displayName },
+    action: "TOPIC_STATUS_CHANGE",
+    entityType: "topic",
+    entityId: "00000000-0000-4000-8000-000000000011",
+    metadata: { previousStatus: "DRAFT", status: "OPEN" },
+    createdAt: "2026-09-30T01:00:00.000Z",
+  },
+];
+
 function appFor(role: "USER" | "ADMIN") {
   const services = createMemoryServices();
-  services.admin = createMemoryAdminService([adminUser, regularUser]);
+  services.admin = createMemoryAdminService(
+    [adminUser, regularUser],
+    auditLogs,
+  );
   return createApp({
     services,
     authenticate: async () => ({
@@ -67,5 +94,42 @@ describe("admin users", () => {
     });
     expect(response.status).toBe(409);
     expect(await response.json()).toMatchObject({ error: { code: "ADMIN_SELF_LOCKOUT" } });
+  });
+});
+
+describe("admin audit logs", () => {
+  it("rejects a regular user", async () => {
+    const response = await appFor("USER").request(
+      "/api/v1/admin/audit-logs",
+    );
+    expect(response.status).toBe(403);
+  });
+
+  it("lists, filters, and paginates audit events newest first", async () => {
+    const app = appFor("ADMIN");
+    const list = await app.request(
+      "/api/v1/admin/audit-logs?page=1&pageSize=1",
+    );
+    expect(list.status).toBe(200);
+    expect(await list.json()).toMatchObject({
+      items: [{ action: "STATEMENT_DELETE" }],
+      pagination: { page: 1, pageSize: 1, total: 2, totalPages: 2 },
+    });
+
+    const filtered = await app.request(
+      "/api/v1/admin/audit-logs?action=TOPIC_STATUS_CHANGE",
+    );
+    expect(filtered.status).toBe(200);
+    expect(await filtered.json()).toMatchObject({
+      items: [{ action: "TOPIC_STATUS_CHANGE" }],
+      pagination: { total: 1, totalPages: 1 },
+    });
+  });
+
+  it("rejects unsupported filters and pagination", async () => {
+    const response = await appFor("ADMIN").request(
+      "/api/v1/admin/audit-logs?action=UNKNOWN&page=0",
+    );
+    expect(response.status).toBe(400);
   });
 });

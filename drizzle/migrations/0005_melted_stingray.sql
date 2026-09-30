@@ -1,0 +1,2 @@
+CREATE INDEX "audit_logs_created_at_idx" ON "core"."audit_logs" USING btree ("created_at" DESC NULLS LAST,"id" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "audit_logs_action_created_at_idx" ON "core"."audit_logs" USING btree ("action","created_at" DESC NULLS LAST,"id" DESC NULLS LAST);
