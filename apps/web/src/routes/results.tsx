@@ -107,9 +107,11 @@ export function ResultsPage() {
           </Link>{" "}
           / {t("common.results")}
         </nav>
-        <header>
-          <p className="eyebrow">{t("analysis.eyebrow")}</p>
-          <h1>{topic.data?.title ?? t("common.results")}</h1>
+        <header className="flex flex-col *:gap-2">
+          <div>
+            <p className="eyebrow">{t("analysis.eyebrow")}</p>
+            <h1>{topic.data?.title ?? t("common.results")}</h1>
+          </div>
           <p>{t("analysis.privacy")}</p>
           <button
             type="button"
@@ -138,6 +140,7 @@ export function ResultsPage() {
 
         {analysis.data ? (
           <>
+            {/* Metrics Summary / メトリックの要約 */}
             <section className="analysis-summary">
               <div className="panel metric">
                 <strong>{analysis.data.participantCount}</strong>
@@ -152,6 +155,8 @@ export function ResultsPage() {
                 <span>{t("analysis.groups")}</span>
               </div>
             </section>
+
+            {/* Opinion Map / 意見マップ */}
             <section className="panel" aria-labelledby="map-heading">
               <h2 id="map-heading">{t("analysis.map")}</h2>
               <OpinionMap
@@ -160,16 +165,20 @@ export function ResultsPage() {
                 viewerPoint={analysis.data.viewerPoint}
               />
             </section>
+
+            {/* Vote Distributions / 意見の分布 */}
             <section
               className="analysis-section"
               aria-labelledby="vote-distributions-heading"
             >
-              <p className="eyebrow">
-                {t("analysis.voteDistributionsEyebrow")}
-              </p>
-              <h2 id="vote-distributions-heading">
-                {t("analysis.voteDistributions")}
-              </h2>
+              <div className="analysis-group-heading">
+                <p className="eyebrow">
+                  {t("analysis.voteDistributionsEyebrow")}
+                </p>
+                <h2 id="vote-distributions-heading">
+                  {t("analysis.voteDistributions")}
+                </h2>
+              </div>
               <p>{t("analysis.voteDistributionsHelp")}</p>
               {analysis.data.voteDistributions.length > 0 ? (
                 <div className="vote-distributions">
@@ -186,6 +195,8 @@ export function ResultsPage() {
                 </p>
               )}
             </section>
+
+            {/* Findings / 一般的な意見 */}
             <section
               className="analysis-section"
               aria-labelledby="common-opinions-heading"
@@ -201,6 +212,8 @@ export function ResultsPage() {
                 )}
               />
             </section>
+
+            {/* Group Opinions / グループごとの意見 */}
             {analysis.data.groups.map((group) => (
               <section
                 className="analysis-section"

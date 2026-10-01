@@ -12,10 +12,16 @@ import { createAdminRoute } from "./routes/admin.js";
 import { createUsersRoute } from "./routes/users.js";
 import { checkDatabaseReadiness } from "./db/health.js";
 import { auth } from "./auth/auth.js";
-import { authenticateRequest, type AuthenticateRequest } from "./auth/session.js";
+import {
+  authenticateRequest,
+  type AuthenticateRequest,
+} from "./auth/session.js";
 import { databaseRuntime } from "./db/runtime.js";
 import type { AppEnvironment } from "./http/context.js";
-import { createPostgresServices, type ApplicationServices } from "./services/services.js";
+import {
+  createPostgresServices,
+  type ApplicationServices,
+} from "./services/services.js";
 import {
   createFixedWindowRateLimiter,
   rateLimit,
@@ -54,37 +60,53 @@ function positiveInteger(value: string | undefined, fallback: number) {
 export function createApp(options: AppOptions = {}) {
   const readinessCheck = options.readinessCheck ?? checkDatabaseReadiness;
   const authenticate = options.authenticate ?? authenticateRequest;
-  const services = options.services ?? createPostgresServices(databaseRuntime.db);
-  const csrfTrustedOrigins = options.csrfTrustedOrigins ?? configuredTrustedOrigins();
-  const isRegistrationEnabled = options.registrationEnabled ?? registrationEnabled();
+  const services =
+    options.services ?? createPostgresServices(databaseRuntime.db);
+  const csrfTrustedOrigins =
+    options.csrfTrustedOrigins ?? configuredTrustedOrigins();
+  const isRegistrationEnabled =
+    options.registrationEnabled ?? registrationEnabled();
   const isLocalAuthEnabled = options.localAuthEnabled ?? localAuthEnabled();
-  const isCategoryCreationAdminOnly = options.categoryCreationAdminOnly
-    ?? categoryCreationAdminOnly();
+  const isCategoryCreationAdminOnly =
+    options.categoryCreationAdminOnly ?? categoryCreationAdminOnly();
   const configuredSsoProviders = options.ssoProviders ?? publicSsoProviders();
-  const windowMs = positiveInteger(process.env.RATE_LIMIT_WINDOW_SECONDS, 60) * 1_000;
-  const authRateLimiter = options.authRateLimiter === false
-    ? undefined
-    : options.authRateLimiter
-      ?? createFixedWindowRateLimiter(positiveInteger(process.env.RATE_LIMIT_AUTH_MAX, 20), windowMs);
-  const apiRateLimiter = options.apiRateLimiter === false
-    ? undefined
-    : options.apiRateLimiter
-      ?? createFixedWindowRateLimiter(positiveInteger(process.env.RATE_LIMIT_API_MAX, 300), windowMs);
+  const windowMs =
+    positiveInteger(process.env.RATE_LIMIT_WINDOW_SECONDS, 60) * 1_000;
+  const authRateLimiter =
+    options.authRateLimiter === false
+      ? undefined
+      : (options.authRateLimiter ??
+        createFixedWindowRateLimiter(
+          positiveInteger(process.env.RATE_LIMIT_AUTH_MAX, 20),
+          windowMs,
+        ));
+  const apiRateLimiter =
+    options.apiRateLimiter === false
+      ? undefined
+      : (options.apiRateLimiter ??
+        createFixedWindowRateLimiter(
+          positiveInteger(process.env.RATE_LIMIT_API_MAX, 300),
+          windowMs,
+        ));
   const app = new Hono<AppEnvironment>()
     .use("*", requestId())
     .use("*", secureHeaders());
   if (authRateLimiter) {
-    app.use("/api/auth/*", rateLimit(authRateLimiter, (c) => requestAddress(c.req.raw.headers)));
+    app.use(
+      "/api/auth/*",
+      rateLimit(authRateLimiter, (c) => requestAddress(c.req.raw.headers)),
+    );
   }
-  app.route(
-    "/api/config",
-    createConfigRoute(
-      isRegistrationEnabled,
-      isLocalAuthEnabled,
-      isCategoryCreationAdminOnly,
-      configuredSsoProviders,
-    ),
-  )
+  app
+    .route(
+      "/api/config",
+      createConfigRoute(
+        isRegistrationEnabled,
+        isLocalAuthEnabled,
+        isCategoryCreationAdminOnly,
+        configuredSsoProviders,
+      ),
+    )
     .all("/api/auth/*", (c) => auth.handler(c.req.raw))
     .get("/health/live", (c) => c.json({ status: "ok" as const }))
     .get("/health/ready", async (c) => {
@@ -122,11 +144,16 @@ export function createApp(options: AppOptions = {}) {
       await next();
     });
   if (apiRateLimiter) {
-    app.use("/api/v1/*", rateLimit(apiRateLimiter, (c) => c.get("currentUser").id));
+    app.use(
+      "/api/v1/*",
+      rateLimit(apiRateLimiter, (c) => c.get("currentUser").id),
+    );
   }
   app.onError((error, c) => {
     if (!c.req.path.startsWith("/api/v1")) {
-      return error instanceof HTTPException ? error.getResponse() : c.text("Internal Server Error", 500);
+      return error instanceof HTTPException
+        ? error.getResponse()
+        : c.text("Internal Server Error", 500);
     }
     const requestIdValue = c.get("requestId");
     if (error instanceof HTTPException && error.status === 400) {
