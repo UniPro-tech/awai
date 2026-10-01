@@ -1,10 +1,8 @@
-import type { AnalysisRunResponse } from "@private-polis/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { OpinionMap } from "../features/analysis/opinion-map";
-import { groupColors } from "../features/analysis/palette";
 import { VoteDistribution } from "../features/analysis/vote-distribution";
 import { AuthGate } from "../features/auth/auth-gate";
 import { getLatestAnalysis, listAnalysisRuns } from "../features/analysis/api";
@@ -12,35 +10,6 @@ import { downloadAnalysisPdf } from "../features/analysis/pdf";
 import { getTopic } from "../features/topics/api";
 import { errorMessage } from "../lib/error-message";
 import "./results-analysis.css";
-
-function FindingsList({
-  results,
-}: {
-  results: AnalysisRunResponse["statementResults"];
-}) {
-  const { t } = useTranslation();
-  if (results.length === 0) return <p>{t("analysis.noRanked")}</p>;
-  return (
-    <ol className="analysis-findings">
-      {results.map((result) => (
-        <li className="panel" key={`${result.kind}-${result.statement.id}`}>
-          <p className="eyebrow">
-            {result.kind.endsWith("_AGREE")
-              ? t("analysis.agreeFinding")
-              : t("analysis.disagreeFinding")}
-          </p>
-          <p>{result.statement.body}</p>
-          <p className="meta">
-            {t("analysis.rank", {
-              rank: result.rank,
-              score: result.score.toFixed(3),
-            })}
-          </p>
-        </li>
-      ))}
-    </ol>
-  );
-}
 
 export function ResultsPage() {
   const { t, i18n } = useTranslation();
@@ -166,7 +135,7 @@ export function ResultsPage() {
               />
             </section>
 
-            {/* Vote Distributions / 意見の分布 */}
+            {/* Statement analysis / 意見ごとの分析 */}
             <section
               className="analysis-section"
               aria-labelledby="vote-distributions-heading"
@@ -185,6 +154,9 @@ export function ResultsPage() {
                   {analysis.data.voteDistributions.map((distribution) => (
                     <VoteDistribution
                       distribution={distribution}
+                      findings={analysis.data.statementResults.filter(
+                        (result) => result.statement.id === distribution.statement.id,
+                      )}
                       key={distribution.statement.id}
                     />
                   ))}
@@ -196,60 +168,6 @@ export function ResultsPage() {
               )}
             </section>
 
-            {/* Findings / 一般的な意見 */}
-            <section
-              className="analysis-section"
-              aria-labelledby="common-opinions-heading"
-            >
-              <p className="eyebrow">{t("analysis.findings")}</p>
-              <h2 id="common-opinions-heading">
-                {t("analysis.commonOpinions")}
-              </h2>
-              <p>{t("analysis.commonOpinionsHelp")}</p>
-              <FindingsList
-                results={analysis.data.statementResults.filter(
-                  (result) => result.groupOrdinal === null,
-                )}
-              />
-            </section>
-
-            {/* Group Opinions / グループごとの意見 */}
-            {analysis.data.groups.map((group) => (
-              <section
-                className="analysis-section"
-                aria-labelledby={`group-${group.ordinal}-opinions-heading`}
-                key={group.ordinal}
-              >
-                <div className="analysis-group-heading">
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      background:
-                        groupColors[group.ordinal % groupColors.length],
-                    }}
-                  />
-                  <div>
-                    <p className="eyebrow">
-                      {t("analysis.group", {
-                        number: group.ordinal + 1,
-                        count: group.participantCount,
-                      })}
-                    </p>
-                    <h2 id={`group-${group.ordinal}-opinions-heading`}>
-                      {t("analysis.groupOpinions", {
-                        number: group.ordinal + 1,
-                      })}
-                    </h2>
-                  </div>
-                </div>
-                <p>{t("analysis.groupOpinionsHelp")}</p>
-                <FindingsList
-                  results={analysis.data.statementResults.filter(
-                    (result) => result.groupOrdinal === group.ordinal,
-                  )}
-                />
-              </section>
-            ))}
             <p className="meta">
               {t("analysis.runs", {
                 count: runs.data?.items.length ?? 1,
