@@ -47,7 +47,10 @@ export function ResultsPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadFailed, setDownloadFailed] = useState(false);
   const { topicId } = useParams({ from: "/topics/$topicId/results" });
-  const topic = useQuery({ queryKey: ["topic", topicId], queryFn: () => getTopic(topicId) });
+  const topic = useQuery({
+    queryKey: ["topic", topicId],
+    queryFn: () => getTopic(topicId),
+  });
   const analysis = useQuery({
     queryKey: ["analysis", topicId, "latest"],
     queryFn: () => getLatestAnalysis(topicId),
@@ -98,7 +101,11 @@ export function ResultsPage() {
     <AuthGate>
       <main className="shell">
         <nav className="breadcrumb">
-          <Link to="/topics">{t("common.topics")}</Link> / <Link to="/topics/$topicId" params={{ topicId }}>{t("common.discussion")}</Link> / {t("common.results")}
+          <Link to="/topics">{t("common.topics")}</Link> /{" "}
+          <Link to="/topics/$topicId" params={{ topicId }}>
+            {t("common.discussion")}
+          </Link>{" "}
+          / {t("common.results")}
         </nav>
         <header>
           <p className="eyebrow">{t("analysis.eyebrow")}</p>
@@ -109,9 +116,13 @@ export function ResultsPage() {
             onClick={downloadReport}
             disabled={!analysis.data || !topic.data || isDownloading}
           >
-            {isDownloading ? t("analysis.preparingPdf") : t("analysis.downloadPdf")}
+            {isDownloading
+              ? t("analysis.preparingPdf")
+              : t("analysis.downloadPdf")}
           </button>
-          {downloadFailed ? <p role="alert">{t("analysis.pdfFailed")}</p> : null}
+          {downloadFailed ? (
+            <p role="alert">{t("analysis.pdfFailed")}</p>
+          ) : null}
         </header>
 
         {analysis.isPending ? <p>{t("analysis.waiting")}</p> : null}
@@ -128,9 +139,18 @@ export function ResultsPage() {
         {analysis.data ? (
           <>
             <section className="analysis-summary">
-              <div className="panel metric"><strong>{analysis.data.participantCount}</strong><span>{t("analysis.participants")}</span></div>
-              <div className="panel metric"><strong>{analysis.data.statementCount}</strong><span>{t("analysis.statements")}</span></div>
-              <div className="panel metric"><strong>{analysis.data.groups.length}</strong><span>{t("analysis.groups")}</span></div>
+              <div className="panel metric">
+                <strong>{analysis.data.participantCount}</strong>
+                <span>{t("analysis.participants")}</span>
+              </div>
+              <div className="panel metric">
+                <strong>{analysis.data.statementCount}</strong>
+                <span>{t("analysis.statements")}</span>
+              </div>
+              <div className="panel metric">
+                <strong>{analysis.data.groups.length}</strong>
+                <span>{t("analysis.groups")}</span>
+              </div>
             </section>
             <section className="panel" aria-labelledby="map-heading">
               <h2 id="map-heading">{t("analysis.map")}</h2>
@@ -144,7 +164,9 @@ export function ResultsPage() {
               className="analysis-section"
               aria-labelledby="vote-distributions-heading"
             >
-              <p className="eyebrow">{t("analysis.voteDistributionsEyebrow")}</p>
+              <p className="eyebrow">
+                {t("analysis.voteDistributionsEyebrow")}
+              </p>
               <h2 id="vote-distributions-heading">
                 {t("analysis.voteDistributions")}
               </h2>
@@ -159,12 +181,19 @@ export function ResultsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="panel empty-state">{t("analysis.noVoteDistributions")}</p>
+                <p className="panel empty-state">
+                  {t("analysis.noVoteDistributions")}
+                </p>
               )}
             </section>
-            <section className="analysis-section" aria-labelledby="common-opinions-heading">
+            <section
+              className="analysis-section"
+              aria-labelledby="common-opinions-heading"
+            >
               <p className="eyebrow">{t("analysis.findings")}</p>
-              <h2 id="common-opinions-heading">{t("analysis.commonOpinions")}</h2>
+              <h2 id="common-opinions-heading">
+                {t("analysis.commonOpinions")}
+              </h2>
               <p>{t("analysis.commonOpinionsHelp")}</p>
               <FindingsList
                 results={analysis.data.statementResults.filter(
@@ -182,7 +211,8 @@ export function ResultsPage() {
                   <span
                     aria-hidden="true"
                     style={{
-                      background: groupColors[group.ordinal % groupColors.length],
+                      background:
+                        groupColors[group.ordinal % groupColors.length],
                     }}
                   />
                   <div>
@@ -193,7 +223,9 @@ export function ResultsPage() {
                       })}
                     </p>
                     <h2 id={`group-${group.ordinal}-opinions-heading`}>
-                      {t("analysis.groupOpinions", { number: group.ordinal + 1 })}
+                      {t("analysis.groupOpinions", {
+                        number: group.ordinal + 1,
+                      })}
                     </h2>
                   </div>
                 </div>
@@ -206,7 +238,10 @@ export function ResultsPage() {
               </section>
             ))}
             <p className="meta">
-              {t("analysis.runs", { count: runs.data?.items.length ?? 1, version: analysis.data.algorithmVersion })}
+              {t("analysis.runs", {
+                count: runs.data?.items.length ?? 1,
+                version: analysis.data.algorithmVersion,
+              })}
             </p>
           </>
         ) : null}
