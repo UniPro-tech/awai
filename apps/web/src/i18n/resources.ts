@@ -215,7 +215,7 @@ export const resources = {
         group: "グループ {{number}}：{{count}}人",
         groupShort: "グループ {{number}}",
         voteDistributionsEyebrow: "回答の内訳",
-        voteDistributions: "意見ごとの賛否割合",
+        voteDistributions: "意見ごとの分布と注目点",
         voteDistributionsHelp:
           "各意見への回答を、全体と意見グループごとに比較できます。割合は「わからない／どちらでもない」を含む回答数から算出しています。",
         everyone: "全体",
@@ -580,7 +580,7 @@ export const resources = {
         group: "Group {{number}}: {{count}} participants",
         groupShort: "Group {{number}}",
         voteDistributionsEyebrow: "Response breakdown",
-        voteDistributions: "Agreement by statement",
+        voteDistributions: "Response breakdown and key findings",
         voteDistributionsHelp:
           "Compare responses to each statement overall and by opinion group. Percentages use all responses, including passes.",
         everyone: "Overall",

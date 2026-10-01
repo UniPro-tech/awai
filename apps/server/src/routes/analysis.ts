@@ -26,7 +26,10 @@ export function createAnalysisRoute(services: ApplicationServices) {
           404,
         );
       }
-      const run = await services.analysis.latest(topicId.data, c.get("currentUser").id);
+      const run = await services.analysis.latest(
+        topicId.data,
+        c.get("currentUser").id,
+      );
       if (!run) return c.json(notFound(), 404);
       return c.json(AnalysisRunResponseSchema.parse(run), 200);
     })

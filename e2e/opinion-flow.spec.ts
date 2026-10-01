@@ -302,14 +302,17 @@ test("prioritizes an unanswered statement over an answered statement", async ({ 
   await expect(page.getByText(statements[0].body)).toHaveCount(0);
 });
 
-test("groups findings and downloads a detailed PDF", async ({ page }) => {
+test("combines findings and response charts by statement and downloads a detailed PDF", async ({ page }) => {
   await mockOpinionApp(page);
   await page.goto(`/topics/${topicId}/results`);
 
-  await expect(page.getByRole("heading", { name: "共通の意見" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "グループ 1の意見" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "グループ 2の意見" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "意見ごとの賛否割合" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "意見ごとの分布と注目点" })).toBeVisible();
+  await expect(
+    page.getByText(/全体\s*賛成が特徴的\s*順位 1・スコア 0\.900/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/グループ 1\s*賛成が特徴的\s*順位 1・スコア 0\.800/),
+  ).toBeVisible();
   await expect(
     page.getByRole("img", { name: "全体：賛成 5件、反対 2件、わからない／どちらでもない 1件" }),
   ).toBeVisible();
