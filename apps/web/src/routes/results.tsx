@@ -1,8 +1,10 @@
+import type { AnalysisRunResponse } from "@private-polis/contracts";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { OpinionMap } from "../features/analysis/opinion-map";
+import { groupColors } from "../features/analysis/palette";
 import { VoteDistribution } from "../features/analysis/vote-distribution";
 import { AuthGate } from "../features/auth/auth-gate";
 import { getLatestAnalysis, listAnalysisRuns } from "../features/analysis/api";
@@ -10,6 +12,64 @@ import { downloadAnalysisPdf } from "../features/analysis/pdf";
 import { getTopic } from "../features/topics/api";
 import { errorMessage } from "../lib/error-message";
 import "./results-analysis.css";
+
+function FindingDistributions({
+  results,
+  distributions,
+}: {
+  results: AnalysisRunResponse["statementResults"];
+  distributions: AnalysisRunResponse["voteDistributions"];
+}) {
+  const { t } = useTranslation();
+  if (results.length === 0) return <p>{t("analysis.noRanked")}</p>;
+
+  const distributionByStatement = new Map(
+    distributions.map((distribution) => [distribution.statement.id, distribution] as const),
+  );
+  const findingsByStatement = new Map<
+    string,
+    AnalysisRunResponse["statementResults"]
+  >();
+  for (const result of results) {
+    const findings = findingsByStatement.get(result.statement.id) ?? [];
+    findings.push(result);
+    findingsByStatement.set(result.statement.id, findings);
+  }
+
+  return (
+    <div className="vote-distributions">
+      {[...findingsByStatement.entries()].map(([statementId, findings]) => {
+        const distribution = distributionByStatement.get(statementId);
+        if (!distribution) {
+          return (
+            <article className="panel analysis-finding-fallback" key={statementId}>
+              <p>{findings[0]?.statement.body}</p>
+              {findings.map((finding) => (
+                <p className="meta" key={`${finding.kind}-${finding.groupOrdinal ?? "overall"}`}>
+                  {finding.kind.endsWith("_AGREE")
+                    ? t("analysis.agreeFinding")
+                    : t("analysis.disagreeFinding")}
+                  {" · "}
+                  {t("analysis.rank", {
+                    rank: finding.rank,
+                    score: finding.score.toFixed(3),
+                  })}
+                </p>
+              ))}
+            </article>
+          );
+        }
+        return (
+          <VoteDistribution
+            distribution={distribution}
+            findings={findings}
+            key={statementId}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 export function ResultsPage() {
   const { t, i18n } = useTranslation();
@@ -154,9 +214,7 @@ export function ResultsPage() {
                   {analysis.data.voteDistributions.map((distribution) => (
                     <VoteDistribution
                       distribution={distribution}
-                      findings={analysis.data.statementResults.filter(
-                        (result) => result.statement.id === distribution.statement.id,
-                      )}
+                      findings={[]}
                       key={distribution.statement.id}
                     />
                   ))}
@@ -167,6 +225,60 @@ export function ResultsPage() {
                 </p>
               )}
             </section>
+
+            <section
+              className="analysis-section"
+              aria-labelledby="common-opinions-heading"
+            >
+              <p className="eyebrow">{t("analysis.findings")}</p>
+              <h2 id="common-opinions-heading">
+                {t("analysis.commonOpinions")}
+              </h2>
+              <p>{t("analysis.commonOpinionsHelp")}</p>
+              <FindingDistributions
+                results={analysis.data.statementResults.filter(
+                  (result) => result.groupOrdinal === null,
+                )}
+                distributions={analysis.data.voteDistributions}
+              />
+            </section>
+
+            {analysis.data.groups.map((group) => (
+              <section
+                className="analysis-section"
+                aria-labelledby={`group-${group.ordinal}-opinions-heading`}
+                key={group.ordinal}
+              >
+                <div className="analysis-group-heading">
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      background: groupColors[group.ordinal % groupColors.length],
+                    }}
+                  />
+                  <div>
+                    <p className="eyebrow">
+                      {t("analysis.group", {
+                        number: group.ordinal + 1,
+                        count: group.participantCount,
+                      })}
+                    </p>
+                    <h2 id={`group-${group.ordinal}-opinions-heading`}>
+                      {t("analysis.groupOpinions", {
+                        number: group.ordinal + 1,
+                      })}
+                    </h2>
+                  </div>
+                </div>
+                <p>{t("analysis.groupOpinionsHelp")}</p>
+                <FindingDistributions
+                  results={analysis.data.statementResults.filter(
+                    (result) => result.groupOrdinal === group.ordinal,
+                  )}
+                  distributions={analysis.data.voteDistributions}
+                />
+              </section>
+            ))}
 
             <p className="meta">
               {t("analysis.runs", {

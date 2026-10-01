@@ -307,17 +307,25 @@ test("combines findings and response charts by statement and downloads a detaile
   await page.goto(`/topics/${topicId}/results`);
 
   await expect(page.getByRole("heading", { name: "意見ごとの分布と注目点" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "共通の意見" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "グループ 1の意見" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "グループ 2の意見" })).toBeVisible();
   await expect(
     page.getByText(/全体\s*賛成が特徴的\s*順位 1・スコア 0\.900/),
-  ).toBeVisible();
+  ).toHaveCount(1);
   await expect(
     page.getByText(/グループ 1\s*賛成が特徴的\s*順位 1・スコア 0\.800/),
+  ).toHaveCount(1);
+  const overview = page.getByRole("region", { name: "意見ごとの分布と注目点" });
+  await expect(
+    overview.getByRole("img", {
+      name: "全体：賛成 5件、反対 2件、わからない／どちらでもない 1件",
+    }),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", { name: "全体：賛成 5件、反対 2件、わからない／どちらでもない 1件" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("img", { name: "グループ 1：賛成 3件、反対 1件、わからない／どちらでもない 0件" }),
+    overview.getByRole("img", {
+      name: "グループ 1：賛成 3件、反対 1件、わからない／どちらでもない 0件",
+    }),
   ).toBeVisible();
 
   const downloadPromise = page.waitForEvent("download");

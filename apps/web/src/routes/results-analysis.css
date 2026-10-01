@@ -2,6 +2,10 @@
   margin-top: 2.5rem;
 }
 
+.analysis-finding-fallback p {
+  margin-block: 0.35rem;
+}
+
 .analysis-group-heading {
   display: flex;
   align-items: center;
