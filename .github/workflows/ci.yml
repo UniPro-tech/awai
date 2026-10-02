@@ -169,7 +169,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5
       - run: helm lint deploy/helm/private-polis --set existingSecret=private-polis-ci
       - run: helm template private-polis deploy/helm/private-polis --set existingSecret=private-polis-ci
       - run: helm lint deploy/helm/private-polis --set postgresql.enabled=true --set postgresql.auth.password=ci-password --set auth.secret=ci-secret-at-least-32-characters
@@ -210,7 +210,7 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5
       - id: release
         name: Resolve chart version
         shell: bash
