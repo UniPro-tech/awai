@@ -24,7 +24,9 @@ function FindingDistributions({
   if (results.length === 0) return <p>{t("analysis.noRanked")}</p>;
 
   const distributionByStatement = new Map(
-    distributions.map((distribution) => [distribution.statement.id, distribution] as const),
+    distributions.map(
+      (distribution) => [distribution.statement.id, distribution] as const,
+    ),
   );
   const findingsByStatement = new Map<
     string,
@@ -42,10 +44,16 @@ function FindingDistributions({
         const distribution = distributionByStatement.get(statementId);
         if (!distribution) {
           return (
-            <article className="panel analysis-finding-fallback" key={statementId}>
+            <article
+              className="panel analysis-finding-fallback"
+              key={statementId}
+            >
               <p>{findings[0]?.statement.body}</p>
               {findings.map((finding) => (
-                <p className="meta" key={`${finding.kind}-${finding.groupOrdinal ?? "overall"}`}>
+                <p
+                  className="meta"
+                  key={`${finding.kind}-${finding.groupOrdinal ?? "overall"}`}
+                >
                   {finding.kind.endsWith("_AGREE")
                     ? t("analysis.agreeFinding")
                     : t("analysis.disagreeFinding")}
@@ -196,6 +204,7 @@ export function ResultsPage() {
             </section>
 
             {/* Statement analysis / 意見ごとの分析 */}
+            {/*
             <section
               className="analysis-section"
               aria-labelledby="vote-distributions-heading"
@@ -225,7 +234,9 @@ export function ResultsPage() {
                 </p>
               )}
             </section>
+            */}
 
+            {/* Common Opinions / 共通の意見 */}
             <section
               className="analysis-section"
               aria-labelledby="common-opinions-heading"
@@ -243,6 +254,7 @@ export function ResultsPage() {
               />
             </section>
 
+            {/* Group Opinions / グループごとの意見 */}
             {analysis.data.groups.map((group) => (
               <section
                 className="analysis-section"
@@ -253,7 +265,8 @@ export function ResultsPage() {
                   <span
                     aria-hidden="true"
                     style={{
-                      background: groupColors[group.ordinal % groupColors.length],
+                      background:
+                        groupColors[group.ordinal % groupColors.length],
                     }}
                   />
                   <div>
