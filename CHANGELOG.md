@@ -2,6 +2,13 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3](https://github.com/UniPro-tech/awai/compare/v0.10.2...v0.10.3) (2026-10-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @hono/zod-validator to ^0.9.0 ([#28](https://github.com/UniPro-tech/awai/issues/28)) ([0b5f690](https://github.com/UniPro-tech/awai/commit/0b5f6903a2cf714e80bbbc73fc3e9af6b0a4f89b))
+
 ## [0.10.2](https://github.com/UniPro-tech/awai/compare/v0.10.1...v0.10.2) (2026-10-03)
 
 
