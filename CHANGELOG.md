@@ -2,6 +2,18 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0](https://github.com/UniPro-tech/awai/compare/v0.10.4...v0.11.0) (2026-10-10)
+
+
+### Features
+
+* 投票後に自動的に次の意見に移動する ([#72](https://github.com/UniPro-tech/awai/issues/72)) ([adc8790](https://github.com/UniPro-tech/awai/commit/adc8790f707b6733c03dcaf8cb3ecdc610597144))
+
+
+### Bug Fixes
+
+* **style:** 意見カードの横幅の制限によりスタイルが崩れている 問題を修正 ([#69](https://github.com/UniPro-tech/awai/issues/69)) ([7f5b766](https://github.com/UniPro-tech/awai/commit/7f5b766cf31b2f6c24fe6fe5cec3fc02ab1a78ca))
+
 ## [0.10.4](https://github.com/UniPro-tech/awai/compare/v0.10.3...v0.10.4) (2026-10-06)
 
 
