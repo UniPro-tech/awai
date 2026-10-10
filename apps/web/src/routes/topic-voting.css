@@ -19,7 +19,6 @@
 }
 
 .statement-card--focused > p:first-child {
-  max-width: 50rem;
   font-size: clamp(1.25rem, 3vw, 2rem);
   line-height: 1.45;
 }
