@@ -373,7 +373,13 @@ function TopicPage() {
               canModerate={
                 topic.data?.permissions.canModerateStatements ?? false
               }
-              onAnswered={markAnswered}
+              onAnswered={() => {
+                markAnswered();
+                // Move to the next statement if there is one
+                setStatementIndex((index) =>
+                  Math.min(statementItems.length - 1, index + 1),
+                );
+              }}
               onDeleted={() =>
                 setStatementIndex((index) => Math.max(0, index - 1))
               }
