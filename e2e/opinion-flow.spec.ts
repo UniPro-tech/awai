@@ -300,10 +300,20 @@ test("shows one statement and reveals counts and position only after voting", as
     page.getByText("回答すると、みんなの投票結果が表示されます。"),
   ).toBeVisible();
 
+  // Click Agree Button
   await page.getByRole("button", { name: "賛成" }).click();
+
+  // Check moving to next statement
   await expect(
     page.getByText("賛成 5・反対 2・わからない/どちらでもない 1"),
-  ).toBeVisible();
+  ).toHaveCount(0);
+  await expect(page.getByText(statements[1].body)).toHaveCount(1);
+  await page.getByRole("button", { name: "前の意見" }).click();
+  await expect(
+    page.getByText("賛成 5・反対 2・わからない/どちらでもない 1"),
+  ).toHaveCount(1);
+
+  // Check visible map
   await expect(
     page.getByRole("heading", { name: "意見マップ上のあなた" }),
   ).toBeVisible();
