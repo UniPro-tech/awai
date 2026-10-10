@@ -30,11 +30,13 @@ function StatementCard({
   canModerate,
   onAnswered,
   onDeleted,
+  nextAction,
 }: {
   statement: StatementResponse;
   canModerate: boolean;
   onAnswered: () => void;
   onDeleted: () => void;
+  nextAction: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -94,7 +96,10 @@ function StatementCard({
             }
             key={value}
             type="button"
-            onClick={() => vote.mutate(value)}
+            onClick={() => {
+              vote.mutate(value);
+              nextAction();
+            }}
             disabled={vote.isPending || currentVote.isPending}
           >
             {value === "AGREE"
@@ -373,9 +378,8 @@ function TopicPage() {
               canModerate={
                 topic.data?.permissions.canModerateStatements ?? false
               }
-              onAnswered={() => {
-                markAnswered();
-                // Move to the next statement if there is one
+              onAnswered={markAnswered}
+              nextAction={() => {
                 setStatementIndex((index) =>
                   Math.min(statementItems.length - 1, index + 1),
                 );
