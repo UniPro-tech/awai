@@ -2,6 +2,13 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1](https://github.com/UniPro-tech/awai/compare/v0.11.0...v0.11.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **ci:** remove version specification for pnpm action setup ([fcc466f](https://github.com/UniPro-tech/awai/commit/fcc466f8649ccf12d976b46838d99f18ee0d0c7d))
+
 ## [0.11.0](https://github.com/UniPro-tech/awai/compare/v0.10.4...v0.11.0) (2026-10-10)
 
 
