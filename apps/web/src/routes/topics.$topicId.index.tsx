@@ -7,7 +7,11 @@ import { useTranslation } from "react-i18next";
 import { getLatestAnalysis } from "../features/analysis/api";
 import { OpinionMap } from "../features/analysis/opinion-map";
 import { AuthGate } from "../features/auth/auth-gate";
-import { createStatement, deleteStatement, listStatements } from "../features/statements/api";
+import {
+  createStatement,
+  deleteStatement,
+  listStatements,
+} from "../features/statements/api";
 import { getTopic } from "../features/topics/api";
 import {
   getCurrentVote,
@@ -26,11 +30,13 @@ function StatementCard({
   canModerate,
   onAnswered,
   onDeleted,
+  nextAction,
 }: {
   statement: StatementResponse;
   canModerate: boolean;
   onAnswered: () => void;
   onDeleted: () => void;
+  nextAction: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -54,14 +60,18 @@ function StatementCard({
         queryClient.invalidateQueries({
           queryKey: ["vote-statistics", statement.id],
         }),
-        queryClient.invalidateQueries({ queryKey: ["analysis", statement.topicId] }),
+        queryClient.invalidateQueries({
+          queryKey: ["analysis", statement.topicId],
+        }),
       ]);
     },
   });
   const remove = useMutation({
     mutationFn: () => deleteStatement(statement.id, { reason: deletionReason }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["statements", statement.topicId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["statements", statement.topicId],
+      });
       onDeleted();
     },
   });
@@ -72,25 +82,40 @@ function StatementCard({
   return (
     <article className="panel statement-card statement-card--focused">
       <p>{statement.body}</p>
-      <p className="meta">{statement.author.visibility === "ANONYMOUS" ? t("common.anonymous") : statement.author.displayName}</p>
+      <p className="meta">
+        {statement.author.visibility === "ANONYMOUS"
+          ? t("common.anonymous")
+          : statement.author.displayName}
+      </p>
       <div className="vote-actions" aria-label={t("topic.voteLabel")}>
         {(["AGREE", "DISAGREE", "PASS"] as const).map((value) => (
           <button
             aria-pressed={currentVote.data?.value === value}
-            className={currentVote.data?.value === value ? "is-selected" : undefined}
+            className={
+              currentVote.data?.value === value ? "is-selected" : undefined
+            }
             key={value}
             type="button"
-            onClick={() => vote.mutate(value)}
+            onClick={() => {
+              vote.mutate(value);
+              nextAction();
+            }}
             disabled={vote.isPending || currentVote.isPending}
           >
-            {value === "AGREE" ? t("topic.agree") : value === "DISAGREE" ? t("topic.disagree") : t("topic.pass")}
+            {value === "AGREE"
+              ? t("topic.agree")
+              : value === "DISAGREE"
+                ? t("topic.disagree")
+                : t("topic.pass")}
           </button>
         ))}
       </div>
       {currentVote.data?.value === null ? (
         <p className="meta vote-counts-locked">{t("topic.statsLocked")}</p>
       ) : null}
-      {statistics.data ? <p className="meta">{t("topic.stats", statistics.data)}</p> : null}
+      {statistics.data ? (
+        <p className="meta">{t("topic.stats", statistics.data)}</p>
+      ) : null}
       {vote.error ? <p role="alert">{errorMessage(vote.error, t)}</p> : null}
       {canModerate ? (
         <div className="statement-moderation">
@@ -128,12 +153,20 @@ function StatementCard({
                 <button
                   className="danger-button"
                   type="submit"
-                  disabled={remove.isPending || deletionReason.trim().length === 0}
+                  disabled={
+                    remove.isPending || deletionReason.trim().length === 0
+                  }
                 >
-                  {t(remove.isPending ? "topic.deletingStatement" : "topic.confirmDeletion")}
+                  {t(
+                    remove.isPending
+                      ? "topic.deletingStatement"
+                      : "topic.confirmDeletion",
+                  )}
                 </button>
               </div>
-              {remove.error ? <p role="alert">{errorMessage(remove.error, t)}</p> : null}
+              {remove.error ? (
+                <p role="alert">{errorMessage(remove.error, t)}</p>
+              ) : null}
             </form>
           ) : (
             <button
@@ -156,11 +189,16 @@ function TopicPage() {
   const { topicId } = Route.useParams();
   const queryClient = useQueryClient();
   const [body, setBody] = useState("");
-  const [visibility, setVisibility] = useState<"IDENTIFIED" | "ANONYMOUS">("ANONYMOUS");
+  const [visibility, setVisibility] = useState<"IDENTIFIED" | "ANONYMOUS">(
+    "ANONYMOUS",
+  );
   const [statementIndex, setStatementIndex] = useState(0);
   const [hasAnswered, setHasAnswered] = useState(false);
   const markAnswered = useCallback(() => setHasAnswered(true), []);
-  const topic = useQuery({ queryKey: ["topic", topicId], queryFn: () => getTopic(topicId) });
+  const topic = useQuery({
+    queryKey: ["topic", topicId],
+    queryFn: () => getTopic(topicId),
+  });
   const statements = useQuery({
     queryKey: ["statements", topicId],
     queryFn: async () => {
@@ -187,16 +225,19 @@ function TopicPage() {
   });
   const create = useMutation({
     mutationFn: () => {
-      const authorVisibility = topic.data?.statementIdentityPolicy === "ANONYMOUS_REQUIRED"
-        ? "ANONYMOUS"
-        : topic.data?.statementIdentityPolicy === "IDENTIFIED_REQUIRED"
-          ? "IDENTIFIED"
-          : visibility;
+      const authorVisibility =
+        topic.data?.statementIdentityPolicy === "ANONYMOUS_REQUIRED"
+          ? "ANONYMOUS"
+          : topic.data?.statementIdentityPolicy === "IDENTIFIED_REQUIRED"
+            ? "IDENTIFIED"
+            : visibility;
       return createStatement(topicId, { body, authorVisibility });
     },
     onSuccess: async () => {
       setBody("");
-      await queryClient.invalidateQueries({ queryKey: ["statements", topicId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["statements", topicId],
+      });
     },
   });
   useEffect(() => {
@@ -214,19 +255,46 @@ function TopicPage() {
   return (
     <AuthGate>
       <main className="shell">
-        <nav className="breadcrumb"><Link to="/topics">{t("common.topics")}</Link> / {t("common.discussion")}</nav>
+        <nav className="breadcrumb">
+          <Link to="/topics">{t("common.topics")}</Link> /{" "}
+          {t("common.discussion")}
+        </nav>
         {topic.isPending ? <p>{t("common.loading")}</p> : null}
-        {topic.error ? <p role="alert">{errorMessage(topic.error, t)}</p> : null}
+        {topic.error ? (
+          <p role="alert">{errorMessage(topic.error, t)}</p>
+        ) : null}
         {topic.data ? (
           <header>
             <p className="eyebrow">{t(`common.status.${topic.data.status}`)}</p>
             <h1>{topic.data.title}</h1>
             <p>{topic.data.description || t("common.noDescription")}</p>
-            {topic.data.category ? <p className="meta">{t("topics.category")}: {topic.data.category.name}</p> : null}
-            {topic.data.tags.length > 0 ? <div className="tag-list">{topic.data.tags.map((tag) => <span key={tag.id}>{tag.name}</span>)}</div> : null}
+            {topic.data.category ? (
+              <p className="meta">
+                {t("topics.category")}: {topic.data.category.name}
+              </p>
+            ) : null}
+            {topic.data.tags.length > 0 ? (
+              <div className="tag-list">
+                {topic.data.tags.map((tag) => (
+                  <span key={tag.id}>{tag.name}</span>
+                ))}
+              </div>
+            ) : null}
             <div className="link-row">
-              <Link className="text-link" to="/topics/$topicId/results" params={{ topicId }}>{t("topic.analysis")}</Link>
-              <Link className="text-link" to="/topics/$topicId/settings" params={{ topicId }}>{t("topic.settings")}</Link>
+              <Link
+                className="text-link"
+                to="/topics/$topicId/results"
+                params={{ topicId }}
+              >
+                {t("topic.analysis")}
+              </Link>
+              <Link
+                className="text-link"
+                to="/topics/$topicId/settings"
+                params={{ topicId }}
+              >
+                {t("topic.settings")}
+              </Link>
             </div>
           </header>
         ) : null}
@@ -248,9 +316,18 @@ function TopicPage() {
             />
             {topic.data?.statementIdentityPolicy === "OPTIONAL" ? (
               <>
-                <label htmlFor="statement-visibility">{t("topic.authorVisibility")}</label>
-                <select id="statement-visibility" value={visibility} onChange={(event) => setVisibility(event.target.value as typeof visibility)}>
-                  <option value="ANONYMOUS">{t("common.anonymous")}</option><option value="IDENTIFIED">{t("common.identified")}</option>
+                <label htmlFor="statement-visibility">
+                  {t("topic.authorVisibility")}
+                </label>
+                <select
+                  id="statement-visibility"
+                  value={visibility}
+                  onChange={(event) =>
+                    setVisibility(event.target.value as typeof visibility)
+                  }
+                >
+                  <option value="ANONYMOUS">{t("common.anonymous")}</option>
+                  <option value="IDENTIFIED">{t("common.identified")}</option>
                 </select>
               </>
             ) : topic.data?.statementIdentityPolicy ? (
@@ -265,8 +342,12 @@ function TopicPage() {
                 </p>
               </div>
             ) : null}
-            <button type="submit" disabled={create.isPending || !topic.data}>{t("topic.add")}</button>
-            {create.error ? <p role="alert">{errorMessage(create.error, t)}</p> : null}
+            <button type="submit" disabled={create.isPending || !topic.data}>
+              {t("topic.add")}
+            </button>
+            {create.error ? (
+              <p role="alert">{errorMessage(create.error, t)}</p>
+            ) : null}
           </form>
         </section>
 
@@ -286,25 +367,39 @@ function TopicPage() {
             ) : null}
           </div>
           {statements.isPending ? <p>{t("topic.loading")}</p> : null}
-          {statements.error ? <p role="alert">{errorMessage(statements.error, t)}</p> : null}
+          {statements.error ? (
+            <p role="alert">{errorMessage(statements.error, t)}</p>
+          ) : null}
           {statementItems.length === 0 ? <p>{t("topic.empty")}</p> : null}
           {currentStatement ? (
             <StatementCard
               key={currentStatement.id}
               statement={currentStatement}
-              canModerate={topic.data?.permissions.canModerateStatements ?? false}
+              canModerate={
+                topic.data?.permissions.canModerateStatements ?? false
+              }
               onAnswered={markAnswered}
+              nextAction={() => {
+                setStatementIndex((index) =>
+                  Math.min(statementItems.length - 1, index + 1),
+                );
+              }}
               onDeleted={() =>
                 setStatementIndex((index) => Math.max(0, index - 1))
               }
             />
           ) : null}
           {statementItems.length > 1 ? (
-            <div className="statement-pager" aria-label={t("topic.statementNavigation")}>
+            <div
+              className="statement-pager"
+              aria-label={t("topic.statementNavigation")}
+            >
               <button
                 className="secondary"
                 type="button"
-                onClick={() => setStatementIndex((index) => Math.max(0, index - 1))}
+                onClick={() =>
+                  setStatementIndex((index) => Math.max(0, index - 1))
+                }
                 disabled={statementIndex === 0}
               >
                 {t("topic.previousStatement")}
@@ -332,7 +427,10 @@ function TopicPage() {
         </section>
 
         {hasAnswered ? (
-          <section className="panel position-preview" aria-labelledby="position-heading">
+          <section
+            className="panel position-preview"
+            aria-labelledby="position-heading"
+          >
             <div>
               <p className="eyebrow">{t("analysis.yourPositionEyebrow")}</p>
               <h2 id="position-heading">{t("analysis.yourPosition")}</h2>
@@ -360,4 +458,6 @@ function TopicPage() {
   );
 }
 
-export const Route = createFileRoute("/topics/$topicId/")({ component: TopicPage });
+export const Route = createFileRoute("/topics/$topicId/")({
+  component: TopicPage,
+});
