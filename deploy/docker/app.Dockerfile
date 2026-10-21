@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.28
 
-FROM node:24-alpine AS build
+FROM node:24.22.1-alpine AS build
 WORKDIR /workspace
 RUN corepack enable
 
@@ -19,7 +19,7 @@ WORKDIR /workspace/apps/server
 USER 10001:10001
 CMD ["node", "node_modules/drizzle-kit/bin.cjs", "migrate", "--config", "drizzle.config.ts"]
 
-FROM node:24-alpine AS application
+FROM node:24.22.1-alpine AS application
 RUN addgroup -S -g 10001 awai && adduser -S -D -H -u 10001 -G awai awai
 WORKDIR /app
 
