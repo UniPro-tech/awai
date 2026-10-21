@@ -2,6 +2,13 @@
 
 All notable changes to Awai are documented in this file. The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.2](https://github.com/UniPro-tech/awai/compare/v0.11.1...v0.11.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* **security:** Node.jsのセキュリティパッチ対応 ([20bd4b0](https://github.com/UniPro-tech/awai/commit/20bd4b05445a077827e7e051cc6543b5be41bb71))
+
 ## [0.11.1](https://github.com/UniPro-tech/awai/compare/v0.11.0...v0.11.1) (2026-10-10)
 
 
